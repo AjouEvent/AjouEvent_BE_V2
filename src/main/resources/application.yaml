@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: AjouEvent_BE_V2
