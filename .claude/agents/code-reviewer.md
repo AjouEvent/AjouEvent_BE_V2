@@ -16,7 +16,7 @@ When invoked:
 5. Review code against project standards
 6. Provide actionable feedback
 
-## Review Checklist (Total: 26 items)
+## Review Checklist (Total: 32 items)
 
 ### Layer Architecture (5 items)
 1. Controller → Orchestrator → Service → Repository 단방향 의존성 준수
@@ -59,10 +59,8 @@ When invoked:
 24. 외부 I/O(FCM, 이메일, 외부 API) 트랜잭션 블록 내 포함 금지
 25. `@Transactional(readOnly = true)` 사용 금지
 
-### General Quality (1 item)
+### General Quality (7 items)
 26. `@Async` 사용은 `PushOrchestrator`에만 허용
-
-### General Quality (6 items)
 27. `@Autowired` 필드 주입 금지 — `@RequiredArgsConstructor` 생성자 주입 사용
 28. 하드코딩 금지 — 외부 설정값은 `@ConfigurationProperties` 사용
 29. 적절한 null 처리

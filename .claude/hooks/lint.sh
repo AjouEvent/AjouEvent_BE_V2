@@ -9,10 +9,15 @@ FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 # Check if it's a file type that Spotless handles
 case "$FILE_PATH" in
-  *.java|*.kts|*.json|*.yaml|*.yml|*.md|*.properties|*.xml|*.sql)
+  *.java|*.json|*.yaml|*.yml|*.md|*.properties|*.xml|*.sql|*.sh)
     echo "[lint hook] Running spotlessApply on: $FILE_PATH"
     cd "$CLAUDE_PROJECT_DIR" || exit 0
-    ./gradlew spotlessApply -q 2>/dev/null
+    OUTPUT=$(./gradlew spotlessApply -q 2>&1)
+    EXIT_CODE=$?
+    if [ "$EXIT_CODE" -ne 0 ]; then
+      echo "[lint hook] spotlessApply failed (exit $EXIT_CODE):" >&2
+      echo "$OUTPUT" >&2
+    fi
     ;;
 esac
 
