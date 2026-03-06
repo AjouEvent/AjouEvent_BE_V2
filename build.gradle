@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '4.0.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '7.0.2'
 }
 
 group = 'com.example'
@@ -38,4 +39,43 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+spotless {
+    java {
+        target('src/**/*.java')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    json {
+        target('src/**/*.json', '.claude/**/*.json')
+        gson()
+            .indentWithSpaces(2)
+            .sortByKeys()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    yaml {
+        target('src/**/*.yaml', 'src/**/*.yml')
+        jackson()
+            .yamlFeature('WRITE_DOC_START_MARKER', false)
+            .yamlFeature('MINIMIZE_QUOTES', true)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    format('markdown') {
+        target('*.md', '.claude/**/*.md')
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    format('misc') {
+        target('src/**/*.properties', 'src/**/*.xml', 'src/**/*.sql', 'src/**/*.sh')
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
