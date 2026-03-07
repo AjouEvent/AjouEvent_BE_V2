@@ -11,6 +11,7 @@ As the AI Agent, you **must not** perform any actions or make any changes to the
 
 - Before deleting files, always get developer approval.
 - Do not touch `git push`
+- Do not touch `git commit`
 - **YAML**: Do **not** add quotes (`"` or `'`) around values. Write plain unquoted values (e.g., `url: jdbc:mysql://...` not `url: "jdbc:mysql://..."`). Spotless enforces `MINIMIZE_QUOTES: true` and `WRITE_DOC_START_MARKER: false`.
 - **JSON**: Use 2-space indentation and keep keys sorted alphabetically. Spotless enforces this via `gson().indentWithSpaces(2).sortByKeys()`.
 - **Java**: Remove unused imports, trim trailing whitespace, and end files with a newline. Spotless enforces this automatically.
