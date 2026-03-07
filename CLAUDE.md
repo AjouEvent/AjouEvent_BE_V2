@@ -11,3 +11,8 @@ As the AI Agent, you **must not** perform any actions or make any changes to the
 
 - Before deleting files, always get developer approval.
 - Do not touch `git push`
+
+## V1 Reference Code
+
+- V1 코드는 `chore/ajou-event-v1` 브랜치의 `ajou-event-v1/` 디렉토리에 위치함
+- V2 작업 시 V1 구현을 참고할 때 해당 브랜치를 확인할 것
