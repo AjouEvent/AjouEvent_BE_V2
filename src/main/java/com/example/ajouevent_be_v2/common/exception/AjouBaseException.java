@@ -20,8 +20,14 @@ public abstract class AjouBaseException extends RuntimeException {
         this.customMessage = customMessage;
     }
 
-    protected AjouBaseException(ErrorCode errorCode, String customMessage, Throwable cause) {
+    protected AjouBaseException(ErrorCode errorCode, Throwable cause) {
         super(errorCode.getMessage(), cause);
+        this.errorCode = errorCode;
+        this.customMessage = errorCode.getMessage();
+    }
+
+    protected AjouBaseException(ErrorCode errorCode, String customMessage, Throwable cause) {
+        super(customMessage, cause);
         this.errorCode = errorCode;
         this.customMessage = customMessage;
     }
