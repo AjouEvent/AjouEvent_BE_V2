@@ -101,8 +101,8 @@ CREATE TABLE IF NOT EXISTS club_events (
     created_at  DATETIME,
     subject     VARCHAR(255),
     url         VARCHAR(255),
-    likes_count BIGINT,
-    view_count  BIGINT,
+    likes_count BIGINT        NOT NULL DEFAULT 0,
+    view_count  BIGINT        NOT NULL DEFAULT 0,
     type        VARCHAR(100),
     PRIMARY KEY (event_id)
 );

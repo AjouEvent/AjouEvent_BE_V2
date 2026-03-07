@@ -53,11 +53,11 @@ public class ClubEvent {
     @Column(name = "url")
     private String url;
 
-    @Column(name = "likes_count")
-    private Long likesCount;
+    @Column(name = "likes_count", nullable = false)
+    private Long likesCount = 0L;
 
-    @Column(name = "view_count")
-    private Long viewCount;
+    @Column(name = "view_count", nullable = false)
+    private Long viewCount = 0L;
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "type", length = 50000)
