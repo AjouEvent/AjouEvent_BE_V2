@@ -38,7 +38,7 @@ public class ClubEvent {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "content", length = 50000)
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "writer")
@@ -60,7 +60,7 @@ public class ClubEvent {
     private Long viewCount = 0L;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(name = "type", length = 50000)
+    @Column(name = "type", length = 100)
     private Type type;
 
     @BatchSize(size = 100)
