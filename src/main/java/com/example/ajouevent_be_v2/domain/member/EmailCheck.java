@@ -1,6 +1,6 @@
 package com.example.ajouevent_be_v2.domain.member;
 
-import jakarta.persistence.Id;
+import org.springframework.data.annotation.Id;
 import lombok.Getter;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
