@@ -3,9 +3,9 @@ spring:
     name: ajouevent-be-v2
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: "jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true"
-    username: "${MYSQL_USER}"
-    password: "${MYSQL_PASSWORD}"
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,31 +17,34 @@ spring:
     open-in-view: false
   data:
     redis:
-      host: "${REDIS_HOST}"
-      port: "${REDIS_PORT}"
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
       timeout: 2000ms
       lettuce:
         pool:
           max-active: 8
           max-idle: 8
           min-idle: 2
-jwt:
-  secret: "${JWT_SECRET}"
-  access-token-expiration: "${JWT_ACCESS_TOKEN_EXPIRATION}"
-  refresh-token-expiration: "${JWT_REFRESH_TOKEN_EXPIRATION}"
-  issuer: "${JWT_ISSUER}"
-cloud:
-  aws:
-    credentials:
-      access-key: "${AWS_ACCESS_KEY}"
-      secret-key: "${AWS_SECRET_KEY}"
-    region: "${AWS_REGION}"
-    s3:
-      bucket: "${AWS_S3_BUCKET}"
+
 ajou:
+  swagger:
+    server-url: http://localhost:8080
   fcm:
     default-image-url: https://www.ajou.ac.kr/_res/ajou/kr/img/intro/img-symbol.png
     redirection-url-prefix: https://www.ajouevent.com/event/
     default-click-action-url: https://www.ajouevent.com
   webhook:
     crawling-token-key: crawling-token
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
+  issuer: ${JWT_ISSUER}
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region: ${AWS_REGION}
+    s3:
+      bucket: ${AWS_S3_BUCKET}
