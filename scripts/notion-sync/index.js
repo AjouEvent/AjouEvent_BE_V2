@@ -4,7 +4,7 @@ const { Client } = require('@notionhq/client');
 const fs = require('fs');
 const https = require('https');
 
-const REPO_NAME = 'AjouEvent/AjouEvent_BE';
+const REPO_NAME = 'AjouEvent/AjouEvent_BE_V2';
 
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
 
