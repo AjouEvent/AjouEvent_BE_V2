@@ -60,6 +60,7 @@ spotless {
 
     yaml {
         target('src/**/*.yaml', 'src/**/*.yml')
+        targetExclude('src/main/resources/application.yaml', 'src/main/resources/application-*.yaml')
         jackson()
             .yamlFeature('WRITE_DOC_START_MARKER', false)
             .yamlFeature('MINIMIZE_QUOTES', true)
