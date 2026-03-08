@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "ajou.fcm")
 public class FcmProperties {
 
+    private String certification;
     private String defaultImageUrl;
     private String redirectionUrlPrefix;
     private String defaultClickActionUrl;

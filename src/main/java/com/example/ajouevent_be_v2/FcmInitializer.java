@@ -1,20 +1,21 @@
 package com.example.ajouevent_be_v2;
 
+import com.example.ajouevent_be_v2.push.config.FcmProperties;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class FcmInitializer implements InitializingBean {
 
-    @Value("${fcm.certification}")
-    private String firebaseConfigPath;
+    private final FcmProperties fcmProperties;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -23,7 +24,7 @@ public class FcmInitializer implements InitializingBean {
                     FirebaseOptions.builder()
                             .setCredentials(
                                     GoogleCredentials.fromStream(
-                                            new ClassPathResource(firebaseConfigPath)
+                                            new ClassPathResource(fcmProperties.getCertification())
                                                     .getInputStream()))
                             .build();
             if (FirebaseApp.getApps().isEmpty()) {
