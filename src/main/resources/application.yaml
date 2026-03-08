@@ -28,7 +28,10 @@ spring:
 
 ajou:
   swagger:
-    server-url: http://localhost:8080
+    server-url: ${SWAGGER_SERVER_URL:http://localhost:8080}
+  discord:
+    name: ajouevent
+    webhook-url: ${DISCORD_WEBHOOK_URL}
   fcm:
     certification: firebase/firebase-service-account.json
     default-image-url: https://www.ajou.ac.kr/_res/ajou/kr/img/intro/img-symbol.png
