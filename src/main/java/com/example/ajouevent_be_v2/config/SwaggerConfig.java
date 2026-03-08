@@ -1,25 +1,26 @@
 package com.example.ajouevent_be_v2.config;
 
+import com.example.ajouevent_be_v2.config.properties.SwaggerProperties;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@RequiredArgsConstructor
 public class SwaggerConfig {
 
-    @Value("${ajou.swagger.server-url}")
-    private String serverUrl;
+    private final SwaggerProperties swaggerProperties;
 
     @Bean
     public OpenAPI openAPI() {
         Server server = new Server();
-        server.setUrl(serverUrl);
+        server.setUrl(swaggerProperties.getServerUrl());
         return new OpenAPI().components(jwtToken()).servers(List.of(server)).info(apiInfo());
     }
 

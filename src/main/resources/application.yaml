@@ -29,3 +29,23 @@ spring:
 ajou:
   swagger:
     server-url: http://localhost:8080
+  fcm:
+    certification: firebase/firebase-service-account.json
+    default-image-url: https://www.ajou.ac.kr/_res/ajou/kr/img/intro/img-symbol.png
+    redirection-url-prefix: https://www.ajouevent.com/event/
+    default-click-action-url: https://www.ajouevent.com
+  webhook:
+    crawling-token-key: crawling-token
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
+  issuer: ${JWT_ISSUER}
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region: ${AWS_REGION}
+    s3:
+      bucket: ${AWS_S3_BUCKET}
