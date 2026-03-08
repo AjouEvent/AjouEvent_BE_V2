@@ -31,7 +31,7 @@ public class FcmInitializer implements InitializingBean {
                 log.info("Firebase application has been initialized");
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Failed to initialize Firebase: {}", e.getMessage(), e);
         }
     }
 }
