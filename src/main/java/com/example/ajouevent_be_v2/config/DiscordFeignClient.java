@@ -1,5 +1,6 @@
-package com.example.ajouevent_be_v2.service.discord;
+package com.example.ajouevent_be_v2.config;
 
+import com.example.ajouevent_be_v2.common.discord.DiscordMessage;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;

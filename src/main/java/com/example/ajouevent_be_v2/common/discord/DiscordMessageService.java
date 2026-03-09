@@ -1,7 +1,8 @@
-package com.example.ajouevent_be_v2.service.discord;
+package com.example.ajouevent_be_v2.common.discord;
 
-import com.example.ajouevent_be_v2.service.discord.exception.DiscordErrorCode;
-import com.example.ajouevent_be_v2.service.discord.exception.DiscordException;
+import com.example.ajouevent_be_v2.common.exception.discord.DiscordErrorCode;
+import com.example.ajouevent_be_v2.common.exception.discord.DiscordException;
+import com.example.ajouevent_be_v2.config.DiscordFeignClient;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
