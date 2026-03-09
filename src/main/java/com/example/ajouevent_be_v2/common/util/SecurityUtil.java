@@ -7,7 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @Slf4j
 public class SecurityUtil {
 
-    public static String getCurrentMemberUsernameOrAnonymous() {
+    public static String getCurrentUsernameOrAnonymous() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null
