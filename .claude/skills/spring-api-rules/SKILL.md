@@ -99,9 +99,9 @@ public class MemberController implements MemberControllerDocs {
     private final MemberOrchestrator memberOrchestrator;
 
     @PostMapping("/api/members")
-    public ResponseEntity<ResponseDto> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
         memberOrchestrator.register(request);
-        return ResponseEntity.ok(ResponseDto.success());
+        return ResponseEntity.ok().build();
     }
 }
 ```
@@ -142,6 +142,34 @@ public record NotificationDetailResponse(Long id, String title, String email) {
 }
 ```
 
+### Pagination 전달 객체
+
+계층 간 페이지네이션 데이터 전달 시 역할에 따라 구분하여 사용한다.
+
+| 객체 | 용도 | 방향 |
+|------|------|------|
+| `PageResult<T>` | 페이지 번호 내부 전달 | Service → Orchestrator |
+| `SliceResult<T>` | 무한 스크롤 내부 전달 | Service → Orchestrator |
+| `PageResponse<T>` | 페이지 번호 API 응답 | Orchestrator → Controller |
+| `SliceResponse<T>` | 무한 스크롤 API 응답 | Orchestrator → Controller |
+
+```java
+// QueryService — PageResult 반환
+public PageResult<Member> getMembers(Pageable pageable) {
+    Page<Member> page = memberRepository.findAll(pageable);
+    return new PageResult<>(page.getContent(), page.getNumber(),
+        page.getTotalPages(), page.getTotalElements(), page.hasNext(), page.hasPrevious());
+}
+
+// Orchestrator — PageResult → PageResponse 변환
+public PageResponse<MemberResponse> getMembers(Pageable pageable) {
+    PageResult<Member> result = memberQueryService.getMembers(pageable);
+    List<MemberResponse> responses = result.result().stream().map(MemberResponse::from).toList();
+    return new PageResponse<>(responses, result.currentPage(), result.totalPages(),
+        result.totalElements(), result.hasNext(), result.hasPrevious());
+}
+```
+
 ### Request → Entity 변환
 
 > **Request DTO에 `toEntity()` 작성 금지.** 변환 책임은 **CommandService**가 진다.
@@ -170,7 +198,7 @@ public record RegisterRequest(String email, String password, String name) {
 
 | 상황 | 반환 타입 |
 |------|-----------|
-| 명령 API, 응답 데이터 없음 | `ResponseEntity<ResponseDto>` |
+| 명령 API, 응답 데이터 없음 | `ResponseEntity<Void>` |
 | 명령 API, 응답 데이터 있음 | `ResponseEntity<XxxResponse>` |
 | 단건 조회 | `ResponseEntity<XxxResponse>` |
 | 불리언 확인 | `ResponseEntity<Boolean>` |
