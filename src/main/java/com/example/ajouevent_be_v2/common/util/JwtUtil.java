@@ -63,8 +63,10 @@ public class JwtUtil {
     public boolean validateToken(String token) {
         try {
             Claims claims = parseClaims(token);
-            return claims.getExpiration().after(new Date())
-                    && jwtProperties.getIssuer().equals(claims.getIssuer());
+            if (!jwtProperties.getIssuer().equals(claims.getIssuer())) {
+                throw new AuthException(AuthErrorCode.INVALID_TOKEN);
+            }
+            return claims.getExpiration().after(new Date());
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token: {}", e.getMessage());
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);
