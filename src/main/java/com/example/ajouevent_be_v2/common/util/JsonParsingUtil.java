@@ -3,13 +3,19 @@ package com.example.ajouevent_be_v2.common.util;
 import com.example.ajouevent_be_v2.common.dto.SliceResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -37,8 +43,9 @@ public class JsonParsingUtil {
 
         try {
             if (StringUtils.hasText(jsonData)) {
-                TypeReference<SliceResponse<T>> typeReference = new TypeReference<>() {};
-                return Optional.ofNullable(objectMapper.readValue(jsonData, typeReference));
+                JavaType type = objectMapper.getTypeFactory()
+                        .constructParametricType(SliceResponse.class, typeClass);
+                return Optional.ofNullable(objectMapper.readValue(jsonData, type));
             }
             return Optional.empty();
         } catch (JsonProcessingException e) {
@@ -64,16 +71,30 @@ public class JsonParsingUtil {
     }
 
     public void clearCacheForType(String type) {
-        Set<String> keys = redisTemplate.keys(type + ":*");
-        if (keys != null) {
+        List<String> keys = scanKeys(type + ":*");
+        if (!keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
     }
 
-    public void clearCache(String name) {
-        Set<String> keys = redisTemplate.keys(name);
-        if (keys != null) {
+    public void clearCache(String pattern) {
+        List<String> keys = scanKeys(pattern);
+        if (!keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
+    }
+
+    private List<String> scanKeys(String pattern) {
+        ScanOptions options = ScanOptions.scanOptions().match(pattern).count(100).build();
+        List<String> keys = new ArrayList<>();
+        redisTemplate.execute((RedisCallback<Void>) connection -> {
+            try (Cursor<byte[]> cursor = connection.scan(options)) {
+                while (cursor.hasNext()) {
+                    keys.add(new String(cursor.next(), StandardCharsets.UTF_8));
+                }
+            }
+            return null;
+        });
+        return keys;
     }
 }
