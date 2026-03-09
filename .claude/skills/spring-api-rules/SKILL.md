@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 Standard rules for Spring Boot REST API development in this project.
 
-- Root Package: `com.ajou.ajouevent`
+- Root Package: `com.example.ajouevent_be_v2`
 - Java 21 / Spring Boot 4.0.3 / MySQL + Redis
 
 ---
@@ -16,7 +16,7 @@ Standard rules for Spring Boot REST API development in this project.
 ## Package Structure
 
 ```
-com.ajou.ajouevent
+com.example.ajouevent_be_v2
 ├── controller/
 │   ├── {Domain}Controller.java
 │   └── docs/                         # Swagger interface
@@ -99,9 +99,9 @@ public class MemberController implements MemberControllerDocs {
     private final MemberOrchestrator memberOrchestrator;
 
     @PostMapping("/api/members")
-    public ResponseEntity<ResponseDto> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
         memberOrchestrator.register(request);
-        return ResponseEntity.ok(ResponseDto.success());
+        return ResponseEntity.ok().build();
     }
 }
 ```
@@ -142,6 +142,34 @@ public record NotificationDetailResponse(Long id, String title, String email) {
 }
 ```
 
+### Pagination 전달 객체
+
+계층 간 페이지네이션 데이터 전달 시 역할에 따라 구분하여 사용한다.
+
+| 객체 | 용도 | 방향 |
+|------|------|------|
+| `PageResult<T>` | 페이지 번호 내부 전달 | Service → Orchestrator |
+| `SliceResult<T>` | 무한 스크롤 내부 전달 | Service → Orchestrator |
+| `PageResponse<T>` | 페이지 번호 API 응답 | Orchestrator → Controller |
+| `SliceResponse<T>` | 무한 스크롤 API 응답 | Orchestrator → Controller |
+
+```java
+// QueryService — PageResult 반환
+public PageResult<Member> getMembers(Pageable pageable) {
+    Page<Member> page = memberRepository.findAll(pageable);
+    return new PageResult<>(page.getContent(), page.getNumber(),
+        page.getTotalPages(), page.getTotalElements(), page.hasNext(), page.hasPrevious());
+}
+
+// Orchestrator — PageResult → PageResponse 변환
+public PageResponse<MemberResponse> getMembers(Pageable pageable) {
+    PageResult<Member> result = memberQueryService.getMembers(pageable);
+    List<MemberResponse> responses = result.result().stream().map(MemberResponse::from).toList();
+    return new PageResponse<>(responses, result.currentPage(), result.totalPages(),
+        result.totalElements(), result.hasNext(), result.hasPrevious());
+}
+```
+
 ### Request → Entity 변환
 
 > **Request DTO에 `toEntity()` 작성 금지.** 변환 책임은 **CommandService**가 진다.
@@ -170,7 +198,7 @@ public record RegisterRequest(String email, String password, String name) {
 
 | 상황 | 반환 타입 |
 |------|-----------|
-| 명령 API, 응답 데이터 없음 | `ResponseEntity<ResponseDto>` |
+| 명령 API, 응답 데이터 없음 | `ResponseEntity<Void>` |
 | 명령 API, 응답 데이터 있음 | `ResponseEntity<XxxResponse>` |
 | 단건 조회 | `ResponseEntity<XxxResponse>` |
 | 불리언 확인 | `ResponseEntity<Boolean>` |
@@ -234,6 +262,14 @@ public class MemberRepositoryAdapter implements MemberRepository {
 
 ---
 
+## Feign Client
+
+- 현재 위치: `config/{Domain}FeignClient.java`
+- Feign client가 여러 개로 늘어날 경우 `config/feign/` 하위로 분리 예정
+- `@EnableFeignClients`는 메인 애플리케이션 클래스에 선언
+
+---
+
 ## Redis Cache Port
 
 > **`common/redis/RedisService` 사용 금지.** 도메인별 포트를 `port/`에 정의하고 `adapter/`에서 RedisTemplate으로 구현.
@@ -272,17 +308,42 @@ public class NoticeCommandService {
 
 ## Exception Handling
 
+모든 예외 클래스는 **`common/exception/{subdomain}/`** 에 위치한다.
+
+```
+common/exception/
+├── AjouBaseException.java      # 추상 베이스
+├── ErrorCode.java              # 인터페이스
+├── ErrorResponse.java
+├── GlobalExceptionHandler.java
+├── auth/                       # 인증 예외
+│   ├── AuthErrorCode.java
+│   └── AuthException.java
+├── common/                     # 도메인 없는 인프라/공통 예외
+│   ├── CommonErrorCode.java
+│   └── CommonException.java
+└── {subdomain}/                # 도메인별 예외 추가 시 여기에
+    ├── {Domain}ErrorCode.java
+    └── {Domain}Exception.java
+```
+
 ```java
 // ErrorCode 인터페이스
 public interface ErrorCode {
-    HttpStatus getStatus();
+    int getStatus();
     String getCode();     // 형식: AE-{DOMAIN}-{ERROR-NAME}
     String getMessage();
 }
 
 // 도메인 ErrorCode
+@Getter
+@AllArgsConstructor
 public enum MemberErrorCode implements ErrorCode {
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "AE-MEMBER-USER-NOT-FOUND", "사용자를 찾을 수 없습니다.");
+    USER_NOT_FOUND(404, "AE-MEMBER-USER-NOT-FOUND", "사용자를 찾을 수 없습니다.");
+
+    private final int status;
+    private final String code;
+    private final String message;
 }
 
 // 도메인 Exception
@@ -290,8 +351,6 @@ public class MemberException extends AjouBaseException {
     public MemberException(MemberErrorCode errorCode) { super(errorCode); }
 }
 ```
-
-위치: `{domain}/exception/{Domain}Exception.java`, `{domain}/exception/{Domain}ErrorCode.java`
 
 ---
 
@@ -340,11 +399,20 @@ public class MemberCommandService { ... }  // 클래스 레벨 금지
 ## Properties
 
 > **하드코딩 금지.** URL, 토큰 키, 사이즈 등은 반드시 `@ConfigurationProperties` 사용.
+> 위치: `config/properties/{Domain}Properties.java`
 
 ```java
 // ✅
+@Getter
+@Setter
+@Component
 @ConfigurationProperties(prefix = "ajou.fcm")
-public record FcmProperties(String defaultImageUrl, String redirectionUrlPrefix) {}
+public class FcmProperties {
+    private String certification;
+    private String defaultImageUrl;
+    private String redirectionUrlPrefix;
+    private String defaultClickActionUrl;
+}
 
 // ❌
 private static final String DEFAULT_IMAGE_URL = "https://...";
