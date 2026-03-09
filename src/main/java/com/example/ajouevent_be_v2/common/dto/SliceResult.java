@@ -2,14 +2,14 @@ package com.example.ajouevent_be_v2.common.dto;
 
 import java.util.List;
 
-public record SliceResponse<T>(
+public record SliceResult<T>(
         List<T> result,
         boolean hasPrevious,
         boolean hasNext,
         int currentPage,
-        SortResponse sort
+        SortInfo sort
 ) {
-    public record SortResponse(
+    public record SortInfo(
             boolean sorted,
             String direction,
             String orderProperty
