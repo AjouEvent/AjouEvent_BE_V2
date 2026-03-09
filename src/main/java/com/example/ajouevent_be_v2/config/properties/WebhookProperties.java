@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.webhook.config;
+package com.example.ajouevent_be_v2.config.properties;
 
 import lombok.Getter;
 import lombok.Setter;
