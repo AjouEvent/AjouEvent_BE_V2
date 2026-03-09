@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 Standard rules for Spring Boot REST API development in this project.
 
-- Root Package: `com.ajou.ajouevent`
+- Root Package: `com.example.ajouevent_be_v2`
 - Java 21 / Spring Boot 4.0.3 / MySQL + Redis
 
 ---
@@ -16,7 +16,7 @@ Standard rules for Spring Boot REST API development in this project.
 ## Package Structure
 
 ```
-com.ajou.ajouevent
+com.example.ajouevent_be_v2
 ├── controller/
 │   ├── {Domain}Controller.java
 │   └── docs/                         # Swagger interface
@@ -262,6 +262,14 @@ public class MemberRepositoryAdapter implements MemberRepository {
 
 ---
 
+## Feign Client
+
+- 현재 위치: `config/{Domain}FeignClient.java`
+- Feign client가 여러 개로 늘어날 경우 `config/feign/` 하위로 분리 예정
+- `@EnableFeignClients`는 메인 애플리케이션 클래스에 선언
+
+---
+
 ## Redis Cache Port
 
 > **`common/redis/RedisService` 사용 금지.** 도메인별 포트를 `port/`에 정의하고 `adapter/`에서 RedisTemplate으로 구현.
@@ -300,17 +308,42 @@ public class NoticeCommandService {
 
 ## Exception Handling
 
+모든 예외 클래스는 **`common/exception/{subdomain}/`** 에 위치한다.
+
+```
+common/exception/
+├── AjouBaseException.java      # 추상 베이스
+├── ErrorCode.java              # 인터페이스
+├── ErrorResponse.java
+├── GlobalExceptionHandler.java
+├── auth/                       # 인증 예외
+│   ├── AuthErrorCode.java
+│   └── AuthException.java
+├── common/                     # 도메인 없는 인프라/공통 예외
+│   ├── CommonErrorCode.java
+│   └── CommonException.java
+└── {subdomain}/                # 도메인별 예외 추가 시 여기에
+    ├── {Domain}ErrorCode.java
+    └── {Domain}Exception.java
+```
+
 ```java
 // ErrorCode 인터페이스
 public interface ErrorCode {
-    HttpStatus getStatus();
+    int getStatus();
     String getCode();     // 형식: AE-{DOMAIN}-{ERROR-NAME}
     String getMessage();
 }
 
 // 도메인 ErrorCode
+@Getter
+@AllArgsConstructor
 public enum MemberErrorCode implements ErrorCode {
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "AE-MEMBER-USER-NOT-FOUND", "사용자를 찾을 수 없습니다.");
+    USER_NOT_FOUND(404, "AE-MEMBER-USER-NOT-FOUND", "사용자를 찾을 수 없습니다.");
+
+    private final int status;
+    private final String code;
+    private final String message;
 }
 
 // 도메인 Exception
@@ -318,8 +351,6 @@ public class MemberException extends AjouBaseException {
     public MemberException(MemberErrorCode errorCode) { super(errorCode); }
 }
 ```
-
-위치: `{domain}/exception/{Domain}Exception.java`, `{domain}/exception/{Domain}ErrorCode.java`
 
 ---
 
@@ -368,11 +399,20 @@ public class MemberCommandService { ... }  // 클래스 레벨 금지
 ## Properties
 
 > **하드코딩 금지.** URL, 토큰 키, 사이즈 등은 반드시 `@ConfigurationProperties` 사용.
+> 위치: `config/properties/{Domain}Properties.java`
 
 ```java
 // ✅
+@Getter
+@Setter
+@Component
 @ConfigurationProperties(prefix = "ajou.fcm")
-public record FcmProperties(String defaultImageUrl, String redirectionUrlPrefix) {}
+public class FcmProperties {
+    private String certification;
+    private String defaultImageUrl;
+    private String redirectionUrlPrefix;
+    private String defaultClickActionUrl;
+}
 
 // ❌
 private static final String DEFAULT_IMAGE_URL = "https://...";
