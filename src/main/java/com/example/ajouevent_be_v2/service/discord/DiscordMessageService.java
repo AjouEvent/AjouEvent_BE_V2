@@ -16,7 +16,7 @@ public class DiscordMessageService {
 
     public void sendMessage(String message) {
         try {
-            discordFeignClient.sendMessage(DiscordMessage.of(message));
+            discordFeignClient.sendMessage(new DiscordMessage(message));
         } catch (FeignException e) {
             log.error("Discord webhook 전송 실패: {}", e.getMessage(), e);
             throw new DiscordException(DiscordErrorCode.WEBHOOK_FAILED, e);
