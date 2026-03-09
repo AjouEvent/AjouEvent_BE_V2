@@ -1,6 +1,6 @@
 package com.example.ajouevent_be_v2;
 
-import com.example.ajouevent_be_v2.push.config.FcmProperties;
+import com.example.ajouevent_be_v2.config.properties.FcmProperties;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
