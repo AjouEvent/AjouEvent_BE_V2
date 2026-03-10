@@ -44,14 +44,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
-            filterChain.doFilter(request, response);
         } catch (AuthException ex) {
             SecurityContextHolder.clearContext();
             writeErrorResponse(response, ex.getErrorCode());
+            return;
         } catch (Exception ex) {
             SecurityContextHolder.clearContext();
             writeErrorResponse(response, AuthErrorCode.UNAUTHORIZED);
+            return;
         }
+        filterChain.doFilter(request, response);
     }
 
     private void writeErrorResponse(HttpServletResponse response, ErrorCode errorCode)
