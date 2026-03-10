@@ -15,7 +15,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 @Component
-@Slf4j(topic = "UNAUTHORIZATION_EXCEPTION_HANDLER")
+@Slf4j(topic = "UNAUTHORIZED_EXCEPTION_HANDLER")
 @RequiredArgsConstructor
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
