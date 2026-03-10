@@ -1,7 +1,7 @@
 package com.example.ajouevent_be_v2.service.auth;
 
-import com.example.ajouevent_be_v2.dto.auth.GooglePeopleResponse;
-import com.example.ajouevent_be_v2.dto.auth.GoogleUserInfoResponse;
+import com.example.ajouevent_be_v2.dto.auth.GooglePeopleResult;
+import com.example.ajouevent_be_v2.dto.auth.GoogleUserInfoResult;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -25,8 +25,7 @@ import org.springframework.web.client.RestClient;
 public class OauthService {
 
     private static final String GOOGLE_REGISTRATION_ID = "google";
-    private static final String GOOGLE_PEOPLE_API_URL =
-        "https://people.googleapis.com/v1/people/me?personFields=organizations";
+    private static final String GOOGLE_PEOPLE_API_URL = "https://people.googleapis.com/v1/people/me?personFields=organizations";
 
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final RestClientAuthorizationCodeTokenResponseClient tokenResponseClient;
@@ -40,7 +39,7 @@ public class OauthService {
         this.restClient = RestClient.create();
     }
 
-    public GoogleUserInfoResponse getUserInfo(OauthRequest request) {
+    public GoogleUserInfoResult getUserInfo(OauthRequest request) {
         ClientRegistration clientRegistration =
             clientRegistrationRepository.findByRegistrationId(GOOGLE_REGISTRATION_ID);
 
@@ -75,7 +74,7 @@ public class OauthService {
 
         String department = fetchDepartmentFromPeopleApi(accessToken);
 
-        return new GoogleUserInfoResponse(
+        return new GoogleUserInfoResult(
             oAuth2User.getAttribute("email"),
             oAuth2User.getAttribute("name"),
             department
@@ -84,14 +83,14 @@ public class OauthService {
 
     private String fetchDepartmentFromPeopleApi(String accessToken) {
         try {
-            GooglePeopleResponse response = restClient.get()
+            GooglePeopleResult result = restClient.get()
                 .uri(GOOGLE_PEOPLE_API_URL)
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
-                .body(GooglePeopleResponse.class);
+                .body(GooglePeopleResult.class);
 
-            List<GooglePeopleResponse.Organization> organizations =
-                response != null ? response.organizations() : null;
+            List<GooglePeopleResult.Organization> organizations =
+                result != null ? result.organizations() : null;
 
             if (organizations != null && !organizations.isEmpty()) {
                 return organizations.get(0).department();
