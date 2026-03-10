@@ -2,23 +2,20 @@ package com.example.ajouevent_be_v2.repository.adapter.token;
 
 import com.example.ajouevent_be_v2.domain.member.Token;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class TokenBulkRepositoryAdapter {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final JdbcTemplate jdbcTemplate;
+    private final EntityManager entityManager;
 
     public void batchSoftDeleteTokens(List<Token> tokens) {
         String sql = "UPDATE tokens SET is_deleted = ? WHERE id = ?";
