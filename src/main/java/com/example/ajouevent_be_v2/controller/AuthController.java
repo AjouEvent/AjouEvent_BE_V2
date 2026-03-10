@@ -49,6 +49,7 @@ public class AuthController implements AuthControllerDocs {
     private ResponseCookie refreshCookie(String value) {
         return ResponseCookie.from(REFRESH_TOKEN_COOKIE, value)
             .httpOnly(true)
+            .secure(jwtProperties.isCookieSecure())
             .path("/")
             .maxAge(Duration.ofMillis(jwtProperties.getRefreshTokenExpiration()))
             .sameSite("Lax")
