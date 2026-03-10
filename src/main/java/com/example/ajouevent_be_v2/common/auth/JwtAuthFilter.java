@@ -5,7 +5,6 @@ import com.example.ajouevent_be_v2.common.exception.ErrorResponse;
 import com.example.ajouevent_be_v2.common.exception.auth.AuthErrorCode;
 import com.example.ajouevent_be_v2.common.exception.auth.AuthException;
 import com.example.ajouevent_be_v2.common.util.JwtUtil;
-import com.example.ajouevent_be_v2.service.auth.CustomUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

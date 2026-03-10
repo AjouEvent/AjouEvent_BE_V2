@@ -182,11 +182,16 @@ public EventDetailResponse getEventDetail(Long eventId, Member member, ...) {
 
 ### 네이밍
 
-| 용도 | 접미사 |
-|------|--------|
-| 외부 요청 입력 | `*Request` |
-| API 응답 출력 | `*Response` |
-| 도메인 간 내부 전달 | `*Dto` |
+| 레이어 | 방향 | 접미사 | 예시 |
+|--------|------|--------|------|
+| Controller | 외부 요청 입력 | `*Request` | `OauthRequest`, `MemberUpdateRequest` |
+| Controller | API 응답 출력 | `*Response` | `LoginResponse`, `MemberInfoResponse` |
+| Service / Orchestrator | 서비스 처리 결과 출력 | `*Result` | `MemberLoginResult`, `AuthTokenResult` |
+| Service / Orchestrator | 서비스 처리 명령 입력 | `*Command` | `SendNotificationCommand` |
+
+- **Controller 레이어에서 사용되면 `*Request` / `*Response` 우선**
+- **Service 내부에서만 사용되는 DTO는 `*Result` / `*Command`**
+- 도메인 간 내부 전달 시에도 동일 규칙 적용 (`*Dto` 접미사 사용 금지)
 
 ### Response — `from()` / `of()`
 
