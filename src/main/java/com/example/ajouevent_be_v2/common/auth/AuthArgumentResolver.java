@@ -6,7 +6,7 @@ import com.example.ajouevent_be_v2.common.exception.member.MemberErrorCode;
 import com.example.ajouevent_be_v2.common.exception.member.MemberException;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.domain.member.Role;
-import com.example.ajouevent_be_v2.repository.port.member.MemberRepository;
+import com.example.ajouevent_be_v2.repository.port.member.MemberRepositoryPort;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -23,7 +23,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @RequiredArgsConstructor
 public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final MemberRepository memberRepository;
+    private final MemberRepositoryPort memberRepositoryPort;
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -61,7 +61,7 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
 
     private Member resolveMember(Authentication authentication) {
         String email = authentication.getName();
-        return memberRepository.findByEmail(email)
+        return memberRepositoryPort.findByEmail(email)
             .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 }

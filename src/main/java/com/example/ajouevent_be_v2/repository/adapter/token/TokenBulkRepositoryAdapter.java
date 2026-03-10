@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.repository.adapter.member;
+package com.example.ajouevent_be_v2.repository.adapter.token;
 
 import com.example.ajouevent_be_v2.domain.member.Token;
 import jakarta.persistence.EntityManager;
@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class TokenBulkRepository {
+public class TokenBulkRepositoryAdapter {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -20,7 +20,7 @@ public class TokenBulkRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public void updateTokens(List<Token> tokens) {
+    public void batchSoftDeleteTokens(List<Token> tokens) {
         String sql = "UPDATE tokens SET is_deleted = ? WHERE id = ?";
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
