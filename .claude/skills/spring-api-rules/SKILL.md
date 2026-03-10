@@ -113,6 +113,7 @@ public class MemberController implements MemberControllerDocs {
 ```
 
 - `@RequestMapping` 클래스 레벨 사용 금지 — 각 메서드에 **전체 경로** 작성 (예: `@PostMapping("/api/v2/members")`)
+- `@RequestBody`, `@CookieValue`, `@PathVariable`, `@RequestParam` 등 **파라미터 레벨 애노테이션은 Docs 인터페이스에서 상속되지 않음** — 구현체 메서드에도 반드시 중복 선언할 것
 - **모든 엔드포인트는 `/api/v2/`로 시작**
 - 반환 타입은 반드시 `ResponseEntity<T>`
 - Service 직접 호출 금지 — Orchestrator만 호출

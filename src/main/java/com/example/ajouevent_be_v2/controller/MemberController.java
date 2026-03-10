@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -27,7 +28,7 @@ public class MemberController implements MemberControllerDocs {
     }
 
     @PatchMapping("/api/v2/members")
-    public ResponseEntity<Void> updateMember(MemberUpdateRequest request, @AuthUser Member member) {
+    public ResponseEntity<Void> updateMember(@RequestBody MemberUpdateRequest request, @AuthUser Member member) {
         memberOrchestrator.updateMemberInfo(request, member);
         return ResponseEntity.noContent().build();
     }
@@ -39,7 +40,7 @@ public class MemberController implements MemberControllerDocs {
     }
 
     @PostMapping("/api/v2/members/calendar")
-    public ResponseEntity<Void> connectCalendar(OauthRequest request, @AuthUser Member member) {
+    public ResponseEntity<Void> connectCalendar(@RequestBody OauthRequest request, @AuthUser Member member) {
         memberOrchestrator.connectCalendar(request);
         return ResponseEntity.noContent().build();
     }

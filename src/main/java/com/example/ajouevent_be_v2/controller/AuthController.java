@@ -11,8 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -25,7 +27,7 @@ public class AuthController implements AuthControllerDocs {
     private final JwtProperties jwtProperties;
 
     @PostMapping("/api/v2/auth/login")
-    public ResponseEntity<LoginResponse> login(OauthRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody OauthRequest request) {
         AuthTokenResult result = authOrchestrator.socialLogin(request);
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, refreshCookie(result.refreshToken()).toString())
@@ -33,7 +35,7 @@ public class AuthController implements AuthControllerDocs {
     }
 
     @PatchMapping("/api/v2/auth/reissue")
-    public ResponseEntity<LoginResponse> reissueToken(String refreshToken) {
+    public ResponseEntity<LoginResponse> reissueToken(@CookieValue(name = REFRESH_TOKEN_COOKIE) String refreshToken) {
         AuthTokenResult result = authOrchestrator.reissueToken(refreshToken);
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, refreshCookie(result.refreshToken()).toString())
