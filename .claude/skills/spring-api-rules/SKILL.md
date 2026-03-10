@@ -98,18 +98,81 @@ public class MemberController implements MemberControllerDocs {
 
     private final MemberOrchestrator memberOrchestrator;
 
-    @PostMapping("/api/v2/users")
-    public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
-        memberOrchestrator.register(request);
+    @PostMapping("/api/v2/members")
+    public ResponseEntity<Void> register(@RequestBody RegisterRequest request, @AuthUser Member member) {
+        memberOrchestrator.register(request, member);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/api/v2/admin/members/{id}")
+    public ResponseEntity<Void> deleteMember(@AuthAdmin Member admin, @PathVariable Long id) {
+        memberOrchestrator.deleteMember(admin, id);
         return ResponseEntity.ok().build();
     }
 }
 ```
 
-- `@RequestMapping` 클래스 레벨 사용 금지 — 각 메서드에 **전체 경로** 작성 (예: `@PostMapping("/api/v2/users")`)
+- `@RequestMapping` 클래스 레벨 사용 금지 — 각 메서드에 **전체 경로** 작성 (예: `@PostMapping("/api/v2/members")`)
 - **모든 엔드포인트는 `/api/v2/`로 시작**
 - 반환 타입은 반드시 `ResponseEntity<T>`
 - Service 직접 호출 금지 — Orchestrator만 호출
+- `Principal` 사용 금지 — 반드시 `@AuthUser` / `@AuthAdmin` 애노테이션으로 `Member` 객체를 직접 주입받을 것
+
+## 인증 파라미터 애노테이션
+
+컨트롤러에서 로그인 사용자를 `Principal`로 받지 않고, `@AuthUser` / `@AuthAdmin` / `@AuthOptional` 애노테이션으로 `Member` 엔티티를 바로 주입받는다.
+내부적으로 `AuthArgumentResolver`가 `SecurityContextHolder`에서 이메일을 꺼내 DB 조회 후 반환한다.
+`AuthArgumentResolver`는 `SecurityConfig.addArgumentResolvers()`에 등록되어 있다.
+
+| 애노테이션 | 파일 | 비인증(Anonymous) | 비관리자 | 반환 |
+|-----------|------|------------------|---------|------|
+| `@AuthUser` | `config/auth/AuthUser.java` | `401` throw | — | `Member` |
+| `@AuthAdmin` | `config/auth/AuthAdmin.java` | `401` throw | `403` throw | `Member` |
+| `@AuthOptional` | `config/auth/AuthOptional.java` | `null` 반환 | — | `Member?` |
+
+### 사용 기준
+
+| 엔드포인트 성격 | 사용 애노테이션 |
+|----------------|----------------|
+| 로그인 필수 (일반 사용자) | `@AuthUser` |
+| 로그인 필수 (관리자 전용) | `@AuthAdmin` |
+| 비로그인도 접근 가능하나 로그인 여부에 따라 동작이 다름 | `@AuthOptional` |
+
+```java
+// ✅ 로그인 필수
+@GetMapping("/api/v2/members")
+public ResponseEntity<MemberGetDto> getMemberInfo(@AuthUser Member member) { ... }
+
+// ✅ 관리자 전용
+@DeleteMapping("/api/v2/admin/members/{id}")
+public ResponseEntity<Void> deleteMember(@AuthAdmin Member admin, @PathVariable Long id) { ... }
+
+// ✅ 비로그인 허용 — null 체크로 분기
+@GetMapping("/api/v2/events/{eventId}")
+public ResponseEntity<EventDetailResponse> getEventDetail(
+    @PathVariable Long eventId,
+    @AuthOptional Member member,   // 비인증 시 null
+    HttpServletRequest request,
+    HttpServletResponse response) { ... }
+
+// ❌ 금지 — Principal 직접 사용
+@GetMapping("/api/v2/members")
+public ResponseEntity<MemberGetDto> getMemberInfo(Principal principal) { ... }
+```
+
+### @AuthOptional 사용 시 서비스 분기 패턴
+
+```java
+public EventDetailResponse getEventDetail(Long eventId, Member member, ...) {
+    if (member == null) {
+        // 비인증 사용자 처리 (쿠키/Redis 기반 조회수 등)
+        handleAnonymousUser(request, response, event);
+    } else {
+        // 인증 사용자 처리
+        handleAuthenticatedUser(member, event);
+    }
+}
+```
 
 ---
 
