@@ -194,6 +194,35 @@ public EventDetailResponse getEventDetail(Long eventId, Member member, ...) {
 - Controller 내부 지역 변수로만 사용하더라도 HTTP I/O 목적이 아니면 `*Result` / `*Command`
 - `*Dto` 접미사 사용 금지
 
+### Presentation DTO 조립 책임
+
+> **Service는 `*Response` DTO를 생성하거나 반환하지 않는다. `*Response` 조립은 반드시 Orchestrator에서 수행한다.**
+
+| 레이어 | 책임 |
+|--------|------|
+| Service | 비즈니스 로직 수행, 도메인 객체(Entity / `*Result`) 반환 |
+| Orchestrator | Service 결과를 받아 `*Response` DTO로 조립 후 Controller에 전달 |
+
+이유:
+1. **계층 간 책임 분리** — Service는 비즈니스 로직, Orchestrator는 DTO 조립
+2. **의존성 방향 유지** — 하위 계층(Service)이 상위 계층의 API 응답 포맷(`*Response`)을 알아서는 안 됨
+3. **비즈니스 로직 재사용** — 동일한 Service를 여러 API(다른 응답 포맷)에서 재사용 가능
+
+```java
+// ✅ Service — 도메인 객체 반환
+public Member findByEmail(String email) { ... }
+
+// ✅ Orchestrator — Response 조립
+public MemberInfoResponse getMemberInfo(Member member) {
+    return new MemberInfoResponse(member.getName(), member.getEmail(), member.getMajor());
+}
+
+// ❌ 금지 — Service가 Response DTO 생성
+public MemberInfoResponse getMemberInfo(Member member) {
+    return new MemberInfoResponse(member.getName(), member.getEmail(), member.getMajor());
+}
+```
+
 ### Response — `from()` / `of()`
 
 ```java

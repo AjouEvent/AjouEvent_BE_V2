@@ -15,7 +15,7 @@ public class MemberOrchestrator {
     private final MemberService memberService;
 
     public MemberInfoResponse getMemberInfo(Member member) {
-        return memberService.getMemberInfo(member);
+        return new MemberInfoResponse(member.getName(), member.getEmail(), member.getMajor());
     }
 
     public void updateMemberInfo(MemberUpdateRequest request, Member member) {

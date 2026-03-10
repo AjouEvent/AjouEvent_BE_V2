@@ -5,7 +5,6 @@ import com.example.ajouevent_be_v2.common.exception.member.MemberException;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.domain.member.Token;
 import com.example.ajouevent_be_v2.dto.auth.GoogleUserInfoResult;
-import com.example.ajouevent_be_v2.dto.member.MemberInfoResponse;
 import com.example.ajouevent_be_v2.dto.member.MemberLoginResult;
 import com.example.ajouevent_be_v2.dto.member.MemberUpdateRequest;
 import com.example.ajouevent_be_v2.repository.port.member.MemberRepositoryPort;
@@ -41,10 +40,6 @@ public class MemberService {
     public Member findByEmail(String email) {
         return memberRepositoryPort.findByEmail(email)
             .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-    }
-
-    public MemberInfoResponse getMemberInfo(Member member) {
-        return new MemberInfoResponse(member.getName(), member.getEmail(), member.getMajor());
     }
 
     @Transactional
