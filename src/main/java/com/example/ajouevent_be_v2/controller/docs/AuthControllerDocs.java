@@ -14,16 +14,38 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "Auth", description = "인증 관련 API")
+@Tag(name = "Auth", description = """
+    인증 관련 API
+
+    [V1 → V2 변경사항]
+    - 이메일/비밀번호 로그인 제거 → Google OAuth2 전용
+    - 회원가입, 이메일 인증, 비밀번호 관련 엔드포인트 전체 제거
+    - refreshToken 전달 방식 변경: 응답 바디 → HttpOnly 쿠키 (Set-Cookie: refreshToken)
+    - 토큰 재발급 요청 방식 변경: RequestBody → Cookie
+    - 토큰 재발급 시 accessToken + refreshToken 모두 재발급 (V1은 accessToken만)
+    - 로그인 응답에서 id, grantType, refreshToken 필드 제거
+    """)
 public interface AuthControllerDocs {
 
-    @Operation(summary = "Google 소셜 로그인",
-        description = "Google OAuth 인가 코드로 로그인하거나 신규 회원을 등록하고 JWT 토큰을 발급합니다. "
-            + "액세스 토큰은 응답 바디, 리프레시 토큰은 HttpOnly 쿠키(refreshToken)로 반환됩니다.")
+    @Operation(
+        summary = "Google 소셜 로그인",
+        description = """
+            Google OAuth2 인가 코드로 로그인합니다.
+            - 신규 회원이면 자동 가입 후 로그인 처리 (isNewMember: true)
+            - Google Workspace(@ajou.ac.kr) 프로필에서 학과 정보를 자동으로 가져옵니다
+            - accessToken은 응답 바디, refreshToken은 HttpOnly 쿠키(Set-Cookie: refreshToken)로 반환됩니다
+
+            [V1 대비 변경]
+            - V1: POST /api/users/oauth
+            - V2: POST /api/v2/auth/login
+            - refreshToken이 바디에서 쿠키로 이동
+            - 응답에서 id, grantType 필드 제거
+            """
+    )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "소셜 로그인 성공",
+        @ApiResponse(responseCode = "200", description = "로그인 성공",
             headers = @Header(name = "Set-Cookie",
-                description = "HttpOnly 쿠키로 리프레시 토큰 설정 (refreshToken=...; HttpOnly; Secure; Path=/; SameSite=Lax)",
+                description = "HttpOnly 쿠키로 리프레시 토큰 설정 (refreshToken=...; HttpOnly; Path=/; SameSite=Lax)",
                 schema = @Schema(type = "string")),
             content = @Content(schema = @Schema(implementation = LoginResponse.class))),
         @ApiResponse(responseCode = "400", description = "잘못된 인가 코드",
@@ -31,15 +53,26 @@ public interface AuthControllerDocs {
     })
     ResponseEntity<LoginResponse> login(@RequestBody OauthRequest request);
 
-    @Operation(summary = "토큰 재발급",
-        description = "HttpOnly 쿠키(refreshToken)의 리프레시 토큰으로 액세스 토큰과 리프레시 토큰을 모두 재발급합니다.")
+    @Operation(
+        summary = "토큰 재발급",
+        description = """
+            쿠키의 refreshToken으로 accessToken과 refreshToken을 모두 재발급합니다.
+            - 요청: Cookie에 refreshToken 포함 필요
+            - 응답: 새 accessToken은 바디, 새 refreshToken은 HttpOnly 쿠키로 반환
+
+            [V1 대비 변경]
+            - V1: PATCH /api/users/reissue-token, RequestBody로 refreshToken 전달
+            - V2: PATCH /api/v2/auth/reissue, Cookie로 refreshToken 전달
+            - V2: refreshToken도 함께 재발급 (V1은 accessToken만 재발급)
+            """
+    )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "토큰 재발급 성공",
+        @ApiResponse(responseCode = "200", description = "재발급 성공",
             headers = @Header(name = "Set-Cookie",
-                description = "새 리프레시 토큰으로 쿠키 갱신",
+                description = "새 refreshToken으로 쿠키 갱신",
                 schema = @Schema(type = "string")),
             content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-        @ApiResponse(responseCode = "401", description = "유효하지 않은 토큰",
+        @ApiResponse(responseCode = "401", description = "유효하지 않거나 만료된 토큰",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<LoginResponse> reissueToken(@CookieValue(name = "refreshToken") String refreshToken);
