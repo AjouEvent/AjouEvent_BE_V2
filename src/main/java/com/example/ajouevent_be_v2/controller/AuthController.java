@@ -29,7 +29,7 @@ public class AuthController implements AuthControllerDocs {
         AuthTokenResult result = authOrchestrator.socialLogin(request);
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, refreshCookie(result.refreshToken()).toString())
-            .body(result.loginResponse());
+            .body(toLoginResponse(result));
     }
 
     @PatchMapping("/api/v2/auth/reissue")
@@ -37,7 +37,11 @@ public class AuthController implements AuthControllerDocs {
         AuthTokenResult result = authOrchestrator.reissueToken(refreshToken);
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, refreshCookie(result.refreshToken()).toString())
-            .body(result.loginResponse());
+            .body(toLoginResponse(result));
+    }
+
+    private LoginResponse toLoginResponse(AuthTokenResult result) {
+        return new LoginResponse(result.accessToken(), result.name(), result.major(), result.email(), result.isNewMember());
     }
 
     private ResponseCookie refreshCookie(String value) {

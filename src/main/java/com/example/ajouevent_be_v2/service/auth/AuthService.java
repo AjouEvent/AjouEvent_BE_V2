@@ -3,7 +3,6 @@ package com.example.ajouevent_be_v2.service.auth;
 import com.example.ajouevent_be_v2.common.util.JwtUtil;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.auth.AuthTokenResult;
-import com.example.ajouevent_be_v2.dto.auth.LoginResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +15,7 @@ public class AuthService {
     public AuthTokenResult issueTokens(Member member, Boolean isNewMember) {
         String accessToken = jwtUtil.generateAccessToken(member.getEmail(), member.getRole());
         String refreshToken = jwtUtil.generateRefreshToken(member.getEmail());
-        LoginResponse loginResponse = new LoginResponse(
-            accessToken, member.getName(), member.getMajor(), member.getEmail(), isNewMember
-        );
-        return new AuthTokenResult(loginResponse, refreshToken);
+        return AuthTokenResult.of(member, accessToken, refreshToken, isNewMember);
     }
 
     public String extractEmail(String token) {

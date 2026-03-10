@@ -182,16 +182,16 @@ public EventDetailResponse getEventDetail(Long eventId, Member member, ...) {
 
 ### 네이밍
 
-| 레이어 | 방향 | 접미사 | 예시 |
-|--------|------|--------|------|
-| Controller | 외부 요청 입력 | `*Request` | `OauthRequest`, `MemberUpdateRequest` |
-| Controller | API 응답 출력 | `*Response` | `LoginResponse`, `MemberInfoResponse` |
-| Service / Orchestrator | 서비스 처리 결과 출력 | `*Result` | `MemberLoginResult`, `AuthTokenResult` |
-| Service / Orchestrator | 서비스 처리 명령 입력 | `*Command` | `SendNotificationCommand` |
+| 접미사 | 기준 | 예시 |
+|--------|------|------|
+| `*Request` | Controller 메서드 파라미터로 직접 사용 (HTTP 요청 입력) | `OauthRequest`, `MemberUpdateRequest` |
+| `*Response` | Controller 메서드 반환 타입으로 직접 사용 (HTTP 응답 출력) | `LoginResponse`, `MemberInfoResponse` |
+| `*Result` | Controller 메서드 시그니처에 등장하지 않는 내부 결과 전달 | `MemberLoginResult`, `AuthTokenResult`, `GoogleUserInfoResult` |
+| `*Command` | Controller 메서드 시그니처에 등장하지 않는 내부 명령 전달 | `SendNotificationCommand` |
 
-- **Controller 레이어에서 사용되면 `*Request` / `*Response` 우선**
-- **Service 내부에서만 사용되는 DTO는 `*Result` / `*Command`**
-- 도메인 간 내부 전달 시에도 동일 규칙 적용 (`*Dto` 접미사 사용 금지)
+- **판단 기준: Controller 메서드의 파라미터/반환 타입에 직접 등장하면 `*Request` / `*Response`, 그 외 레이어 간 내부 전달이면 `*Result` / `*Command`**
+- Controller 내부 지역 변수로만 사용하더라도 HTTP I/O 목적이 아니면 `*Result` / `*Command`
+- `*Dto` 접미사 사용 금지
 
 ### Response — `from()` / `of()`
 
