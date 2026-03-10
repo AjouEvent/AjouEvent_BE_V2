@@ -98,7 +98,7 @@ public class MemberController implements MemberControllerDocs {
 
     private final MemberOrchestrator memberOrchestrator;
 
-    @PostMapping("/api/members")
+    @PostMapping("/api/v2/users")
     public ResponseEntity<Void> register(@RequestBody RegisterRequest request) {
         memberOrchestrator.register(request);
         return ResponseEntity.ok().build();
@@ -106,7 +106,8 @@ public class MemberController implements MemberControllerDocs {
 }
 ```
 
-- `@RequestMapping` 클래스 레벨 사용 금지 — 각 메서드에 전체 경로 작성
+- `@RequestMapping` 클래스 레벨 사용 금지 — 각 메서드에 **전체 경로** 작성 (예: `@PostMapping("/api/v2/users")`)
+- **모든 엔드포인트는 `/api/v2/`로 시작**
 - 반환 타입은 반드시 `ResponseEntity<T>`
 - Service 직접 호출 금지 — Orchestrator만 호출
 
