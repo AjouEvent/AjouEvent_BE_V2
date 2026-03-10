@@ -70,4 +70,14 @@ public class Member {
         this.major = major;
         this.phone = phone;
     }
+
+    public void updateInfo(String name, String major, String phone) {
+        if (name != null) this.name = name;
+        if (major != null) this.major = major;
+        if (phone != null) this.phone = phone;
+    }
+
+    public void updateMajor(String major) {
+        if (major != null) this.major = major;
+    }
 }
