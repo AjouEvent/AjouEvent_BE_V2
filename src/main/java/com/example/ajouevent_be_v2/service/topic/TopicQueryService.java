@@ -1,7 +1,7 @@
 package com.example.ajouevent_be_v2.service.topic;
 
-import com.example.ajouevent_be_v2.common.exception.subscription.SubscriptionErrorCode;
-import com.example.ajouevent_be_v2.common.exception.subscription.SubscriptionException;
+import com.example.ajouevent_be_v2.common.exception.topic.TopicErrorCode;
+import com.example.ajouevent_be_v2.common.exception.topic.TopicException;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.domain.topic.Topic;
 import com.example.ajouevent_be_v2.domain.topic.TopicMember;
@@ -30,7 +30,7 @@ public class TopicQueryService {
 
     public Topic findByDepartment(String department) {
         return topicRepositoryPort.findByDepartment(department)
-                .orElseThrow(() -> new SubscriptionException(SubscriptionErrorCode.TOPIC_NOT_FOUND));
+                .orElseThrow(() -> new TopicException(TopicErrorCode.TOPIC_NOT_FOUND));
     }
 
     public List<TopicMember> getSubscribedTopics(Member member) {

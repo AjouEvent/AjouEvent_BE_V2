@@ -1,7 +1,7 @@
 package com.example.ajouevent_be_v2.service.topic;
 
-import com.example.ajouevent_be_v2.common.exception.subscription.SubscriptionErrorCode;
-import com.example.ajouevent_be_v2.common.exception.subscription.SubscriptionException;
+import com.example.ajouevent_be_v2.common.exception.topic.TopicErrorCode;
+import com.example.ajouevent_be_v2.common.exception.topic.TopicException;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.domain.topic.Topic;
 import com.example.ajouevent_be_v2.domain.topic.TopicMember;
@@ -25,10 +25,10 @@ public class TopicCommandService {
     @Transactional
     public Topic subscribeToTopic(String topicName, Member member) {
         Topic topic = topicRepositoryPort.findByDepartment(topicName)
-            .orElseThrow(() -> new SubscriptionException(SubscriptionErrorCode.TOPIC_NOT_FOUND));
+            .orElseThrow(() -> new TopicException(TopicErrorCode.TOPIC_NOT_FOUND));
 
         if (topicMemberRepositoryPort.existsByTopicAndMember(topic, member)) {
-            throw new SubscriptionException(SubscriptionErrorCode.ALREADY_SUBSCRIBED);
+            throw new TopicException(TopicErrorCode.ALREADY_SUBSCRIBED);
         }
 
         TopicMember topicMember = TopicMember.builder()
@@ -62,10 +62,10 @@ public class TopicCommandService {
     @Transactional
     public void updateNotificationPreference(Member member, String topicName, boolean receiveNotification) {
         Topic topic = topicRepositoryPort.findByDepartment(topicName)
-            .orElseThrow(() -> new SubscriptionException(SubscriptionErrorCode.TOPIC_NOT_FOUND));
+            .orElseThrow(() -> new TopicException(TopicErrorCode.TOPIC_NOT_FOUND));
 
         TopicMember topicMember = topicMemberRepositoryPort.findByMemberAndTopic(member, topic)
-            .orElseThrow(() -> new SubscriptionException(SubscriptionErrorCode.SUBSCRIPTION_NOT_FOUND));
+            .orElseThrow(() -> new TopicException(TopicErrorCode.SUBSCRIPTION_NOT_FOUND));
 
         topicMember.updateReceiveNotification(receiveNotification);
     }
