@@ -2,7 +2,7 @@ package com.example.ajouevent_be_v2.common.auth;
 
 import com.example.ajouevent_be_v2.common.exception.ErrorResponse;
 import com.example.ajouevent_be_v2.common.exception.auth.AuthErrorCode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
