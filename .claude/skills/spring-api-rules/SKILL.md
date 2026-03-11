@@ -210,16 +210,22 @@ public EventDetailResponse getEventDetail(Long eventId, Member member, ...) {
 
 ```java
 // ✅ Service — 도메인 객체 반환
-public Member findByEmail(String email) { ... }
+public class MemberService {
+    public Member findByEmail(String email) { ... }
+}
 
 // ✅ Orchestrator — Response 조립
-public MemberInfoResponse getMemberInfo(Member member) {
-    return new MemberInfoResponse(member.getName(), member.getEmail(), member.getMajor());
+public class MemberOrchestrator {
+    public MemberInfoResponse getMemberInfo(Member member) {
+        return new MemberInfoResponse(member.getName(), member.getEmail(), member.getMajor());
+    }
 }
 
 // ❌ 금지 — Service가 Response DTO 생성
-public MemberInfoResponse getMemberInfo(Member member) {
-    return new MemberInfoResponse(member.getName(), member.getEmail(), member.getMajor());
+public class MemberService {
+    public MemberInfoResponse getMemberInfo(Member member) {
+        return new MemberInfoResponse(member.getName(), member.getEmail(), member.getMajor());
+    }
 }
 ```
 
