@@ -24,7 +24,7 @@ public class TokenBulkRepositoryAdapter {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 Token token = tokens.get(i);
-                ps.setBoolean(1, token.isDeleted());
+                ps.setBoolean(1, true);
                 ps.setLong(2, token.getId());
             }
 
