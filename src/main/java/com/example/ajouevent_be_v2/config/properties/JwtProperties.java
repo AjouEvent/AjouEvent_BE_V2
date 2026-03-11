@@ -15,4 +15,5 @@ public class JwtProperties {
     private long accessTokenExpiration;
     private long refreshTokenExpiration;
     private String issuer;
+    private boolean cookieSecure;
 }

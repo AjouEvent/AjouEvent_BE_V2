@@ -60,13 +60,17 @@ public class JwtUtil {
         return parseClaims(token).getSubject();
     }
 
-    public boolean validateToken(String token) {
+    public void validateToken(String token) {
         try {
             Claims claims = parseClaims(token);
             if (!jwtProperties.getIssuer().equals(claims.getIssuer())) {
                 throw new AuthException(AuthErrorCode.INVALID_TOKEN);
             }
-            return claims.getExpiration().after(new Date());
+            if (!claims.getExpiration().after(new Date())) {
+                throw new AuthException(AuthErrorCode.EXPIRED_TOKEN);
+            }
+        } catch (AuthException e) {
+            throw e;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token: {}", e.getMessage());
             throw new AuthException(AuthErrorCode.INVALID_TOKEN);

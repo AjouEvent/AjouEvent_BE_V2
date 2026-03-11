@@ -42,9 +42,6 @@ public class Member {
     @Column(name = "major")
     private String major;
 
-    @Column(name = "phone")
-    private String phone;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role = Role.USER;
@@ -63,11 +60,14 @@ public class Member {
     private List<KeywordMember> keywordMembers;
 
     @Builder
-    public Member(Long id, String email, String name, String major, String phone) {
-        this.id = id;
+    public Member(String email, String name, String major) {
         this.email = email;
         this.name = name;
         this.major = major;
-        this.phone = phone;
+    }
+
+    public void updateInfo(String name, String major) {
+        if (name != null) this.name = name;
+        if (major != null) this.major = major;
     }
 }
