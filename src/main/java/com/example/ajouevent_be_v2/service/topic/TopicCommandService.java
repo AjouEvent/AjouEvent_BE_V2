@@ -1,0 +1,72 @@
+package com.example.ajouevent_be_v2.service.topic;
+
+import com.example.ajouevent_be_v2.common.exception.subscription.SubscriptionErrorCode;
+import com.example.ajouevent_be_v2.common.exception.subscription.SubscriptionException;
+import com.example.ajouevent_be_v2.domain.member.Member;
+import com.example.ajouevent_be_v2.domain.topic.Topic;
+import com.example.ajouevent_be_v2.domain.topic.TopicMember;
+import com.example.ajouevent_be_v2.repository.port.subscription.TopicMemberRepositoryPort;
+import com.example.ajouevent_be_v2.repository.port.subscription.TopicRepositoryPort;
+import java.time.LocalDateTime;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class TopicCommandService {
+
+    private final TopicRepositoryPort topicRepositoryPort;
+    private final TopicMemberRepositoryPort topicMemberRepositoryPort;
+
+    @Transactional
+    public Topic subscribeToTopic(String topicName, Member member) {
+        Topic topic = topicRepositoryPort.findByDepartment(topicName)
+            .orElseThrow(() -> new SubscriptionException(SubscriptionErrorCode.TOPIC_NOT_FOUND));
+
+        if (topicMemberRepositoryPort.existsByTopicAndMember(topic, member)) {
+            throw new SubscriptionException(SubscriptionErrorCode.ALREADY_SUBSCRIBED);
+        }
+
+        TopicMember topicMember = TopicMember.builder()
+            .topic(topic)
+            .member(member)
+            .isRead(false)
+            .lastReadAt(LocalDateTime.now())
+            .receiveNotification(true)
+            .build();
+        topicMemberRepositoryPort.save(topicMember);
+
+        return topic;
+    }
+
+    @Transactional
+    public void deleteTopicMember(Topic topic, Member member) {
+        topicMemberRepositoryPort.deleteByTopicAndMember(topic, member);
+    }
+
+    @Transactional
+    public void deleteAllTopicMembers(Member member) {
+        List<Long> topicMemberIds = topicMemberRepositoryPort.findByMember(member).stream()
+            .map(TopicMember::getId)
+            .toList();
+
+        if (!topicMemberIds.isEmpty()) {
+            topicMemberRepositoryPort.deleteAllByIds(topicMemberIds);
+        }
+    }
+
+    @Transactional
+    public void updateNotificationPreference(Member member, String topicName, boolean receiveNotification) {
+        Topic topic = topicRepositoryPort.findByDepartment(topicName)
+            .orElseThrow(() -> new SubscriptionException(SubscriptionErrorCode.TOPIC_NOT_FOUND));
+
+        TopicMember topicMember = topicMemberRepositoryPort.findByMemberAndTopic(member, topic)
+            .orElseThrow(() -> new SubscriptionException(SubscriptionErrorCode.SUBSCRIPTION_NOT_FOUND));
+
+        topicMember.updateReceiveNotification(receiveNotification);
+    }
+}

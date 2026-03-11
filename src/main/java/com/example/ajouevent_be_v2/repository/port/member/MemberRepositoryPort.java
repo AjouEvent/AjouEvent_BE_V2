@@ -6,6 +6,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+
 @Repository
 @RequiredArgsConstructor
 public class MemberRepositoryPort {
@@ -18,6 +19,10 @@ public class MemberRepositoryPort {
 
     public Optional<Member> findByEmail(String email) {
         return memberJpaRepositoryAdapter.findByEmail(email);
+    }
+
+    public Optional<Member> findById(Long id) {
+        return memberJpaRepositoryAdapter.findById(id);
     }
 
     public void delete(Member member) {

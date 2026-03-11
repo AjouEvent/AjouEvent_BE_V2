@@ -47,4 +47,8 @@ public class TopicMember {
 
     @Column(name = "receive_notification", nullable = false, columnDefinition = "TINYINT(1)")
     private boolean receiveNotification;
+
+    public void updateReceiveNotification(boolean receiveNotification) {
+        this.receiveNotification = receiveNotification;
+    }
 }
