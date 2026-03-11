@@ -1,5 +1,7 @@
 package com.example.ajouevent_be_v2.service.auth;
 
+import com.example.ajouevent_be_v2.common.exception.auth.AuthErrorCode;
+import com.example.ajouevent_be_v2.common.exception.auth.AuthException;
 import com.example.ajouevent_be_v2.dto.auth.GooglePeopleResult;
 import com.example.ajouevent_be_v2.dto.auth.GoogleUserInfoResult;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
@@ -13,15 +15,16 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationExchange;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponse;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-@Component
 @Slf4j
+@Service
 public class OauthService {
 
     private static final String GOOGLE_REGISTRATION_ID = "google";
@@ -65,20 +68,25 @@ public class OauthService {
             new OAuth2AuthorizationExchange(authorizationRequest, authorizationResponse)
         );
 
-        var tokenResponse = tokenResponseClient.getTokenResponse(grantRequest);
-        String accessToken = tokenResponse.getAccessToken().getTokenValue();
+        try {
+            var tokenResponse = tokenResponseClient.getTokenResponse(grantRequest);
+            String accessToken = tokenResponse.getAccessToken().getTokenValue();
 
-        OAuth2User oAuth2User = userService.loadUser(
-            new OAuth2UserRequest(clientRegistration, tokenResponse.getAccessToken())
-        );
+            OAuth2User oAuth2User = userService.loadUser(
+                new OAuth2UserRequest(clientRegistration, tokenResponse.getAccessToken())
+            );
 
-        String department = fetchDepartmentFromPeopleApi(accessToken);
+            String department = fetchDepartmentFromPeopleApi(accessToken);
 
-        return new GoogleUserInfoResult(
-            oAuth2User.getAttribute("email"),
-            oAuth2User.getAttribute("name"),
-            department
-        );
+            return new GoogleUserInfoResult(
+                oAuth2User.getAttribute("email"),
+                oAuth2User.getAttribute("name"),
+                department
+            );
+        } catch (OAuth2AuthorizationException e) {
+            log.warn("OAuth2 토큰 교환 실패: {}", e.getMessage());
+            throw new AuthException(AuthErrorCode.INVALID_AUTHORIZATION_CODE);
+        }
     }
 
     private String fetchDepartmentFromPeopleApi(String accessToken) {

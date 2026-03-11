@@ -14,6 +14,8 @@ public enum AuthErrorCode implements ErrorCode {
     UNSUPPORTED_TOKEN(401, "AE-AUTH-UNSUPPORTED-TOKEN", "지원하지 않는 토큰입니다."),
     ILLEGAL_ARGUMENT_TOKEN(401, "AE-AUTH-ILLEGAL-ARGUMENT-TOKEN", "토큰 값이 올바르지 않습니다."),
 
+    INVALID_AUTHORIZATION_CODE(400, "AE-AUTH-INVALID-AUTHORIZATION-CODE", "잘못된 인가 코드입니다."),
+
     FORBIDDEN(403, "AE-AUTH-FORBIDDEN", "접근 권한이 없습니다.");
 
     private final int status;
