@@ -42,4 +42,8 @@ public class TopicMemberRepositoryPort {
     public TopicMember save(TopicMember topicMember) {
         return topicMemberJpaRepositoryAdapter.save(topicMember);
     }
+
+    public boolean existsByMemberAndIsReadFalse(Member member) {
+        return topicMemberJpaRepositoryAdapter.existsByMemberAndIsReadFalse(member);
+    }
 }

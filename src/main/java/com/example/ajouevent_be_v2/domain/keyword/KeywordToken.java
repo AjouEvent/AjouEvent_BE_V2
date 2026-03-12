@@ -33,4 +33,11 @@ public class KeywordToken {
 
     @Column(name = "token_value")
     private String tokenValue;
+
+    public static KeywordToken create(Keyword keyword, String tokenValue) {
+        return KeywordToken.builder()
+            .keyword(keyword)
+            .tokenValue(tokenValue)
+            .build();
+    }
 }

@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,4 +42,18 @@ public class Keyword {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "topic_id")
     private Topic topic;
+
+    public static String buildFormattedKeyword(String koreanKeyword, String topicName) {
+        String encoded = URLEncoder.encode(koreanKeyword, StandardCharsets.UTF_8).replace("+", "%20");
+        return encoded + "_" + topicName;
+    }
+
+    public static Keyword create(Topic topic, String koreanKeyword, String topicName) {
+        return Keyword.builder()
+            .encodedKeyword(buildFormattedKeyword(koreanKeyword, topicName))
+            .koreanKeyword(koreanKeyword)
+            .searchKeyword(koreanKeyword + "_" + topicName)
+            .topic(topic)
+            .build();
+    }
 }

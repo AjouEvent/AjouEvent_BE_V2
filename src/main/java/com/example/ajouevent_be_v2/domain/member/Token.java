@@ -45,4 +45,8 @@ public class Token {
     public void markAsDeleted() {
         this.isDeleted = true;
     }
+
+    public void renewExpiration(long weeks) {
+        this.expirationDate = LocalDate.now().plusWeeks(weeks);
+    }
 }
