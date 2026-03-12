@@ -21,4 +21,9 @@ public class KeywordQueryService {
     public boolean hasUnreadKeywords(Member member) {
         return keywordMemberRepositoryPort.existsByMemberAndIsReadFalse(member);
     }
+
+    // FCM 토큰 등록 시 KeywordToken 매핑용 — Topic join 불필요
+    public List<KeywordMember> getSubscribedKeywords(Member member) {
+        return keywordMemberRepositoryPort.findByMemberWithKeyword(member);
+    }
 }

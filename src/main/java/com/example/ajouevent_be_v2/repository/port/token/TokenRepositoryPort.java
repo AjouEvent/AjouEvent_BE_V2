@@ -5,6 +5,7 @@ import com.example.ajouevent_be_v2.domain.member.Token;
 import com.example.ajouevent_be_v2.repository.adapter.token.TokenBulkRepositoryAdapter;
 import com.example.ajouevent_be_v2.repository.adapter.token.TokenJpaRepositoryAdapter;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -29,5 +30,13 @@ public class TokenRepositoryPort {
 
     public void batchSoftDeleteTokens(List<Token> tokens) {
         tokenBulkRepositoryAdapter.batchSoftDeleteTokens(tokens);
+    }
+
+    public Token save(Token token) {
+        return tokenJpaRepositoryAdapter.save(token);
+    }
+
+    public Optional<Token> findByTokenValueAndMember(String tokenValue, Member member) {
+        return tokenJpaRepositoryAdapter.findByTokenValueAndMember(tokenValue, member);
     }
 }
