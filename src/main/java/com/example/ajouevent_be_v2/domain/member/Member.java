@@ -2,7 +2,7 @@ package com.example.ajouevent_be_v2.domain.member;
 
 import java.util.List;
 
-import com.example.ajouevent_be_v2.domain.notice.EventLike;
+import com.example.ajouevent_be_v2.domain.event.EventLike;
 import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.topic.TopicMember;
 
