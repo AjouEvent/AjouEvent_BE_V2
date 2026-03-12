@@ -86,4 +86,29 @@ public class TokenService {
             keywordTokenRepositoryPort.deleteAllByTokenValues(tokenValues);
         }
     }
+
+    @Transactional
+    public void linkNewTokenToTopics(String tokenValue, List<Topic> topics) {
+        List<TopicToken> topicTokens = topics.stream()
+            .map(topic -> TopicToken.builder()
+                .topic(topic)
+                .tokenValue(tokenValue)
+                .build())
+            .toList();
+
+        if (!topicTokens.isEmpty()) {
+            topicTokenBulkAdapter.saveAll(topicTokens);
+        }
+    }
+
+    @Transactional
+    public void linkNewTokenToKeywords(String tokenValue, List<Keyword> keywords) {
+        List<KeywordToken> keywordTokens = keywords.stream()
+            .map(keyword -> KeywordToken.create(keyword, tokenValue))
+            .toList();
+
+        if (!keywordTokens.isEmpty()) {
+            keywordTokenBulkAdapter.saveAll(keywordTokens);
+        }
+    }
 }
