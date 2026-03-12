@@ -7,12 +7,14 @@ import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.keyword.KeywordToken;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.domain.member.Token;
+import com.example.ajouevent_be_v2.domain.topic.Topic;
 import com.example.ajouevent_be_v2.dto.keyword.KeywordSubscribeCommand;
 import com.example.ajouevent_be_v2.dto.keyword.KeywordUnsubscribeCommand;
 import com.example.ajouevent_be_v2.repository.port.keyword.KeywordMemberRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.keyword.KeywordRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.keyword.KeywordTokenRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.token.TokenRepositoryPort;
+import com.example.ajouevent_be_v2.repository.port.topic.TopicRepositoryPort;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -32,10 +34,9 @@ public class KeywordCommandService {
     private final KeywordMemberRepositoryPort keywordMemberRepositoryPort;
     private final KeywordTokenRepositoryPort keywordTokenRepositoryPort;
     private final TokenRepositoryPort tokenRepositoryPort;
+    private final TopicRepositoryPort topicRepositoryPort;
 
     // V1 KeywordService.subscribeToKeyword() 포팅
-    // - Topic 조회 및 신규 Keyword 생성 로직은 #26 TopicRepository 구현 완료 후 연동 필요
-    // - 현재는 DB에 존재하는 Keyword만 구독 가능
     @Transactional
     public void subscribeToKeyword(KeywordSubscribeCommand command) {
         Member member = command.member();
@@ -45,18 +46,16 @@ public class KeywordCommandService {
         String encodedKeyword = URLEncoder.encode(koreanKeyword, StandardCharsets.UTF_8).replace("+", "%20");
         String formattedKeyword = encodedKeyword + "_" + topicName;
 
-        // TODO(#26): Topic 조회 후 Keyword 없으면 신규 생성 로직 추가
-        //   Topic topic = topicRepositoryPort.findByDepartment(topicName)
-        //       .orElseThrow(() -> new SubscriptionException(SubscriptionErrorCode.TOPIC_NOT_FOUND));
-        //   Keyword keyword = keywordRepositoryPort.findByEncodedKeyword(formattedKeyword)
-        //       .orElseGet(() -> keywordRepositoryPort.save(Keyword.builder()
-        //           .encodedKeyword(formattedKeyword)
-        //           .koreanKeyword(koreanKeyword)
-        //           .searchKeyword(koreanKeyword + "_" + topicName)
-        //           .topic(topic)
-        //           .build()));
-        Keyword keyword = keywordRepositoryPort.findByEncodedKeyword(formattedKeyword)
+        // TODO: 동시 요청 시 동일 Keyword 중복 생성 가능성 존재 — 추후 Redis 분산 락 도입 예정
+        Topic topic = topicRepositoryPort.findByDepartment(topicName)
             .orElseThrow(() -> new SubscriptionException(SubscriptionErrorCode.TOPIC_NOT_FOUND));
+        Keyword keyword = keywordRepositoryPort.findByEncodedKeyword(formattedKeyword)
+            .orElseGet(() -> keywordRepositoryPort.save(Keyword.builder()
+                .encodedKeyword(formattedKeyword)
+                .koreanKeyword(koreanKeyword)
+                .searchKeyword(koreanKeyword + "_" + topicName)
+                .topic(topic)
+                .build()));
 
         if (keywordMemberRepositoryPort.existsByKeywordAndMember(keyword, member)) {
             throw new SubscriptionException(SubscriptionErrorCode.ALREADY_SUBSCRIBED_KEYWORD);
