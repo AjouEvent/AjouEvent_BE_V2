@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.domain.notice;
+package com.example.ajouevent_be_v2.domain.event;
 
 import com.example.ajouevent_be_v2.domain.member.Member;
 

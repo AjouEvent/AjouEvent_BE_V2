@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.repository.adapter.subscription;
+package com.example.ajouevent_be_v2.repository.adapter.topic;
 
 import com.example.ajouevent_be_v2.domain.topic.TopicToken;
 import java.sql.PreparedStatement;

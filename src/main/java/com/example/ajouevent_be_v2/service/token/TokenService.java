@@ -4,8 +4,8 @@ import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.domain.member.Token;
 import com.example.ajouevent_be_v2.domain.topic.Topic;
 import com.example.ajouevent_be_v2.domain.topic.TopicToken;
-import com.example.ajouevent_be_v2.repository.adapter.subscription.TopicTokenBulkAdapter;
-import com.example.ajouevent_be_v2.repository.port.subscription.TopicTokenRepositoryPort;
+import com.example.ajouevent_be_v2.repository.adapter.topic.TopicTokenBulkAdapter;
+import com.example.ajouevent_be_v2.repository.port.topic.TopicTokenRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.token.TokenRepositoryPort;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +24,7 @@ public class TokenService {
 
     @Transactional
     public void subscribeToTopic(Topic topic, Member member) {
-        List<TopicToken> topicTokens = tokenRepositoryPort.findByMember(member).stream()
-            .filter(t -> !t.isDeleted())
+        List<TopicToken> topicTokens = tokenRepositoryPort.findActiveTokensByMember(member).stream()
             .map(token -> TopicToken.builder()
                 .topic(topic)
                 .tokenValue(token.getTokenValue())

@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.domain.notice;
+package com.example.ajouevent_be_v2.domain.event;
 
 public enum JobStatus {
     PENDING,

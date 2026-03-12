@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.repository.adapter.subscription;
+package com.example.ajouevent_be_v2.repository.adapter.topic;
 
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.domain.topic.Topic;
@@ -26,6 +26,4 @@ public interface TopicMemberJpaRepositoryAdapter extends JpaRepository<TopicMemb
     @Modifying
     @Query("DELETE FROM TopicMember tm WHERE tm.id IN :ids")
     void deleteAllByIds(@Param("ids") List<Long> ids);
-
-    boolean existsByMemberAndIsReadFalse(Member member);
 }

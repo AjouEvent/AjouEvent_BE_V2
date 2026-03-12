@@ -1,9 +1,9 @@
-package com.example.ajouevent_be_v2.repository.port.subscription;
+package com.example.ajouevent_be_v2.repository.port.topic;
 
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.domain.topic.Topic;
 import com.example.ajouevent_be_v2.domain.topic.TopicMember;
-import com.example.ajouevent_be_v2.repository.adapter.subscription.TopicMemberJpaRepositoryAdapter;
+import com.example.ajouevent_be_v2.repository.adapter.topic.TopicMemberJpaRepositoryAdapter;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -37,10 +37,6 @@ public class TopicMemberRepositoryPort {
 
     public void deleteAllByIds(List<Long> ids) {
         topicMemberJpaRepositoryAdapter.deleteAllByIds(ids);
-    }
-
-    public boolean existsByMemberAndIsReadFalse(Member member) {
-        return topicMemberJpaRepositoryAdapter.existsByMemberAndIsReadFalse(member);
     }
 
     public TopicMember save(TopicMember topicMember) {

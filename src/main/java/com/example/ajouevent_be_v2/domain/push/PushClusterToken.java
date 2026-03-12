@@ -3,7 +3,7 @@ package com.example.ajouevent_be_v2.domain.push;
 import java.time.LocalDateTime;
 
 import com.example.ajouevent_be_v2.domain.member.Member;
-import com.example.ajouevent_be_v2.domain.notice.JobStatus;
+import com.example.ajouevent_be_v2.domain.event.JobStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

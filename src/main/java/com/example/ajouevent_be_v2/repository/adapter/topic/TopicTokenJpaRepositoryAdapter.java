@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.repository.adapter.subscription;
+package com.example.ajouevent_be_v2.repository.adapter.topic;
 
 import com.example.ajouevent_be_v2.domain.topic.Topic;
 import com.example.ajouevent_be_v2.domain.topic.TopicToken;
@@ -13,9 +13,6 @@ public interface TopicTokenJpaRepositoryAdapter extends JpaRepository<TopicToken
     @Modifying
     @Query("DELETE FROM TopicToken tt WHERE tt.topic = :topic AND tt.tokenValue IN :tokenValues")
     void deleteByTopicAndTokenValues(@Param("topic") Topic topic, @Param("tokenValues") List<String> tokenValues);
-
-    @Query("SELECT tt FROM TopicToken tt JOIN FETCH tt.topic WHERE tt.tokenValue IN :tokenValues")
-    List<TopicToken> findTopicTokensWithTopic(@Param("tokenValues") List<String> tokenValues);
 
     @Modifying
     @Query("DELETE FROM TopicToken tt WHERE tt.tokenValue IN :tokenValues")
