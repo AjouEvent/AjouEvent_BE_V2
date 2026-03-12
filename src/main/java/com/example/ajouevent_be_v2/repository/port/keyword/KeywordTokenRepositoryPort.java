@@ -31,6 +31,10 @@ public class KeywordTokenRepositoryPort {
         keywordTokenJpaRepositoryAdapter.deleteAllByTokenIds(tokenIds);
     }
 
+    public void deleteAllByTokenValues(List<String> tokenValues) {
+        keywordTokenJpaRepositoryAdapter.deleteAllByTokenValues(tokenValues);
+    }
+
     public List<KeywordToken> findKeywordTokensWithKeyword(List<Token> tokens) {
         List<String> tokenValues = tokens.stream()
             .map(Token::getTokenValue)

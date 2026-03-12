@@ -23,6 +23,10 @@ public interface KeywordTokenJpaRepositoryAdapter extends JpaRepository<KeywordT
     @Query("DELETE FROM KeywordToken kt WHERE kt.tokenValue IN (SELECT t.tokenValue FROM Token t WHERE t.id IN :tokenIds)")
     void deleteAllByTokenIds(@Param("tokenIds") List<Long> tokenIds);
 
+    @Modifying
+    @Query("DELETE FROM KeywordToken kt WHERE kt.tokenValue IN :tokenValues")
+    void deleteAllByTokenValues(@Param("tokenValues") List<String> tokenValues);
+
     @Query("SELECT kt FROM KeywordToken kt JOIN FETCH kt.keyword WHERE kt.tokenValue IN :tokenValues")
     List<KeywordToken> findKeywordTokensWithKeyword(@Param("tokenValues") List<String> tokenValues);
 }

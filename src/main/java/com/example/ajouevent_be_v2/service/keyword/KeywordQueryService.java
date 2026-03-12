@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.service.subscription;
+package com.example.ajouevent_be_v2.service.keyword;
 
 import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.member.Member;
