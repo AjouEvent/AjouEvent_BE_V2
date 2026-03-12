@@ -75,7 +75,7 @@ public class KeywordCommandService {
             .lastReadAt(LocalDateTime.now())
             .build());
 
-        List<Token> memberTokens = tokenRepositoryPort.findByMember(member);
+        List<Token> memberTokens = tokenRepositoryPort.findActiveTokensByMember(member);
         List<KeywordToken> keywordTokens = memberTokens.stream()
             .map(token -> KeywordToken.builder()
                 .keyword(keyword)
@@ -97,7 +97,7 @@ public class KeywordCommandService {
 
         keywordMemberRepositoryPort.deleteByKeywordAndMember(keyword, member);
 
-        List<Token> memberTokens = tokenRepositoryPort.findByMember(member);
+        List<Token> memberTokens = tokenRepositoryPort.findActiveTokensByMember(member);
         keywordTokenRepositoryPort.deleteByKeywordAndTokens(keyword, memberTokens);
 
         log.info("키워드 구독 취소 - member: {}, keyword: {}", member.getEmail(), keyword.getKoreanKeyword());
@@ -110,10 +110,14 @@ public class KeywordCommandService {
         List<Token> tokens = tokenRepositoryPort.findByMember(member);
 
         List<Long> tokenIds = tokens.stream().map(Token::getId).toList();
-        keywordTokenRepositoryPort.deleteAllByTokenIds(tokenIds);
+        if (!tokenIds.isEmpty()) {
+            keywordTokenRepositoryPort.deleteAllByTokenIds(tokenIds);
+        }
 
         List<Long> keywordMemberIds = keywordMembers.stream().map(KeywordMember::getId).toList();
-        keywordMemberRepositoryPort.deleteAllByIds(keywordMemberIds);
+        if (!keywordMemberIds.isEmpty()) {
+            keywordMemberRepositoryPort.deleteAllByIds(keywordMemberIds);
+        }
 
         log.info("키워드 구독 전체 초기화 - member: {}", member.getEmail());
     }

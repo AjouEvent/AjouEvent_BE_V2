@@ -1,7 +1,6 @@
 package com.example.ajouevent_be_v2.repository.adapter.keyword;
 
 import com.example.ajouevent_be_v2.domain.keyword.KeywordToken;
-import jakarta.persistence.EntityManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Repository;
 public class KeywordTokenBulkAdapter {
 
     private final JdbcTemplate jdbcTemplate;
-    private final EntityManager entityManager;
 
     public void saveAll(List<KeywordToken> keywordTokens) {
         String sql = "INSERT INTO keyword_tokens (keyword_id, token_value) VALUES (?, ?)";

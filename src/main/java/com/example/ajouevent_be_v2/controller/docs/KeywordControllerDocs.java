@@ -52,13 +52,13 @@ public interface KeywordControllerDocs {
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "구독 성공"),
-        @ApiResponse(responseCode = "400", description = "키워드 구독 한도 초과 (최대 10개) — AE-SUBSCRIPTION-MAX-KEYWORD-LIMIT",
+        @ApiResponse(responseCode = "400", description = "키워드 구독 한도 초과 (최대 10개) — AE-KEYWORD-MAX-SUBSCRIPTION-LIMIT",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(responseCode = "401", description = "인증 필요",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "404", description = "존재하지 않는 토픽 — AE-SUBSCRIPTION-TOPIC-NOT-FOUND",
+        @ApiResponse(responseCode = "404", description = "존재하지 않는 토픽 — AE-TOPIC-NOT-FOUND",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "409", description = "이미 구독 중인 키워드 — AE-SUBSCRIPTION-KEYWORD-ALREADY-SUBSCRIBED",
+        @ApiResponse(responseCode = "409", description = "이미 구독 중인 키워드 — AE-KEYWORD-ALREADY-SUBSCRIBED",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<Void> subscribeToKeyword(@AuthUser Member member, @RequestBody KeywordSubscribeRequest request);
@@ -80,7 +80,7 @@ public interface KeywordControllerDocs {
         @ApiResponse(responseCode = "204", description = "구독 취소 성공"),
         @ApiResponse(responseCode = "401", description = "인증 필요",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "404", description = "존재하지 않는 키워드 — AE-SUBSCRIPTION-KEYWORD-NOT-FOUND",
+        @ApiResponse(responseCode = "404", description = "존재하지 않는 키워드 — AE-KEYWORD-NOT-FOUND",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<Void> unsubscribeFromKeyword(@AuthUser Member member, @RequestBody KeywordUnsubscribeRequest request);
