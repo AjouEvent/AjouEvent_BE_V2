@@ -14,7 +14,7 @@ public class TopicRepositoryPort {
     private final TopicJpaRepositoryAdapter topicJpaRepositoryAdapter;
 
     public Optional<Topic> findByDepartment(String department) {
-        return topicJpaRepositoryAdapter.findByDepartment(department);
+        return topicJpaRepositoryAdapter.findFirstByDepartment(department);
     }
 
     public List<Topic> findAll() {

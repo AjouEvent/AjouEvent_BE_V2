@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TopicJpaRepositoryAdapter extends JpaRepository<Topic, Long> {
 
-    Optional<Topic> findByDepartment(String department);
+    Optional<Topic> findFirstByDepartment(String department);
 }
