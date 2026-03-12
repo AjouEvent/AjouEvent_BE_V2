@@ -18,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 
     [V1 → V2 변경사항]
     - API 경로 변경: GET /api/subscriptions/isSubscribedTabRead → GET /api/v2/subscriptions/read-status
-    - 인증 방식 변경: SecurityContextHolder → @AuthUser (AuthArgumentResolver 기반)
     - 응답 형식 변경: 바디 직접 반환 → ResponseEntity<TabReadStatusResponse>
     """)
 public interface SubscriptionControllerDocs {
