@@ -6,7 +6,7 @@ import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.keyword.KeywordResponse;
 import com.example.ajouevent_be_v2.dto.keyword.KeywordSubscribeRequest;
 import com.example.ajouevent_be_v2.dto.keyword.KeywordUnsubscribeRequest;
-import com.example.ajouevent_be_v2.orchestrator.keyword.KeywordOrchestrator;
+import com.example.ajouevent_be_v2.orchestrator.KeywordOrchestrator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.orchestrator.subscription;
+package com.example.ajouevent_be_v2.orchestrator;
 
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.subscription.TabReadStatusResponse;

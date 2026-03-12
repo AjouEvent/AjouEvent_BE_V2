@@ -1,7 +1,9 @@
 package com.example.ajouevent_be_v2.service.subscription;
 
-import com.example.ajouevent_be_v2.common.exception.subscription.SubscriptionErrorCode;
-import com.example.ajouevent_be_v2.common.exception.subscription.SubscriptionException;
+import com.example.ajouevent_be_v2.common.exception.keyword.KeywordErrorCode;
+import com.example.ajouevent_be_v2.common.exception.keyword.KeywordException;
+import com.example.ajouevent_be_v2.common.exception.topic.TopicErrorCode;
+import com.example.ajouevent_be_v2.common.exception.topic.TopicException;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.keyword.KeywordToken;
@@ -48,7 +50,7 @@ public class KeywordCommandService {
 
         // TODO: 동시 요청 시 동일 Keyword 중복 생성 가능성 존재 — 추후 Redis 분산 락 도입 예정
         Topic topic = topicRepositoryPort.findByDepartment(topicName)
-            .orElseThrow(() -> new SubscriptionException(SubscriptionErrorCode.TOPIC_NOT_FOUND));
+            .orElseThrow(() -> new TopicException(TopicErrorCode.TOPIC_NOT_FOUND));
         Keyword keyword = keywordRepositoryPort.findByEncodedKeyword(formattedKeyword)
             .orElseGet(() -> keywordRepositoryPort.save(Keyword.builder()
                 .encodedKeyword(formattedKeyword)
@@ -58,12 +60,12 @@ public class KeywordCommandService {
                 .build()));
 
         if (keywordMemberRepositoryPort.existsByKeywordAndMember(keyword, member)) {
-            throw new SubscriptionException(SubscriptionErrorCode.ALREADY_SUBSCRIBED_KEYWORD);
+            throw new KeywordException(KeywordErrorCode.ALREADY_SUBSCRIBED);
         }
 
         long subscribedKeywordCount = keywordMemberRepositoryPort.countByMember(member);
         if (subscribedKeywordCount >= 10) {
-            throw new SubscriptionException(SubscriptionErrorCode.MAX_KEYWORD_LIMIT_EXCEEDED);
+            throw new KeywordException(KeywordErrorCode.MAX_SUBSCRIPTION_LIMIT_EXCEEDED);
         }
 
         keywordMemberRepositoryPort.save(KeywordMember.builder()
@@ -91,7 +93,7 @@ public class KeywordCommandService {
         Member member = command.member();
 
         Keyword keyword = keywordRepositoryPort.findByEncodedKeyword(command.encodedKeyword())
-            .orElseThrow(() -> new SubscriptionException(SubscriptionErrorCode.KEYWORD_NOT_FOUND));
+            .orElseThrow(() -> new KeywordException(KeywordErrorCode.KEYWORD_NOT_FOUND));
 
         keywordMemberRepositoryPort.deleteByKeywordAndMember(keyword, member);
 

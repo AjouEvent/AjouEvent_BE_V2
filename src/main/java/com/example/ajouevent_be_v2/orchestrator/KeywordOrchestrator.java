@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.orchestrator.keyword;
+package com.example.ajouevent_be_v2.orchestrator;
 
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.keyword.KeywordResponse;

@@ -4,7 +4,7 @@ import com.example.ajouevent_be_v2.common.auth.AuthUser;
 import com.example.ajouevent_be_v2.controller.docs.SubscriptionControllerDocs;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.subscription.TabReadStatusResponse;
-import com.example.ajouevent_be_v2.orchestrator.subscription.SubscriptionOrchestrator;
+import com.example.ajouevent_be_v2.orchestrator.SubscriptionOrchestrator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
