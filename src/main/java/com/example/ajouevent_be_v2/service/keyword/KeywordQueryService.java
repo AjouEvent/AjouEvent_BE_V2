@@ -17,4 +17,8 @@ public class KeywordQueryService {
     public List<KeywordMember> getUserKeywords(Member member) {
         return keywordMemberRepositoryPort.findByMemberWithKeywordAndTopic(member);
     }
+
+    public boolean hasUnreadKeywords(Member member) {
+        return keywordMemberRepositoryPort.existsByMemberAndIsReadFalse(member);
+    }
 }
