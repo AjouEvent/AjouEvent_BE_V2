@@ -5,7 +5,7 @@ import com.example.ajouevent_be_v2.controller.docs.AuthControllerDocs;
 import com.example.ajouevent_be_v2.dto.auth.AuthTokenResult;
 import com.example.ajouevent_be_v2.dto.auth.LoginResponse;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
-import com.example.ajouevent_be_v2.orchestrator.auth.AuthOrchestrator;
+import com.example.ajouevent_be_v2.orchestrator.AuthOrchestrator;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

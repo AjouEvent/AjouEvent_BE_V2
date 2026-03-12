@@ -6,7 +6,7 @@ import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
 import com.example.ajouevent_be_v2.dto.member.MemberInfoResponse;
 import com.example.ajouevent_be_v2.dto.member.MemberUpdateRequest;
-import com.example.ajouevent_be_v2.orchestrator.member.MemberOrchestrator;
+import com.example.ajouevent_be_v2.orchestrator.MemberOrchestrator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

@@ -1,6 +1,4 @@
-package com.example.ajouevent_be_v2.domain.topic;
-
-import java.time.LocalDateTime;
+package com.example.ajouevent_be_v2.domain.event;
 
 import com.example.ajouevent_be_v2.domain.member.Member;
 
@@ -21,34 +19,21 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Table(name = "event_likes")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
-@Table(name = "topic_members")
-public class TopicMember {
+public class EventLike {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "event_like_id")
+    private Long eventLikeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "topic_id")
-    private Topic topic;
+    @JoinColumn(name = "club_event_id")
+    private ClubEvent clubEvent;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
-
-    @Column(name = "is_read", nullable = false, columnDefinition = "TINYINT(1)")
-    private boolean isRead;
-
-    @Column(name = "last_read_at", nullable = false)
-    private LocalDateTime lastReadAt;
-
-    @Column(name = "receive_notification", nullable = false, columnDefinition = "TINYINT(1)")
-    private boolean receiveNotification;
-
-    public void updateReceiveNotification(boolean receiveNotification) {
-        this.receiveNotification = receiveNotification;
-    }
 }
