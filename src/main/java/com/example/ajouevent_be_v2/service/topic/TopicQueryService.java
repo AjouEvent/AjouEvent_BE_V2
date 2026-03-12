@@ -37,6 +37,10 @@ public class TopicQueryService {
         return topicMemberRepositoryPort.findByMemberWithTopic(member);
     }
 
+    public boolean hasUnreadTopics(Member member) {
+        return topicMemberRepositoryPort.existsByMemberAndIsReadFalse(member);
+    }
+
     public List<TopicSubscriptionResult> getTopicsWithSubscriptionStatus(Member member) {
         List<Topic> allTopics = topicRepositoryPort.findAll();
         Map<Long, Boolean> subscriptionMap = topicMemberRepositoryPort.findByMemberWithTopic(member)

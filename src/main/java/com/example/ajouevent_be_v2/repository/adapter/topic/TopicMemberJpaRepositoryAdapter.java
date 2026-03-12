@@ -23,6 +23,8 @@ public interface TopicMemberJpaRepositoryAdapter extends JpaRepository<TopicMemb
 
     void deleteByTopicAndMember(Topic topic, Member member);
 
+    boolean existsByMemberAndIsReadFalse(Member member);
+
     @Modifying
     @Query("DELETE FROM TopicMember tm WHERE tm.id IN :ids")
     void deleteAllByIds(@Param("ids") List<Long> ids);
