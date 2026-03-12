@@ -19,6 +19,10 @@ public class TokenRepositoryPort {
         return tokenJpaRepositoryAdapter.findByMember(member);
     }
 
+    public List<Token> findActiveTokensByMember(Member member) {
+        return tokenJpaRepositoryAdapter.findByMemberAndIsDeletedFalse(member);
+    }
+
     public void deleteAllByTokenIds(List<Long> tokenIds) {
         tokenJpaRepositoryAdapter.deleteAllByTokenIds(tokenIds);
     }
