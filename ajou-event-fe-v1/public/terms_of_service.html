@@ -1,0 +1,700 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>서비스이용약관</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-default_background {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 237, 214, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 237, 214, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-transparentGray { background-color: rgba(227, 226, 224, 0); }
+.select-value-color-translucentGray { background-color: rgba(0, 0, 0, 0.06); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(249, 228, 188, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="91c3de83-fb9f-4854-bf8c-cda42c4e1a88" class="page sans"><header><h1 class="page-title">서비스이용약관</h1><p class="page-description"></p></header><div class="page-body"><hr id="1d9b2421-1e04-46ac-b16d-374d5911aa62"/><p id="3ad8840a-ace4-4564-bee9-ba4192762370" class="">
+</p><h3 id="85b08b33-44b2-48b9-bace-e5778eab1c86" class="">제1조(목적)</h3><p id="69ff1c2c-61cd-4a8d-b6ae-cc6fd639f864" class="">이 약관은 AjouEvent (이하 &#x27;회사&#x27; 라고 합니다)가 제공하는 제반 서비스의 이용과 관련하여 회사와 회<br/>원과의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.<br/><br/></p><h3 id="9e4ba841-090e-4120-b78b-0437f38ebb24" class="">제2조(정의)</h3><p id="f02a23a5-53db-4c32-8a7e-72bdc3aac5e2" class="">이 약관에서 사용하는 주요 용어의 정의는 다음과 같습니다.</p><ol type="1" id="6bca18e1-dd69-4670-ba5a-8a3b3e76598e" class="numbered-list" start="1"><li>&#x27;서비스&#x27;라 함은 구현되는 단말기(PC, TV, 휴대형단말기 등의 각종 유무선 장치를 포함)와 상관없이 &#x27;이용자&#x27;가 이용할 수 있는 회사가 제공하는 제반 서비스를 의미합니다.</li></ol><ol type="1" id="60050c67-8937-4a6d-b52c-a23253857d8f" class="numbered-list" start="2"><li>&#x27;이용자&#x27;란 이 약관에 따라 회사가 제공하는 서비스를 받는 &#x27;개인회원&#x27;, &#x27;기업회원&#x27; 및 &#x27;비회원&#x27;을 말합니다.</li></ol><ol type="1" id="b5a26966-13b9-42bf-af06-14da99b81d45" class="numbered-list" start="3"><li>&#x27;개인회원&#x27;은 회사에 개인정보를 제공하여 회원등록을 한 사람으로, 회사로부터 지속적으로 정보를 제공받고 &#x27;회사&#x27;가 제공하는 서비스를 계속적으로 이용할 수 있는 자를 말합니다.</li></ol><ol type="1" id="9be7bc36-1847-4785-9607-f0a87d380555" class="numbered-list" start="4"><li>&#x27;기업회원&#x27;은 회사에 기업정보 및 개인정보를 제공하여 회원등록을 한 사람으로, 회사로부터 지속적으로 정보를 제공받고 회사가 제공하는 서비스를 계속적으로 이용할 수 있는 자를 말합니다.</li></ol><ol type="1" id="e017d907-c4e4-4880-a31d-df716628a445" class="numbered-list" start="5"><li>&#x27;비회원&#x27;은 회원가입 없이 회사가 제공하는 서비스를 이용하는 자를 말합니다.</li></ol><ol type="1" id="1bbd2d57-9064-4c0c-ac37-fc0b5522a783" class="numbered-list" start="6"><li>&#x27;아이디(ID)&#x27;라 함은 회원의 식별과 서비스이용을 위하여 회원이 정하고 회사가 승인하는 문자 또는 문자와 숫자의 조합을 의미합니다.</li></ol><ol type="1" id="09ff46b6-6ad6-43d8-b865-bf443aec1633" class="numbered-list" start="7"><li>&#x27;비밀번호&#x27;라 함은 회원이 부여받은 아이디와 일치되는 회원임을 확인하고 비밀의 보호를 위해 회원 자신이 정한 문자(특수문자 포함)와 숫자의 조합을 의미합니다.</li></ol><ol type="1" id="14bdc281-4863-483d-88fe-7cc4faef78de" class="numbered-list" start="8"><li>&#x27;콘텐츠&#x27;란 정보통신망법의 규정에 따라 정보통신망에서 사용되는 부호·문자·음성·음향·이미지 또는 영상 등으로 정보 형태의 글, 사진, 동영상 및 각종 파일과 링크 등을 말합니다.</li></ol><p id="a02ae2e2-ff17-4fc5-937b-327bc7576ec0" class="">
+</p><h3 id="049be13e-a9bd-4a5e-b931-1d1063a37605" class="">제3조 (약관 외 준칙)</h3><p id="b2c0a111-f03e-4d26-b9d5-05aa678f4832" class="">이 약관에서 정하지 아니한 사항에 대해서는 법령 또는 회사가 정한 서비스의 개별약관, 운영정책 및 규<br/>칙 등(이하 세부지침)의 규정에 따릅니다. 또한 본 약관과 세부지침이 충돌할 경우에는 세부지침에 따<br/>릅니다.<br/></p><p id="88d5a416-28e4-4ce3-bc9d-443eab0279c8" class="">
+</p><h3 id="7cd8ed90-f99d-493e-9c96-58ce74539c0a" class="">제4조(약관의 효력과 변경)</h3><ol type="1" id="f26fdfdb-0a12-43e1-999c-858842e7b021" class="numbered-list" start="1"><li>이 약관은 AjouEvent(이)가 제공하는 모든 인터넷서비스에 게시하여 공시합니다. &#x27;회사&#x27;는 &#x27;전자상거래 등에서의 소비자보호에 관한 법률(이하 &#x27;전자상거래법&#x27;이라 함)&#x27;, &#x27;약관의 규제에 관한 법률(이하 &#x27;약관규제 법&#x27;이라 함)&#x27;, &#x27;전자문서 및 전자거래 기본법(이하 &#x27;전자문서법&#x27;이라 함)&#x27;, &#x27;전자금융거래법 &#x27;, &#x27;정보통신망 이 용촉진 및 정보보호 등에 관한 법률(이하 &#x27;정보통신망법&#x27;이라 함)&#x27;, &#x27;소비자기본법 등 관계 법령(이하 &#x27;관계 법령&#x27; 이라 함)에 위배되지 않는 범위 내에서 이 약관을 변경할 수 있으며, 회사는 약관이 변경되는 경우에 변경된 약관의 내용과 시행일을 정하여, 그 시행일로부터 최소 7일 (이용자에게 불리하거나 중대한 사항 의 변경은 30일) 이전부터 시행일 후 상당한 기간 동안 공지하고, 기존 이용자에게는 변경된 약관, 적용일자 및 변경사유(변경될 내용 중 중요사항에 대한 설명을 포함)를 별도의 전자적 수단(전자우편, 문자메시지, 서비스 내 전자쪽지발송, 알림 메시지를 띄우는 등의 방법)으로 개별 통지합니다. 변경된 약관은 공지 하거나 통지한 시행일로부터 효력이 발생합니다.</li></ol><ol type="1" id="e34bcf5c-a346-4bb1-a2bd-9d73944c73e8" class="numbered-list" start="2"><li>회사가 제1항에 따라 개정약관을 공지 또는 통지하는 경우 &#x27;변경에 동의하지 아니한 경우 공지일 또는 통지를 받은 날로부터 7일(이용자에게 불리하거나 중대한 사항의 변경인 경우에는 30일) 내에 계약을 해지 할 수 있으며, 계약해지의 의사표시를 하지 아니한 경우에는 변경에 동의한 것으로 본다.&#x27; 라는 취지의 내 용을 함께 통지합니다.</li></ol><ol type="1" id="a66799ab-ca7c-4324-a4ba-c023224f9f41" class="numbered-list" start="3"><li>이용자가 제2항의 공지일 또는 통지를 받은 날로부터 7일(또는 이용자에게 불리하거나 중대한 사항의 변경인 경우에는 30일)내에 변경된 약관에 대해 거절의 의사를 표시하지 않았을 때에는 본 약관의 변경에 동의한 것으로 간주합니다.</li></ol><p id="524caa24-3aa3-4829-a243-728adf5228ba" class="">
+</p><h3 id="802541b8-b67d-4c60-ae61-f1421d5baf88" class="">제5조(이용자에 대한 통지)</h3><ol type="1" id="3c8d2693-3fbd-42c2-bd7e-33cbf22d4a97" class="numbered-list" start="1"><li>회사는 이 약관에 별도 규정이 없는 한 이용자에게 전자우편, 문자메시지(SMS), 전자쪽지, 푸쉬(Push)알림 등의 전자적 수단을 이용하여 통지할 수 있습니다.</li></ol><ol type="1" id="0e116163-f957-4a11-9e31-23e83220bf89" class="numbered-list" start="2"><li>회사는 이용자 전체에 대한 통지의 경우 7일 이상 회사가 운영하는 웹사이트 내의 게시판에 게시함으로써 제1항의 통지에 갈음할 수 있습니다. 다만, 이용자 본인의 거래와 관련하여 중대한 영향을 미치는 사항에 대하여는 제1항의 개별 통지를 합니다.</li></ol><ol type="1" id="ea6733c0-5c25-4d4b-b80e-6b426efe4029" class="numbered-list" start="3"><li>회사는 이용자의 연락처 미기재, 변경 후 미수정, 오기재 등으로 인하여 개별 통지가 어려운 경우에 한하여 전항의 공지를 함으로써 개별 통지를 한 것으로 간주합니다.</li></ol><p id="56bdf22e-5f5f-4edb-9758-670f35df1b4f" class="">
+</p><h3 id="ed73f31a-93a3-4e48-bd30-6fd8b6413cdb" class="">제6조(이용계약의 체결)</h3><p id="abc5a988-10e2-4f07-984d-9d1287d047ce" class="">이용계약은 다음의 경우에 체결됩니다.</p><ol type="1" id="492f5aa7-35ff-4ad3-b3d9-04ec349fbd71" class="numbered-list" start="1"><li>이용자가 회원으로 가입하고자 하는 경우 이용자가 약관의 내용에 대하여 동의를 한 다음 회원가입신청을 하고 회사가 이러한 신청에 대하여 승낙한 때</li></ol><ol type="1" id="0844b2ec-f884-444e-9cee-71c14e145b1b" class="numbered-list" start="2"><li>이용자가 회원 가입 없이 이용할 수 있는 서비스에 대하여 회원 가입의 신청없이 서비스를 이용하고자 하는 경우에는 회사 서비스 이용을 위해 결제하는 때</li></ol><ol type="1" id="4769f29c-44e2-4b6c-baa9-fbaefc6fd9c8" class="numbered-list" start="3"><li>이용자가 회원가입 없이 이용할 수 있는 서비스에 대하여 회원가입의 신청없이 무료 서비스를 이용하고자하는 경우에는 그 무료 서비스와 관련된 사항의 저장 등 부가서비스를 이용하면서 위 1호 및 2호의 절차를 진행한 때</li></ol><p id="95f472b1-2c21-4a87-a747-ce3e9adc3f25" class="">
+</p><h3 id="69df1040-86da-4c11-874e-fa4ef147e377" class="">제7조(회원가입에 대한 승낙)</h3><ol type="1" id="001a9e87-2a57-4d83-9b46-012c2b23df3a" class="numbered-list" start="1"><li>회사는 이용계약에 대한 요청이 있을 때 서비스 이용을 승낙함을 원칙으로 합니다.</li></ol><ol type="1" id="7933942b-b9c5-4f72-93f4-9ba1cb72714b" class="numbered-list" start="2"><li>전항에도 불구하고, 다음 각호의 사유에 해당하는 경우 회사는 회원가입을 보류하거나 거절하는 등 제한할 수 있습니다.<p id="62798595-7d5a-4d10-9b5c-b5e09f0f7ae5" class="">가. 가입신청자가 이 약관에 의하여 이전에 회원자격을 상실한 적이 있는 경우(단, 회사의 재가입 승낙<br/>을 얻은 경우에는 예외로 함)<br/></p><p id="f050faaf-f676-4f52-9c05-20f118d64d3a" class="">나. 실명이 아니거나 타인의 명의를 도용한 경우</p><p id="604c654b-9b0d-47c5-ab4a-ea46963cdf2e" class="">다. 회사가 정하는 필수정보를 누락하거나 허위로 기재한 경우</p><p id="cca023e7-42e5-4962-96a6-342132a93719" class="">라. 만 14세 미만의 아동, 만 19세 미만의 미성년자, 피한정후견인, 피성년후견인이 법정대리인의 동의<br/>를 얻지 않은 경우<br/></p><p id="dc686888-9120-4b41-aab6-6ed25a0ecadb" class="">마. 이용자의 귀책사유로 인하여 승인이 불가능하거나 기타 이 약관 등 회사가 규정한 운영원칙을 위반<br/>한 경우<br/></p><p id="643455a7-fb4e-446e-97aa-61285c496acc" class="">바. 신용정보의 이용과 보호에 관한 법률에 따라 PC통신, 인터넷서비스의 신용불량자로 등록되어 있는<br/>경우<br/></p><p id="52d05947-82ab-4b53-aa89-d8aff86de5cf" class="">사. 정보통신윤리위원회에 PC통신, 인터넷서비스의 불량이용자로 등록되어 있는 경우</p><p id="12bfcc9b-bc9e-46d4-a32e-16cae55b767c" class="">아.이미 사용 중인 회원정보 또는 공서양속을 저해하는 아이디를 사용하고자 하는 경우</p></li></ol><ol type="1" id="eed68b10-ffef-4184-b17e-dc5cd262a20b" class="numbered-list" start="3"><li>제1항에 따른 신청에 있어 회사는 서비스 제공에 필요한 경우 전문기관을 통한 실명확인 및 본인인증을 요청할 수 있습니다.</li></ol><ol type="1" id="105aa52e-aec6-402e-bde3-8362b8e92442" class="numbered-list" start="4"><li>회사는 서비스 관련 설비의 여유가 없거나, 기술상 또는 업무상 문제가 있는 경우에는 승낙을 유보할 수<br/>있습니다.<br/></li></ol><ol type="1" id="6184d65e-d3df-438e-bcfa-7567a8768eb6" class="numbered-list" start="5"><li>제2항과 제4항에 따라 서비스 이용을 승낙하지 아니하거나 유보한 경우, 회사는 원칙적으로 이를 서비스 이용 신청자에게 알리도록 합니다. 단, 회사의 귀책사유 없이 이용자에게 알릴 수 없는 경우에는 예외로 합니다.</li></ol><ol type="1" id="83edcaff-7519-402f-9484-399c6735dd42" class="numbered-list" start="6"><li>이용계약의 성립 시기는 제6조 제1호의 경우에는 회사가 가입완료를 신청절차 상에서 표시한 시점, 제6조 제2호의 경우에는 결제가 완료되었다는 표시가 된 시점으로 합니다.</li></ol><ol type="1" id="2c10d87c-c63f-4c36-9b5b-edf05c299eda" class="numbered-list" start="7"><li>회사는 회원에 대해 회사정책에 따라 등급별로 구분하여 이용시간, 이용횟수, 서비스 메뉴 등을 세분하여 이용에 차등을 둘 수 있습니다.</li></ol><ol type="1" id="5879493c-1a14-47e7-8d99-a74f38be7fb6" class="numbered-list" start="8"><li>회사는 회원에 대하여 &#x27;영화및비디오물의진흥에관한법률&#x27; 및 &#x27;청소년보호법&#x27; 등에 따른 등급 및 연령 준수를 위하여 이용제한이나 등급별 제한을 둘 수 있습니다.</li></ol><p id="c1877f77-a047-4d03-88e5-c98e0dbd8ac2" class="">
+</p><h3 id="855fcfb2-8d83-4137-96c2-ee50c0e13220" class="">제8조(회원정보의 변경)</h3><ol type="1" id="3ff6a96a-15f8-40b6-b86b-41b56dd1b677" class="numbered-list" start="1"><li>회원은 개인정보관리화면을 통하여 언제든지 본인의 개인정보를 열람하고 수정할 수 있습니다. 다만, 서비스 관리를 위해 필요한 실명, 아이디 등은 수정이 불가능합니다.</li></ol><ol type="1" id="efb6509a-11d8-4ce6-9bdd-9189c8cc8f90" class="numbered-list" start="2"><li>회원은 회원가입신청 시 기재한 사항이 변경되었을 경우 온라인으로 수정을 하거나 전자우편 기타 방법으로 회사에 대하여 그 변경사항을 알려야 합니다.</li></ol><ol type="1" id="f0ca7ecb-3c91-46e7-9c94-7d97f20c376c" class="numbered-list" start="3"><li>제2항의 변경사항을 회사에 알리지 않아 발생한 불이익에 대하여는 회원에게 책임이 있습니다.</li></ol><p id="1bd381ea-e6e1-4cd7-9da3-de26c7471ad2" class="">
+</p><h3 id="24a76ac6-52e4-40ba-9939-89b233508e7e" class="">제9조(회원정보의 관리 및 보호)</h3><ol type="1" id="bcbb968c-fab7-48b5-9346-7f8f676f9a31" class="numbered-list" start="1"><li>회원의 아이디(ID)와 비밀번호에 관한 관리책임은 회원에게 있으며, 이를 제3자가 이용하도록 하여서는 안 됩니다.</li></ol><ol type="1" id="954b0310-dd49-43ac-b976-6bbfd0e2f754" class="numbered-list" start="2"><li>회사는 회원의 아이디(ID)가 개인정보 유출 우려가 있거나, 반사회적 또는 공서양속에 어긋나거나, 회사 또는 서비스의 운영자로 오인할 우려가 있는 경우, 해당 아이디(ID)의 이용을 제한할 수 있습니다.</li></ol><ol type="1" id="7d8394f0-bc5d-4e01-950a-7c746d617c9b" class="numbered-list" start="3"><li>회원은 아이디(ID) 및 비밀번호가 도용되거나 제3자가 사용하고 있음을 인지한 경우에는 이를 즉시 회사에 통지하고 안내에 따라야 합니다.</li></ol><ol type="1" id="fd82b3fb-9da4-42fb-8323-cc2a4ec53ad7" class="numbered-list" start="4"><li>제3항의 경우 해당 회원이 회사에 그 사실을 통지하지 않거나, 통지하였으나 회사의 안내에 따르지 않아 발생한 불이익에 대하여 회사는 책임지지 않습니다.</li></ol><p id="5fb66629-4a9d-45cb-8aa9-a48dd4e554a7" class="">
+</p><h3 id="d28fbdb2-d299-4aab-afa2-b51b0473d491" class="">제10조(회사의 의무)</h3><ol type="1" id="94c03135-a57b-44ef-9c17-702da5315255" class="numbered-list" start="1"><li>회사는 계속적이고 안정적인 서비스의 제공을 위하여 설비에 장애가 생기거나 멸실된 때에는 이를 지체<br/>없이 수리 또는 복구하며, 다음 각 호의 사유 발생 시 부득이한 경우 예고 없이 서비스의 전부 또는 일부의 제공을 일시 중지할 수 있습니다. 이 경우 그 사유 및 중지 기간 등을 이용자에게 지체 없이 사후 공지합니다.<br/><p id="fdf9e4c0-93e2-466c-8cec-e56a430a2e4f" class="">가. 시스템의 긴급점검, 증설, 교체, 시설의 보수 또는 공사를 하기 위하여 필요한 경우</p><p id="4d86dfab-fc66-47a6-9ddb-897eacc4d799" class="">나. 새로운 서비스를 제공하기 위하여 시스템교체가 필요하다고 판단되는 경우</p><p id="b9aa415c-ea0d-4a48-b4bf-929a1c585690" class="">다.시스템 또는 기타 서비스 설비의 장애, 유무선 Network 장애 등으로 정상적인 서비스 제공이 불가<br/>능할 경우<br/></p><p id="fda124b2-666e-4e9f-b247-6e9390d6a493" class="">라. 국가비상사태, 정전, 불가항력적 사유로 인한 경우</p></li></ol><ol type="1" id="fe48e0db-61e1-4981-9c1c-8ff3928d089b" class="numbered-list" start="2"><li>회사는 이용계약의 체결, 계약사항의 변경 및 해지 등 이용자와의 계약관련 절차 및 내용 등에 있어 이용자에게 편의를 제공하도록 노력합니다.</li></ol><ol type="1" id="87bd6fe6-e095-44a3-8511-abaa4c69bad9" class="numbered-list" start="3"><li>회사는 대표자의 성명, 상호, 주소, 전화번호, 모사전송번호(FAX), 통신판매업 신고번호, 이용약관, 개인정보취급방침 등을 이용자가 쉽게 알 수 있도록 온라인 서비스 초기화면에 게시합니다.</li></ol><h3 id="1e081b41-624f-4233-9211-c483e79e785a" class="">제11조(개인정보보호)</h3><ol type="1" id="dac142c8-856a-4a4f-afeb-2f8ec4116bdb" class="numbered-list" start="1"><li>회사는 이용자들의 개인정보를 중요시하며, 정보통신망 이용촉진 및 정보보호 등에 관한 법률, 개인정보 보호법 등 관련 법규를 준수하기 위해 노력합니다. 회사는 개인정보보호정책을 통하여 이용자가 제공하는 개인정보가 어떠한 용도와 방식으로 이용되고 있으며 개인정보보호를 위해 어떠한 조치가 취해지고 있는지 알려드립니다.</li></ol><ol type="1" id="4b160e4a-7636-4b56-a317-9f53aa3d4da7" class="numbered-list" start="2"><li>회사가 이용자의 개인정보의 보호 및 사용에 대해서 관련 법규 및 회사의 개인정보처리방침을 적용합니 다. 다만, 회사에서 운영하는 웹 사이트 등에서 링크된 외부 웹페이지에서는 회사의 개인정보처리방침이 적용되지 않습니다.</li></ol><p id="3f281d8e-4dde-4fa4-91af-04ff2810e5c1" class="">
+</p><h3 id="fddd5a1a-4e0b-48ab-94df-80a07d2d8a61" class="">제12조(이용자의 의무)</h3><ol type="1" id="0e360b15-b0d9-4063-a0b6-72d7bcd15d97" class="numbered-list" start="1"><li>이용자는 이용자가입을 통해 이용신청을 하는 경우 사실에 근거하여 신청서를 작성해야 합니다. 이용자<br/>가 허위, 또는 타인의 정보를 등록한 경우 회사에 대하여 일체의 권리를 주장할 수 없으며, 회사는 이로 인 하여 발생한 손해에 대하여 책임을 부담하지 않습니다.<br/></li></ol><ol type="1" id="59aed0d3-b914-443b-9f77-ffee93c1e7a7" class="numbered-list" start="2"><li>이용자는 본 약관에서 규정하는 사항과 기타 회사가 정한 제반 규정, 회사가 공지하는 사항을 준수하여야 합니다. 또한 이용자는 회사의 업무를 방해하는 행위 및 회사의 명예를 훼손하는 행위를 하여서는 안됩니다.</li></ol><ol type="1" id="c8ef8ed1-4b33-4b59-80bb-edfaf498b436" class="numbered-list" start="3"><li>이용자는 주소, 연락처, 전자우편 주소 등 회원정보가 변경된 경우 즉시 온라인을 통해 이를 수정해야 합 니다. 이 때 변경된 정보를 수정하지 않거나 수정이 지연되어 발생하는 책임은 이용자가 지게 됩니다.</li></ol><ol type="1" id="1002d6e1-c884-42f6-a028-c8b8b9406cf9" class="numbered-list" start="4"><li>이용자는 이용자에게 부여된 아이디와 비밀번호를 직접 관리해야 합니다. 이용자의 관리 소홀로 발생한<br/>문제는 회사가 책임을 부담하지 않습니다.<br/></li></ol><ol type="1" id="b7487b9d-c251-4ad0-9a39-6caa168d406c" class="numbered-list" start="5"><li>이용자가 아이디, 닉네임, 기타 서비스 내에서 사용되는 명칭 등을 선정할 때에는 다음 각 호에 해당하는 행위를 해서는 안 됩니다.<p id="d709c63b-7add-4651-b123-a51a389a3a2c" class="">가. 회사가 제공하는 서비스의 공식 운영자를 사칭하거나 이와 유사한 명칭을 사용하여 다른 이용자에<br/>게 혼란을 주는 행위<br/></p><p id="31c75376-5179-4dd8-9764-b2744d3c259b" class="">나. 선정적이고 음란한 내용이 포함된 명칭을 사용하는 행위</p><p id="9d6a8496-ba10-4be4-a598-906b9f6c9ef5" class="">다. 제3자의 상표권, 저작권 등 권리를 침해할 가능성이 있는 명칭을 사용하는 행위</p><p id="e0fa47cf-a2db-45c6-b8f1-3c0dc54e94f1" class="">라. 제3자의 명예를 훼손하거나, 그 업무를 방해할 가능성이 있는 명칭을 사용하는 행위</p><p id="fcf656be-f6ce-4933-aaeb-1abe7af0ac9c" class="">마. 기타 반사회적이고 관계법령에 저촉되는 내용이 포함된 명칭을 사용하는 행위</p></li></ol><ol type="1" id="3a760210-aada-474e-8b55-7de527013762" class="numbered-list" start="6"><li>이용자는 회사의 명시적 동의가 없는 한 서비스 이용 권한, 기타 이용계약상의 지위에 대하여 매도, 증여, 담보제공 등 처분행위를 할 수 없습니다.</li></ol><ol type="1" id="293e3006-822d-44c2-8907-537801c4119b" class="numbered-list" start="7"><li>본 조와 관련하여 서비스 이용에 있어 주의사항 등 그 밖의 자세한 내용은 운영정책으로 정하며, 이용자가 서비스 이용약관 및 운영정책을 위반하는 경우 서비스 이용제한, 민형사상의 책임 등 불이익이 발생할 수 있습니다.</li></ol><p id="24324fea-4ff1-4d20-8228-bbf434d6e907" class="">
+</p><h3 id="5e98e1f4-0614-4f6b-ae75-852f4abe7044" class="">제13조(서비스의 제공)</h3><ol type="1" id="2e124424-555a-4b1f-9385-1d72c878193e" class="numbered-list" start="1"><li>회사의 서비스는 연중무휴, 1일 24시간 제공을 원칙으로 합니다. 다만 회사 시스템의 유지 보수를 위한 점검, 통신장비의 교체 등 특별한 사유가 있는 경우 서비스의 전부 또는 일부에 대하여 일시적인 제공 중단 이 발생할 수 있습니다.</li></ol><ol type="1" id="ad43d554-877a-4979-81b2-852c336e8766" class="numbered-list" start="2"><li>회사가 제공하는 개별 서비스에 대한 구체적인 안내사항은 개별 서비스 화면에서 확인할 수 있습니다.</li></ol><ol type="1" id="1d0b41f8-e525-45c1-91d4-646b214a578e" class="numbered-list" start="3"><li>회사가 제공하는 서비스의 내용은 다음과 같습니다.<br/>가. 아주대학교에서 제공하는 공지사항에 대한 검색, 찜하기 기능<br/><p id="6ef3dca4-768e-4250-830a-3d946b7dd695" class="">나.구독한 토픽에 대한 아주대학교 공지사항 알림, 구독한 토픽과 키워드에 대한 아주대학교 공지사항<br/>알림 <br/></p><p id="d1dbf002-d271-49ea-8e1b-dd423349f0f4" class="">다. 공지사항을 구글 캘린더 연결</p></li></ol><p id="13c263ac-72f6-4f2a-832a-ac89fc70a061" class="">
+</p><h3 id="a31c82a5-74f4-4a88-81f3-9c6be5aab83a" class="">제14조(서비스의 제한 등)</h3><ol type="1" id="bdbf9000-b0b0-4307-9b3f-c805b045c9fa" class="numbered-list" start="1"><li>회사는 전시, 사변, 천재지변 또는 이에 준하는 국가비상사태가 발생하거나 발생할 우려가 있는 경우와 전 기통신사업법에 의한 기간통신사업자가 전기통신서비스를 중지하는 등 부득이한 사유가 있는 경우에는 서비스의 전부 또는 일부를 제한하거나 중지할 수 있습니다.</li></ol><ol type="1" id="c0446ca0-3422-4de2-8997-839c6ad5b6dd" class="numbered-list" start="2"><li>무료서비스는 전항의 규정에도 불구하고, 회사의 운영정책 등의 사유로 서비스의 전부 또는 일부가 제한되거나 중지될 수 있으며, 유료로 전환될 수 있습니다.</li></ol><ol type="1" id="1805e1e8-92f7-4f10-b2bc-8f266f394475" class="numbered-list" start="3"><li>회사는 서비스의 이용을 제한하거나 정지하는 때에는 그 사유 및 제한기간, 예정 일시 등을 지체없이 이용자에게 알립니다.</li></ol><ol type="1" id="1bdcd2c0-8dd7-4b2a-9f0c-862088c6e045" class="numbered-list" start="4"><li>회사는 사전에 결제정보를 입력 받고, 무료로 제공중인 서비스를 유료로 전환할 경우, 그 사유와 유료 전환 예정 일시를 통지하고 유료 전환에 대한 이용자의 동의를 받습니다.</li></ol><p id="cfc9abca-186e-4d14-80ba-487dfc3e3dae" class="">
+</p><h3 id="52db3f44-51dd-47b7-8405-dc8a9d179724" class="">제15조(서비스의 해제·해지 및 탈퇴 절차)</h3><ol type="1" id="a50dffd1-4aab-4fcb-853a-1471d826eb51" class="numbered-list" start="1"><li>이용자가 이용 계약을 해지하고자 할 때는 언제든지 홈페이지 상의 이용자 탈퇴 신청을 통해 이용계약 해지를 요청할 수 있습니다. 단, 신규가입 후 일정 시간 동안 서비스 부정이용 방지 등의 사유로 즉시 탈퇴가 제한될 수 있습니다.</li></ol><ol type="1" id="280f5b4a-36cc-4ec3-8d01-c3f987a21825" class="numbered-list" start="2"><li>회사는 이용자가 본 약관에서 정한 이용자의 의무를 위반한 경우 등 비정상적인 이용 또는 부당한 이용과 이용자 금지프로그램 사용하는 경우 또는 타인의 명예를 훼손하거나 모욕하는 방송과 게시물을 작성한 경우 이러한 행위를 금지하거나 삭제를 요청하였음에도 불구하고 최초의 금지 또는 삭제 요청을 포함하여 2회 이상 누적되는 경우 이용자에게 통지하고, 계약을 해지할 수 있습니다.</li></ol><ol type="1" id="23d452bf-4e7d-412e-ac80-cc6279dec91b" class="numbered-list" start="3"><li>회사는 이용자의 청약철회, 해제 또는 해지의 의사표시를 수신한 후 그 사실을 이용자에게 회신합니다. 회신은 이용자가 회사에 대하여 통지한 방법 중 하나에 의하고, 이용자가 회사에 대하여 통지한 연락처가 존 재하지 않는 경우에는 회신하지 않을 수 있습니다.</li></ol><p id="19f73594-9ee1-43bf-aafc-1515253c418b" class="">
+</p><h3 id="2a134f05-34f4-45b3-a510-98d6a6fabc72" class="">제16조 (손해배상)</h3><ol type="1" id="1ccf3f9c-3cc7-4498-a052-393a74c8f0e4" class="numbered-list" start="1"><li>회사 또는 이용자는 상대방의 귀책에 따라 손해가 발생하는 경우 손해배상을 청구할 수 있습니다. 다만,<br/>회사는 무료서비스의 장애, 제공 중단, 보관된 자료 멸실 또는 삭제, 변조 등으로 인한 손해에 대하여는 배상책임을 부담하지 않습니다.<br/></li></ol><ol type="1" id="ae819376-5b44-4367-8728-c7dc4de92a5a" class="numbered-list" start="2"><li>회사가 제공하는 서비스의 이용과 관련하여 회사의 운영정책 및 개인 정보 보호정책, 기타 서비스별 이용약관에서 정하는 내용에 위반하지 않는 한 회사는 어떠한 손해에 대하여도 책임을 부담하지 않습니다</li></ol><p id="9644e539-1a7e-4d65-b720-7d88ba8fcafe" class="">
+</p><h3 id="64ea7322-a278-4a1a-b0eb-cb18eca03119" class="">제17조(면책사항)</h3><ol type="1" id="de5c1942-eefc-4969-a21b-3218e02ef904" class="numbered-list" start="1"><li>회사는 천재지변 또는 이에 준하는 불가항력으로 인하여 서비스를 제공할 수 없는 경우에는 서비스 제공에 관한 책임을 지지 않습니다.</li></ol><ol type="1" id="79f8334c-d8f6-4616-aff1-14503cd89900" class="numbered-list" start="2"><li>회사는 이용자의 귀책사유로 인한 서비스 이용장애에 대하여 책임을 지지 지 않습니다.</li></ol><ol type="1" id="91385d49-2b78-40c5-a818-e46410558939" class="numbered-list" start="3"><li>회사는 이용자가 서비스를 이용하며 기대하는 수익을 얻지 못한 것에 대하여 책임 지지 않으며 서비스를 통하여 얻은 자료로 인한 손해 등에 대하여도 책임을 지지 않습니다.</li></ol><ol type="1" id="26446baa-88ee-4fd2-a7bf-82173bbc9e4a" class="numbered-list" start="4"><li>회사는 이용자가 웹페이지에 게재한 내용의 신뢰도, 정확성 등 내용에 대해서는 책임지지 않으며, 이용자 상호간 또는 이용자와 제3자 상호간 서비스를 매개로 발생한 분쟁에 개입하지 않습니다.</li></ol><h3 id="70f08bfd-7236-4abd-879a-c8fc06a03949" class="">제18조(권리의 귀속)</h3><ol type="1" id="81aacb2c-f7f6-4209-a70b-5f72349842cd" class="numbered-list" start="1"><li>회사가 제공하는 서비스에 대한 저작권 등 지식재산권은 회사에 귀속 됩니다.</li></ol><ol type="1" id="937014e5-df33-4daa-90f0-9f652dc2da4e" class="numbered-list" start="2"><li>회사는 서비스와 관련하여 이용자에게 회사가 정한 조건 따라 회사가 제공하는 서비스를 이용할 수 있는 권한만을 부여하며, 이용자는 이를 양도, 판매, 담보제공 하는 등 처분행위를 할 수 없습니다.</li></ol><ol type="1" id="76cf2259-2c07-4263-8407-47d086237400" class="numbered-list" start="3"><li>제1항의 규정에도 불구하고 이용자가 직접 작성한 콘텐츠 및 회사의 제휴계약에 따라 제공된 저작물에 대한 지식재산권은 회사에 귀속되지 않습니다.</li></ol><p id="fc2d20d5-e4eb-43cb-b1f3-5c864195ce3b" class="">
+</p><h3 id="0ca13c11-597e-4493-a16c-81bd2d83f34b" class="">제19조(콘텐츠의 관리)</h3><ol type="1" id="210887eb-f105-4de5-8d8f-292a3a1eeaea" class="numbered-list" start="1"><li>회원이 작성 또는 창작한 콘텐츠가 &#x27;개인정보보호법&#x27; 및 &#x27;저작권법&#x27; 등 관련 법에 위반되는 내용을 포함하 는 경우, 관리자는 관련 법이 정한 절차에 따라 해당 콘텐츠의 게시중단 및 삭제 등을 요청할 수 있으며, 회사는 관련 법에 따라 조치를 취하여야 합니다.</li></ol><ol type="1" id="86b51d0f-57bc-43a4-933a-6a8b0eb8cca7" class="numbered-list" start="2"><li>회사는 전항에 따른 권리자의 요청이 없는 경우라도 권리침해가 인정될 만한 사유가 있거나 기타 회사 정책 및 관련 법에 위반되는 경우에는 관련 법에 따라 해당 콘텐츠에 대해 임시조치 등을 취할 수 있습니다.</li></ol><h3 id="c6fc6ed4-e44c-45a5-9772-92e9fc5bee01" class="">제20조(관할법원 및 준거법)</h3><p id="20197671-1621-4cbd-9d11-aa427525b46f" class="">서비스와 관련하여 분쟁이 발생한 경우 관할법원은 민사소송법에 따른 관할법원으로 정하며, 준거법은<br/>대한민국의 법령을 적용합니다.<br/><br/></p><h2 id="912e3cab-7004-4607-bd1f-78be5f4e193a" class="">부칙<br/><br/></h2><h3 id="4ee3fbf0-99b1-4f24-b50f-f783ab81bd5b" class="">제1조(시행일)</h3><p id="033fe110-dff1-4c08-bca3-0ec5f62ccc00" class="">본 약관은 2024.09.02.부터 시행됩니다.</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>

@@ -1,0 +1,21 @@
+{
+  "short_name": "Ajou-Event",
+  "name": "Ajou-Event Web App",
+  "description": "아주대학교 공지사항을 실시간으로 받아보세요!",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo196.png",
+      "type": "image/png",
+      "sizes": "196x196"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff"
+}
