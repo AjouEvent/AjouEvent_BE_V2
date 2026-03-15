@@ -1,0 +1,4 @@
+ajou:
+  discord:
+    name: ajouevent
+    webhook-url: ${DISCORD_WEBHOOK_URL}

@@ -1,68 +1,17 @@
 spring:
   application:
     name: ajouevent-be-v2
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            scope:
-              - email
-              - profile
-              - https://www.googleapis.com/auth/user.organization.read
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
-    open-in-view: false
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      timeout: 2000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 2
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:prod}
+  config:
+    import:
+      - classpath:config/db.yaml
+      - classpath:config/oauth.yaml
+      - classpath:config/jwt.yaml
+      - classpath:config/fcm.yaml
+      - classpath:config/discord.yaml
+      - classpath:config/aws.yaml
 
 ajou:
   swagger:
     server-url: ${SWAGGER_SERVER_URL:http://localhost:8080}
-  discord:
-    name: ajouevent
-    webhook-url: ${DISCORD_WEBHOOK_URL}
-  fcm:
-    certification: firebase/firebase-service-account.json
-    default-image-url: https://www.ajou.ac.kr/_res/ajou/kr/img/intro/img-symbol.png
-    redirection-url-prefix: https://www.ajouevent.com/event/
-    default-click-action-url: https://www.ajouevent.com
-  webhook:
-    crawling-token-key: crawling-token
-
-jwt:
-  secret: ${JWT_SECRET}
-  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
-  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
-  issuer: ${JWT_ISSUER}
-  cookie-secure: ${JWT_COOKIE_SECURE:false}
-
-cloud:
-  aws:
-    credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRET_KEY}
-    region: ${AWS_REGION}
-    s3:
-      bucket: ${AWS_S3_BUCKET}
