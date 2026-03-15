@@ -1,0 +1,6 @@
+ajou:
+  fcm:
+    certification: firebase/firebase-service-account.json
+    default-image-url: https://www.ajou.ac.kr/_res/ajou/kr/img/intro/img-symbol.png
+    redirection-url-prefix: https://www.ajouevent.com/event/
+    default-click-action-url: https://www.ajouevent.com
