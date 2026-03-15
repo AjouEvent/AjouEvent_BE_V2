@@ -4,11 +4,14 @@ import com.example.ajouevent_be_v2.common.auth.CustomAccessDeniedHandler;
 import com.example.ajouevent_be_v2.common.auth.CustomAuthenticationEntryPoint;
 import com.example.ajouevent_be_v2.common.auth.JwtAuthFilter;
 import com.example.ajouevent_be_v2.common.auth.AuthArgumentResolver;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,15 +36,25 @@ public class SecurityConfig implements WebMvcConfigurer {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final AuthArgumentResolver authArgumentResolver;
+    private final Environment environment;
 
     private static final String[] AUTH_WHITELIST = {
             "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
-            "/api/v2/auth/login", "/api/v2/auth/reissue", "/api/v2/auth/test-login",
+            "/api/v2/auth/login", "/api/v2/auth/reissue",
             "/api/v2/topics"
+    };
+
+    private static final String[] LOCAL_AUTH_WHITELIST = {
+            "/api/v2/auth/test-login"
     };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        List<String> whitelist = new ArrayList<>(Arrays.asList(AUTH_WHITELIST));
+        if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
+            whitelist.addAll(Arrays.asList(LOCAL_AUTH_WHITELIST));
+        }
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
@@ -57,7 +70,7 @@ public class SecurityConfig implements WebMvcConfigurer {
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                                .requestMatchers(AUTH_WHITELIST).permitAll()
+                                .requestMatchers(whitelist.toArray(String[]::new)).permitAll()
                                 .anyRequest().authenticated()
                 );
 
