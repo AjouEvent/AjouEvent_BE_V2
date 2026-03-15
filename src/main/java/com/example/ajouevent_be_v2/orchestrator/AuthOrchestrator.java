@@ -31,4 +31,9 @@ public class AuthOrchestrator {
         Member member = memberService.findByEmail(email);
         return authService.issueTokens(member, null);
     }
+
+    public AuthTokenResult testLogin(String email) {
+        Member member = memberService.findByEmail(email);
+        return authService.issueTokens(member, null);
+    }
 }
