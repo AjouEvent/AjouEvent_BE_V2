@@ -42,6 +42,10 @@ public class KeywordMemberRepositoryPort {
         keywordMemberJpaRepositoryAdapter.deleteAllByIds(ids);
     }
 
+    public List<KeywordMember> findByKeywordWithMember(Keyword keyword) {
+        return keywordMemberJpaRepositoryAdapter.findByKeywordWithMember(keyword);
+    }
+
     public boolean existsByMemberAndIsReadFalse(Member member) {
         return keywordMemberJpaRepositoryAdapter.existsByMemberAndIsReadFalse(member);
     }

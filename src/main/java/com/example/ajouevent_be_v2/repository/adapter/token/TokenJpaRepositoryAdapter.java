@@ -15,6 +15,11 @@ public interface TokenJpaRepositoryAdapter extends JpaRepository<Token, Long> {
 
     List<Token> findByMemberAndIsDeletedFalse(Member member);
 
+    List<Token> findByIsDeletedFalse();
+
+    @Query("SELECT t FROM Token t WHERE t.member IN :members AND t.isDeleted = false")
+    List<Token> findByMemberInAndIsDeletedFalse(@Param("members") List<Member> members);
+
     Optional<Token> findByTokenValueAndMember(String tokenValue, Member member);
 
     @Modifying

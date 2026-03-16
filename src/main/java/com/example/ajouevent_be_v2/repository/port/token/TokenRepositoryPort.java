@@ -39,4 +39,12 @@ public class TokenRepositoryPort {
     public Optional<Token> findByTokenValueAndMember(String tokenValue, Member member) {
         return tokenJpaRepositoryAdapter.findByTokenValueAndMember(tokenValue, member);
     }
+
+    public List<Token> findAllActiveTokens() {
+        return tokenJpaRepositoryAdapter.findByIsDeletedFalse();
+    }
+
+    public List<Token> findActiveTokensByMembers(List<Member> members) {
+        return tokenJpaRepositoryAdapter.findByMemberInAndIsDeletedFalse(members);
+    }
 }

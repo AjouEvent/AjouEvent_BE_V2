@@ -39,6 +39,10 @@ public class TopicMemberRepositoryPort {
         topicMemberJpaRepositoryAdapter.deleteAllByIds(ids);
     }
 
+    public List<TopicMember> findByTopicWithMemberAndReceiveNotificationTrue(Topic topic) {
+        return topicMemberJpaRepositoryAdapter.findByTopicWithMemberAndReceiveNotificationTrue(topic);
+    }
+
     public TopicMember save(TopicMember topicMember) {
         return topicMemberJpaRepositoryAdapter.save(topicMember);
     }
