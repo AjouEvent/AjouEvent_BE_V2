@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 public class PushClusterRepositoryPort {
 
     private final PushClusterJpaRepositoryAdapter pushClusterJpaRepositoryAdapter;
-    private final PushClusterBulkRepositoryAdapter pushClusterBulkRepositoryAdapter;
 
     public Optional<PushCluster> findById(Long id) {
         return pushClusterJpaRepositoryAdapter.findById(id);
