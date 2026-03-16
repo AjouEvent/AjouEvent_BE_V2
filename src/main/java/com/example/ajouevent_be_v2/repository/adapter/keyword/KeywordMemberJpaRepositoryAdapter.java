@@ -32,7 +32,7 @@ public interface KeywordMemberJpaRepositoryAdapter extends JpaRepository<Keyword
 
     boolean existsByMemberAndIsReadFalse(Member member);
 
-    @Query("SELECT km FROM KeywordMember km JOIN FETCH km.keyword k JOIN FETCH k.topic WHERE km.member = :member AND (k.searchKeyword = :keyword OR k.koreanKeyword = :keyword)")
+    @Query("SELECT km FROM KeywordMember km JOIN FETCH km.keyword k JOIN FETCH k.topic WHERE km.member = :member AND k.searchKeyword = :keyword")
     Optional<KeywordMember> findByMemberAndKeywordName(
         @Param("member") Member member, @Param("keyword") String keyword);
 }
