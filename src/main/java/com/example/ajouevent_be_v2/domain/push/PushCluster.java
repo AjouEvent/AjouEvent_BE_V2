@@ -53,31 +53,31 @@ public class PushCluster {
     @Column(name = "click_url", nullable = false)
     private String clickUrl;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "job_status", nullable = false)
     private JobStatus jobStatus = JobStatus.PENDING;
 
+    @Builder.Default
     @Column(name = "total_count", nullable = false)
     private int totalCount = 0;
 
     @Column(name = "registered_at", nullable = false)
     private LocalDateTime registeredAt;
 
+    @Builder.Default
     @Column(name = "success_count", nullable = false)
     private int successCount = 0;
 
+    @Builder.Default
     @Column(name = "fail_count", nullable = false)
     private int failCount = 0;
 
-    @Column(name = "received_count", nullable = false)
-    private int receivedCount = 0;
-
-    @Column(name = "clicked_count", nullable = false)
-    private int clickedCount = 0;
-
+    @Builder.Default
     @Column(name = "start_at", nullable = true)
     private LocalDateTime startAt = LocalDateTime.now();
 
+    @Builder.Default
     @Column(name = "end_at", nullable = true)
     private LocalDateTime endAt = LocalDateTime.now();
 
