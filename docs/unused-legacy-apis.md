@@ -14,14 +14,6 @@
 
 ---
 
-## WebhookController
-
-| 메서드 | 경로 | 설명 |
-|--------|------|------|
-| POST | `/api/webhook/crawling` | 크롤링 웹훅 처리 |
-
----
-
 ## FCMController
 
 | 메서드 | 경로 | 설명 |
