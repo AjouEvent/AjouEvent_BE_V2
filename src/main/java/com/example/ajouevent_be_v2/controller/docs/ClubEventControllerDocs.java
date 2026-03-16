@@ -77,7 +77,7 @@ public interface ClubEventControllerDocs {
 
             [V1 대비 변경]
             - V1: GET /api/event/{type}
-            - V2: GET /api/v2/event/{type}  (경로 충돌 방지를 위해 type/ prefix 추가)
+            - V2: GET /api/v2/event/{type}
             """)
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공")
