@@ -47,6 +47,12 @@ public class KeywordCommandService {
     }
 
     @Transactional
+    public void markKeywordMemberAsRead(Member member, Keyword keyword) {
+        keywordMemberRepositoryPort.findByKeywordAndMemberAndIsReadFalse(keyword, member)
+            .ifPresent(KeywordMember::markAsRead);
+    }
+
+    @Transactional
     public void unsubscribeKeywordMember(Keyword keyword, Member member) {
         keywordMemberRepositoryPort.deleteByKeywordAndMember(keyword, member);
         log.info("키워드 구독 취소 - member: {}, keyword: {}", member.getEmail(), keyword.getKoreanKeyword());
