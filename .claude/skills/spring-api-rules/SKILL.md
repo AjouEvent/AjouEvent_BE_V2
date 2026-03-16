@@ -394,7 +394,7 @@ public class NoticeCacheAdapter implements NoticeCachePort {
 
     @Override
     public boolean isFirstIpRequest(String clientIp, Long eventId) {
-        String key = "view:" + eventId + ":" + clientIp;
+        String key = "ClubEvent:anon:" + eventId + ":" + clientIp;
         return Boolean.TRUE.equals(
             redisTemplate.opsForValue().setIfAbsent(key, "1", 1, TimeUnit.HOURS)
         );
@@ -408,6 +408,63 @@ public class NoticeCommandService {
     private final NoticeCachePort noticeCachePort;
 }
 ```
+
+---
+
+## Redis Key Naming Convention
+
+### 키 구조
+
+```
+{도메인} : {목적} : {entityId} : {식별자...}
+```
+
+예시:
+
+```
+ClubEvent:views:{eventId}
+ClubEvent:user:{eventId}:{email}
+ClubEvent:anon:{eventId}:{ip}:{userAgent}
+```
+
+### 규칙
+
+**1. prefix 상수는 어댑터 클래스 상단에 모두 선언한다**
+
+```java
+private static final String VIEW_KEY_PREFIX    = "ClubEvent:views:";
+private static final String USER_REQUEST_PREFIX = "ClubEvent:user:";
+private static final String ANON_REQUEST_PREFIX = "ClubEvent:anon:";
+private static final long   VIEW_COUNT_TTL_MINUTES  = 4L;
+private static final long   VIEW_DEDUP_TTL_SECONDS  = 86400L;
+```
+
+**2. 키에서 entityId를 파싱하는 로직은 Port 메서드로 제공한다**
+
+Service가 `split(":")[n]` 인덱스로 직접 파싱하면 키 형식이 바뀔 때 런타임에 버그가 발생한다.
+파싱 책임은 키를 정의한 어댑터가 갖고, Port 메서드로 노출한다.
+
+```java
+// ❌ 금지 — Service가 키 구조를 직접 알면 안 됨
+Long eventId = Long.parseLong(key.split(":")[2]);
+
+// ✅ Port 메서드로 추상화
+Long eventId = noticeCachePort.extractEventIdFromViewKey(key);
+
+// Adapter 구현 — prefix 상수로 파싱해 키 형식 변경에 자동 대응
+@Override
+public Long extractEventIdFromViewKey(String key) {
+    return Long.parseLong(key.substring(VIEW_KEY_PREFIX.length()));
+}
+```
+
+**3. SCAN은 스케줄러 flush 대상 키에만 허용한다**
+
+단순 존재 여부 확인은 `hasKey`(O(1))를 사용한다. SCAN은 O(N)이므로 남용하면 Redis 성능에 영향을 준다.
+
+**4. 모든 Redis 키에는 반드시 TTL을 설정한다**
+
+TTL 없는 키는 Redis 메모리를 영구 점유한다. `setIfAbsent`, `set` 호출 시 항상 TTL 파라미터를 포함한다.
 
 ---
 
