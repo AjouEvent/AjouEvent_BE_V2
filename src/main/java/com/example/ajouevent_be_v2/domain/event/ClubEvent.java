@@ -75,4 +75,8 @@ public class ClubEvent {
     public void decreaseLikes() {
         this.likesCount--;
     }
+
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
 }
