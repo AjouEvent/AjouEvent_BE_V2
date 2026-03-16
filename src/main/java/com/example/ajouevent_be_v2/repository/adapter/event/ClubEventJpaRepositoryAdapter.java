@@ -29,10 +29,8 @@ public interface ClubEventJpaRepositoryAdapter extends JpaRepository<ClubEvent, 
     Slice<ClubEvent> findByEventIdInAndTypeAndTitleContaining(
         List<Long> eventId, Type type, String title, Pageable pageable);
 
-    @Query("SELECT ce FROM ClubEvent ce WHERE ce.createdAt BETWEEN :startOfWeek AND :endOfWeek ORDER BY ce.viewCount DESC LIMIT 10")
     List<ClubEvent> findTop10ByCreatedAtBetweenOrderByViewCountDesc(
-        @Param("startOfWeek") LocalDateTime startOfWeek,
-        @Param("endOfWeek") LocalDateTime endOfWeek);
+        LocalDateTime startOfWeek, LocalDateTime endOfWeek);
 
     @Modifying
     @Query("UPDATE ClubEvent e SET e.viewCount = :viewCount WHERE e.eventId = :eventId")

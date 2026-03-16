@@ -71,12 +71,12 @@ public class NoticeCacheAdapter implements NoticeCachePort {
             .count(10)
             .build();
         Set<String> keys = new HashSet<>();
-        Cursor<byte[]> cursor = stringRedisTemplate.executeWithStickyConnection(
-            connection -> connection.scan(options)
-        );
-        if (cursor != null) {
-            while (cursor.hasNext()) {
-                keys.add(new String(cursor.next()));
+        try (Cursor<byte[]> cursor = stringRedisTemplate.executeWithStickyConnection(
+            connection -> connection.scan(options))) {
+            if (cursor != null) {
+                while (cursor.hasNext()) {
+                    keys.add(new String(cursor.next()));
+                }
             }
         }
         return keys;

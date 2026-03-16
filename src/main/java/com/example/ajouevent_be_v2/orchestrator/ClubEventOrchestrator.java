@@ -81,7 +81,7 @@ public class ClubEventOrchestrator {
         SliceResult<ClubEvent> result = clubEventQueryService.getEventsByType(eventType.get(), keyword, pageable);
         Set<Long> likedIds = eventLikeQueryService.getLikedEventIds(member);
         if (member != null) {
-            topicCommandService.markTopicAsRead(member, type);
+            topicCommandService.markTopicAsRead(member, eventType.get().getEnglishTopic());
         }
         return SliceResponse.from(result, e -> ClubEventResponse.from(e, likedIds.contains(e.getEventId())));
     }
@@ -120,6 +120,9 @@ public class ClubEventOrchestrator {
         List<Type> subscribedTypes = topicQueryService.getSubscribedTopics(member).stream()
             .map(tm -> tm.getTopic().getType())
             .toList();
+        if (subscribedTypes.isEmpty()) {
+            return SliceResponse.empty(pageable.getPageNumber());
+        }
         SliceResult<ClubEvent> result = clubEventQueryService.getEventsByTypes(subscribedTypes, keyword, pageable);
         Set<Long> likedIds = eventLikeQueryService.getLikedEventIds(member);
         return SliceResponse.from(result, e -> ClubEventResponse.from(e, likedIds.contains(e.getEventId())));
@@ -139,6 +142,9 @@ public class ClubEventOrchestrator {
         List<Long> eventIds = eventLikeQueryService.getLikedEventsWithDetails(member).stream()
             .map(el -> el.getClubEvent().getEventId())
             .toList();
+        if (eventIds.isEmpty()) {
+            return SliceResponse.empty(pageable.getPageNumber());
+        }
         boolean hasTypeFilter = type != null && !type.isBlank();
         Optional<Type> resolvedType = hasTypeFilter ? resolveEventType(type) : Optional.empty();
         if (hasTypeFilter && resolvedType.isEmpty()) {
