@@ -1,6 +1,6 @@
 # 레거시 BE에서 구현됐지만 FE V1에서 사용하지 않는 API 목록
 
-> 레거시 BE: `/Users/administrator/Developer/GitHub/AjouEvent_BE`
+> 레거시 BE: `chore/ajou-event-v1` 브랜치의 `ajou-event-v1/` 디렉토리
 > 레거시 FE: `chore/ajou-event-fe-v1` 브랜치의 `ajou-event-fe-v1/` 디렉토리
 > 분석 기준일: 2026-03-15
 
