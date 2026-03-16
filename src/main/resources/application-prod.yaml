@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+ajou:
+  swagger:
+    server-url: ${SWAGGER_SERVER_URL}
+
+jwt:
+  cookie-secure: true
