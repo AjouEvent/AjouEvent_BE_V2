@@ -44,7 +44,7 @@ out/
 ### Node.js ###
 node_modules/
 
-/src/main/.DS_Store
+.DS_Store
 
 **/src/main/resources/credentials.json
 
