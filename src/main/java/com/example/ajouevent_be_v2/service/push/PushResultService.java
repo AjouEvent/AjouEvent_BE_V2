@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.example.ajouevent_be_v2.common.exception.push.PushErrorCode;
-import com.example.ajouevent_be_v2.common.exception.push.PushException;
 import com.example.ajouevent_be_v2.domain.member.Token;
 import com.example.ajouevent_be_v2.domain.push.PushCluster;
 import com.example.ajouevent_be_v2.domain.push.PushClusterToken;
@@ -35,25 +33,21 @@ public class PushResultService {
 
     @Transactional
     public void skipWithNoTargets(PushCluster pushCluster) {
-        pushCluster.updateCountsAndStatus(0, 0);
-        pushClusterRepositoryPort.save(pushCluster);
+        pushClusterRepositoryPort.incrementCountsAndUpdateStatus(pushCluster.getId(), 0, 0);
     }
 
     @Transactional
     public void processPushResult(Long pushClusterId, List<PushClusterToken> clusterTokens, BatchResponse response) {
-        PushCluster pushCluster = pushClusterRepositoryPort.findById(pushClusterId)
-            .orElseThrow(() -> new PushException(PushErrorCode.PUSH_CLUSTER_NOT_FOUND));
-
         int successCount = 0;
         int failCount = 0;
         List<Token> tokensToSoftDelete = new ArrayList<>();
 
         for (int i = 0; i < clusterTokens.size(); i++) {
             PushClusterToken pushClusterToken = clusterTokens.get(i);
-            if (response.getResponses().get(i).isSuccessful()) { // FCM 전송 성공
+            if (response.getResponses().get(i).isSuccessful()) {
                 pushClusterToken.markAsSuccess();
                 successCount++;
-            } else {                                             // FCM 전송 실패
+            } else {
                 pushClusterToken.markAsFail();
                 failCount++;
                 Optional<Token> token = tokenRepositoryPort.findByTokenValueAndMember(
@@ -69,8 +63,7 @@ public class PushResultService {
             tokenRepositoryPort.batchSoftDeleteTokens(tokensToSoftDelete);
         }
 
-        pushCluster.updateCountsAndStatus(successCount, failCount);
-        pushClusterRepositoryPort.save(pushCluster);
+        pushClusterRepositoryPort.incrementCountsAndUpdateStatus(pushClusterId, successCount, failCount);
         log.info("푸시 완료 - PushClusterID: {} 성공: {} 실패: {}", pushClusterId, successCount, failCount);
     }
 

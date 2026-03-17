@@ -89,17 +89,5 @@ public class PushCluster {
         this.jobStatus = JobStatus.IN_PROGRESS;
     }
 
-    public void updateCountsAndStatus(int successCount, int failCount) {
-        this.successCount += successCount;
-        this.failCount += failCount;
-        if (this.successCount == 0 && this.failCount == 0) {
-            this.jobStatus = JobStatus.NONE;
-        } else if (this.failCount > 0) {
-            this.jobStatus = JobStatus.PARTIAL_FAIL;
-        } else {
-            this.jobStatus = JobStatus.SUCCESS;
-        }
 
-        this.endAt = LocalDateTime.now();
-    }
 }

@@ -20,4 +20,8 @@ public class PushClusterRepositoryPort {
     public PushCluster save(PushCluster pushCluster) {
         return pushClusterJpaRepositoryAdapter.save(pushCluster);
     }
+
+    public void incrementCountsAndUpdateStatus(Long id, int successDelta, int failDelta) {
+        pushClusterJpaRepositoryAdapter.incrementCountsAndUpdateStatus(id, successDelta, failDelta);
+    }
 }
