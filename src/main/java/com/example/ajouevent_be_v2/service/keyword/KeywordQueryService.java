@@ -5,7 +5,10 @@ import com.example.ajouevent_be_v2.common.exception.keyword.KeywordException;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.member.Member;
+import com.example.ajouevent_be_v2.domain.topic.Topic;
+import com.example.ajouevent_be_v2.dto.clubevent.ClubEventCommand;
 import com.example.ajouevent_be_v2.repository.port.keyword.KeywordMemberRepositoryPort;
+import com.example.ajouevent_be_v2.repository.port.keyword.KeywordRepositoryPort;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,17 @@ import org.springframework.stereotype.Service;
 public class KeywordQueryService {
 
     private final KeywordMemberRepositoryPort keywordMemberRepositoryPort;
+    private final KeywordRepositoryPort keywordRepositoryPort;
+
+    public List<Keyword> findMatchingByClubEvent(Topic topic, ClubEventCommand command) {
+        return keywordRepositoryPort.findByTopic(topic).stream()
+            .filter(keyword -> {
+                String kw = keyword.getKoreanKeyword().toLowerCase();
+                return (command.title() != null && command.title().toLowerCase().contains(kw))
+                    || (command.content() != null && command.content().toLowerCase().contains(kw));
+            })
+            .toList();
+    }
 
     public List<KeywordMember> getUserKeywords(Member member) {
         return keywordMemberRepositoryPort.findByMemberWithKeywordAndTopic(member);

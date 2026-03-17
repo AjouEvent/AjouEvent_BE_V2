@@ -25,6 +25,9 @@ public interface TopicMemberJpaRepositoryAdapter extends JpaRepository<TopicMemb
 
     boolean existsByMemberAndIsReadFalse(Member member);
 
+    @Query("SELECT tm FROM TopicMember tm JOIN FETCH tm.member WHERE tm.topic = :topic AND tm.receiveNotification = true")
+    List<TopicMember> findByTopicWithMemberAndReceiveNotificationTrue(@Param("topic") Topic topic);
+
     @Modifying
     @Query("DELETE FROM TopicMember tm WHERE tm.id IN :ids")
     void deleteAllByIds(@Param("ids") List<Long> ids);

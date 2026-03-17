@@ -8,6 +8,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Repository;
 public class TokenBulkRepositoryAdapter {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final EntityManager entityManager;
 
     public void batchSoftDeleteTokens(List<Token> tokens) {
@@ -35,5 +38,10 @@ public class TokenBulkRepositoryAdapter {
         });
 
         tokens.forEach(entityManager::detach);
+    }
+
+    public void batchSoftDeleteByTokenValues(List<String> tokenValues) {
+        String sql = "UPDATE tokens SET is_deleted = true WHERE token_value IN (:tokenValues)";
+        namedParameterJdbcTemplate.update(sql, new MapSqlParameterSource("tokenValues", tokenValues));
     }
 }

@@ -20,13 +20,8 @@ public class FcmInitializer implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         try {
-            FirebaseOptions options =
-                    FirebaseOptions.builder()
-                            .setCredentials(
-                                    GoogleCredentials.fromStream(
-                                            new ClassPathResource(fcmProperties.getCertification())
-                                                    .getInputStream()))
-                            .build();
+            FirebaseOptions options = FirebaseOptions.builder()
+                            .setCredentials(GoogleCredentials.fromStream(new ClassPathResource(fcmProperties.getCertification()).getInputStream())).build();
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
                 log.info("Firebase application has been initialized");
