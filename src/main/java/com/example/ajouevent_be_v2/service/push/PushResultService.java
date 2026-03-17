@@ -3,13 +3,14 @@ package com.example.ajouevent_be_v2.service.push;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.ajouevent_be_v2.domain.member.Token;
 import com.example.ajouevent_be_v2.domain.push.PushCluster;
 import com.example.ajouevent_be_v2.domain.push.PushClusterToken;
 import com.example.ajouevent_be_v2.repository.port.push.PushClusterRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.push.PushClusterTokenRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.token.TokenRepositoryPort;
 import com.google.firebase.messaging.BatchResponse;
+import com.google.firebase.messaging.MessagingErrorCode;
+import com.google.firebase.messaging.SendResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,26 +40,27 @@ public class PushResultService {
     public void processPushResult(Long pushClusterId, List<PushClusterToken> clusterTokens, BatchResponse response) {
         int successCount = 0;
         int failCount = 0;
-        List<String> failedTokenValues = new ArrayList<>();
+        List<String> invalidTokenValues = new ArrayList<>();
 
         for (int i = 0; i < clusterTokens.size(); i++) {
             PushClusterToken pushClusterToken = clusterTokens.get(i);
-            if (response.getResponses().get(i).isSuccessful()) {  // FCM 전송 성공시
+            SendResponse sendResponse = response.getResponses().get(i);
+            if (sendResponse.isSuccessful()) {
                 pushClusterToken.markAsSuccess();
                 successCount++;
-            } else {  // FCM 전솔 실패시
+            } else {
                 pushClusterToken.markAsFail();
                 failCount++;
-                failedTokenValues.add(pushClusterToken.getTokenValue());
+                if (isInvalidTokenError(sendResponse)) {
+                    invalidTokenValues.add(pushClusterToken.getTokenValue());
+                }
             }
         }
 
         updatePushClusterTokens(clusterTokens);
 
-        if (!failedTokenValues.isEmpty()) {
-            List<Token> tokensToSoftDelete = tokenRepositoryPort.findActiveTokensByValues(failedTokenValues);
-            tokensToSoftDelete.forEach(Token::markAsDeleted);
-            tokenRepositoryPort.batchSoftDeleteTokens(tokensToSoftDelete);
+        if (!invalidTokenValues.isEmpty()) {
+            tokenRepositoryPort.batchSoftDeleteByTokenValues(invalidTokenValues);
         }
 
         pushClusterRepositoryPort.incrementCountsAndUpdateStatus(pushClusterId, successCount, failCount);
@@ -76,6 +78,15 @@ public class PushResultService {
         batch.forEach(PushClusterToken::markAsFail);
         updatePushClusterTokens(batch);
         pushClusterRepositoryPort.incrementCountsAndUpdateStatus(pushClusterId, 0, batch.size());
+    }
+
+    private boolean isInvalidTokenError(SendResponse sendResponse) {
+        if (sendResponse.getException() == null) {
+            return false;
+        }
+        MessagingErrorCode errorCode = sendResponse.getException().getMessagingErrorCode();
+        return errorCode == MessagingErrorCode.UNREGISTERED
+            || errorCode == MessagingErrorCode.INVALID_ARGUMENT;
     }
 
     private void updatePushClusterTokens(List<PushClusterToken> clusterTokens) {

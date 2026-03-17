@@ -13,8 +13,10 @@ import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.MessagingErrorCode;
 import com.google.firebase.messaging.MulticastMessage;
 import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.SendResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -85,7 +87,8 @@ public class FcmService {
 
             List<String> invalidTokens = new ArrayList<>();
             for (int i = 0; i < response.getResponses().size(); i++) {
-                if (!response.getResponses().get(i).isSuccessful()) {
+                SendResponse sendResponse = response.getResponses().get(i);
+                if (!sendResponse.isSuccessful() && isInvalidTokenError(sendResponse)) {
                     invalidTokens.add(tokenValues.get(i));
                 }
             }
@@ -105,10 +108,24 @@ public class FcmService {
                 Message singleMessage = Message.builder().setToken(tokenValue).build();
                 FirebaseMessaging.getInstance().send(singleMessage, true);
             } catch (FirebaseMessagingException ex) {
-                log.warn("재시도 중 실패한 토큰: {}", tokenValue);
-                invalidTokens.add(tokenValue);
+                if (isInvalidTokenError(ex.getMessagingErrorCode())) {
+                    log.warn("재시도 중 유효하지 않은 토큰: {}", tokenValue);
+                    invalidTokens.add(tokenValue);
+                }
             }
         }
         return invalidTokens;
+    }
+
+    private boolean isInvalidTokenError(SendResponse sendResponse) {
+        if (sendResponse.getException() == null) {
+            return false;
+        }
+        return isInvalidTokenError(sendResponse.getException().getMessagingErrorCode());
+    }
+
+    private boolean isInvalidTokenError(MessagingErrorCode errorCode) {
+        return errorCode == MessagingErrorCode.UNREGISTERED
+            || errorCode == MessagingErrorCode.INVALID_ARGUMENT;
     }
 }

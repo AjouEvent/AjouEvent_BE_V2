@@ -44,6 +44,10 @@ public class TokenRepositoryPort {
         return tokenJpaRepositoryAdapter.findByTokenValueInAndIsDeletedFalse(tokenValues);
     }
 
+    public void batchSoftDeleteByTokenValues(List<String> tokenValues) {
+        tokenBulkRepositoryAdapter.batchSoftDeleteByTokenValues(tokenValues);
+    }
+
     public List<Token> findAllActiveTokens() {
         return tokenJpaRepositoryAdapter.findByIsDeletedFalse();
     }
