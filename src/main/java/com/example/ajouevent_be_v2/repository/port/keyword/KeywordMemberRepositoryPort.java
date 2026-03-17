@@ -5,6 +5,7 @@ import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.repository.adapter.keyword.KeywordMemberJpaRepositoryAdapter;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -48,5 +49,13 @@ public class KeywordMemberRepositoryPort {
 
     public boolean existsByMemberAndIsReadFalse(Member member) {
         return keywordMemberJpaRepositoryAdapter.existsByMemberAndIsReadFalse(member);
+    }
+
+    public Optional<KeywordMember> findByMemberAndKeywordName(Member member, String keyword) {
+        return keywordMemberJpaRepositoryAdapter.findByMemberAndKeywordName(member, keyword);
+    }
+
+    public Optional<KeywordMember> findByKeywordAndMemberAndIsReadFalse(Keyword keyword, Member member) {
+        return keywordMemberJpaRepositoryAdapter.findByKeywordAndMemberAndIsReadFalse(keyword, member);
     }
 }

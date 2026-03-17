@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.domain.event;
+package com.example.ajouevent_be_v2.domain.clubevent;
 
 import com.example.ajouevent_be_v2.domain.member.Member;
 
@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
-public class EventLike {
+public class ClubEventLike {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "event_like_id")

@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.domain.event;
+package com.example.ajouevent_be_v2.domain.clubevent;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -74,5 +74,9 @@ public class ClubEvent {
 
     public void decreaseLikes() {
         this.likesCount--;
+    }
+
+    public void incrementViewCount() {
+        this.viewCount++;
     }
 }

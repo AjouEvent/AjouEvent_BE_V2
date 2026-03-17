@@ -51,4 +51,9 @@ public class TopicMember {
     public void updateReceiveNotification(boolean receiveNotification) {
         this.receiveNotification = receiveNotification;
     }
+
+    public void markAsRead() {
+        this.isRead = true;
+        this.lastReadAt = LocalDateTime.now();
+    }
 }
