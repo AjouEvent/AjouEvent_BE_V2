@@ -25,6 +25,7 @@ public interface PushNotificationJpaRepositoryAdapter extends JpaRepository<Push
         "WHERE tm.topic.koreanTopic = :koreanTopic " +
         "GROUP BY tm.member.id")
     List<UnreadNotificationCountResult> countUnreadNotificationsForTopic(@Param("koreanTopic") String koreanTopic);
+
     Slice<PushNotification> findByMemberAndNotificationType(
         Member member, NotificationType notificationType, Pageable pageable);
 
@@ -41,11 +42,12 @@ public interface PushNotificationJpaRepositoryAdapter extends JpaRepository<Push
         "WHERE km.keyword.encodedKeyword = :encodedKeyword " +
         "GROUP BY km.member.id")
     List<UnreadNotificationCountResult> countUnreadNotificationsForKeyword(@Param("encodedKeyword") String encodedKeyword);
-    @Modifying
+
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE PushNotification p SET p.isRead = true, p.clickedAt = :now WHERE p.id IN :ids")
     void updateReadStatusByIds(@Param("ids") List<Long> ids, @Param("now") LocalDateTime now);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE PushNotification p SET p.isRead = true, p.clickedAt = :now WHERE p.id IN :ids AND p.isRead = false")
     void updateReadStatusByIdsWhereUnread(@Param("ids") List<Long> ids, @Param("now") LocalDateTime now);
 }
