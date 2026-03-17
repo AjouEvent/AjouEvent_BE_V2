@@ -6,8 +6,8 @@ import com.example.ajouevent_be_v2.dto.push.FcmMessageCommand;
 import com.example.ajouevent_be_v2.dto.push.PushClusterSendRequest;
 import com.example.ajouevent_be_v2.service.notification.PushNotificationService;
 import com.example.ajouevent_be_v2.service.push.PushClusterQueryService;
-import com.example.ajouevent_be_v2.service.push.PushResultService;
-import com.example.ajouevent_be_v2.service.webhook.FcmService;
+import com.example.ajouevent_be_v2.service.webhook.FcmPushResultService;
+import com.example.ajouevent_be_v2.service.webhook.FcmPushService;
 import com.google.api.core.ApiFutureCallback;
 import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.Message;
@@ -23,9 +23,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class FcmOrchestrator {
 
-    private final FcmService fcmService;
+    private final FcmPushService fcmPushService;
     private final PushClusterQueryService pushClusterQueryService;
-    private final PushResultService pushResultService;
+    private final FcmPushResultService fcmPushResultService;
     private final PushNotificationService pushNotificationService;
 
     public void dispatch(List<PushClusterSendRequest> sendRequests) {
@@ -38,29 +38,29 @@ public class FcmOrchestrator {
 
         if (clusterTokens.isEmpty()) {
             log.info("푸시 전송 스킵 - PushClusterID: {} 알림 대상 토큰이 없습니다.", cluster.getId());
-            pushResultService.skipWithNoTargets(cluster);
+            fcmPushResultService.skipWithNoTargets(cluster);
             return;
         }
 
-        pushResultService.markAsInProgressAndSave(cluster);
+        fcmPushResultService.markAsInProgressAndSave(cluster);
 
         Map<Long, Long> unreadCountMap = pushNotificationService.countUnreadByCommand(command);
 
         List<List<PushClusterToken>> batches = splitIntoBatches(clusterTokens, 400);
         for (List<PushClusterToken> batch : batches) {
-            pushResultService.markBatchAsSendingAndSave(batch);
+            fcmPushResultService.markBatchAsSendingAndSave(batch);
 
-            List<Message> messages = fcmService.buildMessages(cluster.getId(), batch, command, unreadCountMap);
-            fcmService.sendBatchAsync(messages, new ApiFutureCallback<>() {
+            List<Message> messages = fcmPushService.buildMessages(cluster.getId(), batch, command, unreadCountMap);
+            fcmPushService.sendBatchAsync(messages, new ApiFutureCallback<>() {
                 @Override
                 public void onSuccess(BatchResponse response) {
-                    pushResultService.processPushResult(cluster.getId(), batch, response);
+                    fcmPushResultService.processPushResult(cluster.getId(), batch, response);
                 }
 
                 @Override
                 public void onFailure(Throwable t) {
                     log.error("FCM 알림 전송 실패 - pushClusterId={}", cluster.getId(), t);
-                    pushResultService.markBatchAsFailAndSave(cluster.getId(), batch);
+                    fcmPushResultService.markBatchAsFailAndSave(cluster.getId(), batch);
                 }
             });
         }

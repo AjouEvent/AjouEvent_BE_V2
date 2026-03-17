@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.service.push;
+package com.example.ajouevent_be_v2.service.webhook;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PushResultService {
+public class FcmPushResultService {
 
     private final PushClusterRepositoryPort pushClusterRepositoryPort;
     private final PushClusterTokenRepositoryPort pushClusterTokenRepositoryPort;

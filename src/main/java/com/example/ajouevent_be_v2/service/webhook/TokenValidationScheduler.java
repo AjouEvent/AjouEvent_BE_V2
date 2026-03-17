@@ -23,7 +23,7 @@ public class TokenValidationScheduler {
 
     private static final int BATCH_SIZE = 400;
 
-    private final FcmService fcmService;
+    private final FcmPushService fcmPushService;
     private final TokenService tokenService;
 
     @Scheduled(cron = "0 0 5 ? * SUN")
@@ -68,7 +68,7 @@ public class TokenValidationScheduler {
             int toIndex = Math.min(fromIndex + BATCH_SIZE, totalTokens);
             List<String> batch = tokenValues.subList(fromIndex, toIndex);
 
-            List<String> batchInvalidTokens = fcmService.validateTokens(batch);
+            List<String> batchInvalidTokens = fcmPushService.validateTokens(batch);
             invalidTokens.addAll(batchInvalidTokens);
 
             log.info("배치 {} 완료 | {} ~ {} 번 토큰 검증 | 무효 토큰 수: {}",

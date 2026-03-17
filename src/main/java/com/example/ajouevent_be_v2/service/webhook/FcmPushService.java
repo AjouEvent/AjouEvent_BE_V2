@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FcmService {
+public class FcmPushService {
 
     private final Executor fcmCallbackExecutor;
 
