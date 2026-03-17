@@ -51,4 +51,9 @@ public class KeywordMember {
             .lastReadAt(LocalDateTime.now())
             .build();
     }
+
+    public void markAsRead() {
+        this.isRead = true;
+        this.lastReadAt = LocalDateTime.now();
+    }
 }

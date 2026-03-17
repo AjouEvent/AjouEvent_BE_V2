@@ -2,7 +2,7 @@ package com.example.ajouevent_be_v2.domain.topic;
 
 import java.util.List;
 
-import com.example.ajouevent_be_v2.domain.event.Type;
+import com.example.ajouevent_be_v2.domain.clubevent.Type;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

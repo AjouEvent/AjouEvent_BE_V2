@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.domain.event;
+package com.example.ajouevent_be_v2.domain.clubevent;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

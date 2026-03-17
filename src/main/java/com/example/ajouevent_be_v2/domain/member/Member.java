@@ -2,7 +2,7 @@ package com.example.ajouevent_be_v2.domain.member;
 
 import java.util.List;
 
-import com.example.ajouevent_be_v2.domain.event.EventLike;
+import com.example.ajouevent_be_v2.domain.clubevent.ClubEventLike;
 import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.topic.TopicMember;
 
@@ -50,7 +50,7 @@ public class Member {
     private List<Token> tokens;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-    private List<EventLike> eventLikeList;
+    private List<ClubEventLike> clubEventLikeList;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<TopicMember> topicMembers;
