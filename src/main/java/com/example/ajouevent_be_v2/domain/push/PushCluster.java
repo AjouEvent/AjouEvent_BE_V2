@@ -92,9 +92,9 @@ public class PushCluster {
     public void updateCountsAndStatus(int successCount, int failCount) {
         this.successCount += successCount;
         this.failCount += failCount;
-        if (successCount == 0 && failCount == 0) {
+        if (this.successCount == 0 && this.failCount == 0) {
             this.jobStatus = JobStatus.NONE;
-        } else if (failCount > 0) {
+        } else if (this.failCount > 0) {
             this.jobStatus = JobStatus.PARTIAL_FAIL;
         } else {
             this.jobStatus = JobStatus.SUCCESS;
