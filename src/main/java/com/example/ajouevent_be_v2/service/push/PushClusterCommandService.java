@@ -63,7 +63,7 @@ public class PushClusterCommandService {
         String title = buildTopicTitle(command);
         String body = command.title();
         String imageUrl = resolveImageUrl(command);
-        String clickUrl = resolveClickUrl(command, clubEvent.getEventId());
+        String clickUrl = resolveClickUrl(clubEvent.getEventId());
 
         PushCluster cluster = savePushCluster(clubEvent, title, body, imageUrl, clickUrl, activeTokens.size());
         savePushClusterTokens(cluster, activeTokens);
@@ -93,7 +93,7 @@ public class PushClusterCommandService {
         String title = keyword.getKoreanKeyword() + " - " + buildTopicTitle(command);
         String body = command.title();
         String imageUrl = resolveImageUrl(command);
-        String clickUrl = resolveClickUrl(command, clubEvent.getEventId());
+        String clickUrl = resolveClickUrl(clubEvent.getEventId());
 
         PushCluster cluster = savePushCluster(clubEvent, title, body, imageUrl, clickUrl, activeTokens.size());
         savePushClusterTokens(cluster, activeTokens);
@@ -145,10 +145,7 @@ public class PushClusterCommandService {
         return images.get(0);
     }
 
-    private String resolveClickUrl(ClubEventCommand command, Long eventId) {
-        return Optional.ofNullable(command.url())
-            .filter(u -> !u.isEmpty())
-            .map(u -> fcmProperties.getRedirectionUrlPrefix() + eventId)
-            .orElse(fcmProperties.getDefaultClickActionUrl());
+    private String resolveClickUrl(Long eventId) {
+        return fcmProperties.getRedirectionUrlPrefix() + eventId;
     }
 }
