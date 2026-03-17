@@ -33,8 +33,6 @@ public interface PushNotificationJpaRepositoryAdapter extends JpaRepository<Push
 
     long countByMemberAndIsReadFalse(Member member);
 
-    List<PushNotification> findByMemberAndIsReadFalse(Member member);
-
     @Query("SELECT new com.example.ajouevent_be_v2.dto.push.UnreadNotificationCountResult(" +
         "km.member.id, CAST(COALESCE(COUNT(pn), 0) AS long)) " +
         "FROM KeywordMember km " +
@@ -50,4 +48,8 @@ public interface PushNotificationJpaRepositoryAdapter extends JpaRepository<Push
     @Modifying(clearAutomatically = true)
     @Query("UPDATE PushNotification p SET p.isRead = true, p.clickedAt = :now WHERE p.id IN :ids AND p.isRead = false")
     void updateReadStatusByIdsWhereUnread(@Param("ids") List<Long> ids, @Param("now") LocalDateTime now);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE PushNotification p SET p.isRead = true, p.clickedAt = :now WHERE p.member = :member AND p.isRead = false")
+    void updateAllUnreadByMember(@Param("member") Member member, @Param("now") LocalDateTime now);
 }

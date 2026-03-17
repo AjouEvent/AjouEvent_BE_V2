@@ -1,7 +1,5 @@
 package com.example.ajouevent_be_v2.service.notification;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -43,7 +41,4 @@ public class NotificationQueryService {
         return pushNotificationRepositoryPort.countByMemberAndIsReadFalse(member);
     }
 
-    public List<PushNotification> getUnreadNotifications(Member member) {
-        return pushNotificationRepositoryPort.findByMemberAndIsReadFalse(member);
-    }
 }

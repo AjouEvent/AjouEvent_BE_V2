@@ -50,10 +50,6 @@ public class PushNotificationRepositoryPort {
         return pushNotificationJpaRepositoryAdapter.countByMemberAndIsReadFalse(member);
     }
 
-    public List<PushNotification> findByMemberAndIsReadFalse(Member member) {
-        return pushNotificationJpaRepositoryAdapter.findByMemberAndIsReadFalse(member);
-    }
-
     public void updateReadStatusByIds(List<Long> ids, LocalDateTime now) {
         pushNotificationJpaRepositoryAdapter.updateReadStatusByIds(ids, now);
     }
@@ -64,5 +60,9 @@ public class PushNotificationRepositoryPort {
 
     public PushNotification save(PushNotification pushNotification) {
         return pushNotificationJpaRepositoryAdapter.save(pushNotification);
+    }
+
+    public void updateAllUnreadByMember(Member member, LocalDateTime now) {
+        pushNotificationJpaRepositoryAdapter.updateAllUnreadByMember(member, now);
     }
 }

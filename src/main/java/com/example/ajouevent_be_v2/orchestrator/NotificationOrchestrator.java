@@ -1,7 +1,5 @@
 package com.example.ajouevent_be_v2.orchestrator;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,9 +50,6 @@ public class NotificationOrchestrator {
 
     @Transactional
     public void markAllNotificationsAsRead(Member member) {
-        List<PushNotification> unreadNotifications = notificationQueryService.getUnreadNotifications(member);
-        if (!unreadNotifications.isEmpty()) {
-            notificationCommandService.markAllAsRead(unreadNotifications);
-        }
+        notificationCommandService.markAllAsReadByMember(member);
     }
 }
