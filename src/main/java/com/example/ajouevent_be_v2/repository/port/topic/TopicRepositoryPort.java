@@ -17,6 +17,10 @@ public class TopicRepositoryPort {
         return topicJpaRepositoryAdapter.findFirstByDepartment(department);
     }
 
+    public Optional<Topic> findByKoreanTopic(String koreanTopic) {
+        return topicJpaRepositoryAdapter.findByKoreanTopic(koreanTopic);
+    }
+
     public List<Topic> findAll() {
         return topicJpaRepositoryAdapter.findAll();
     }

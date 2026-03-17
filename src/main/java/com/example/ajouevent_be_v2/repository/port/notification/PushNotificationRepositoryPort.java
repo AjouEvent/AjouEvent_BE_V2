@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.domain.notification.NotificationType;
 import com.example.ajouevent_be_v2.domain.notification.PushNotification;
+import com.example.ajouevent_be_v2.dto.push.UnreadNotificationCountResult;
 import com.example.ajouevent_be_v2.repository.adapter.notification.PushNotificationJpaRepositoryAdapter;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,19 @@ import lombok.RequiredArgsConstructor;
 public class PushNotificationRepositoryPort {
 
     private final PushNotificationJpaRepositoryAdapter pushNotificationJpaRepositoryAdapter;
+
+    public List<PushNotification> saveAll(List<PushNotification> notifications) {
+        return pushNotificationJpaRepositoryAdapter.saveAll(notifications);
+    }
+
+    public List<UnreadNotificationCountResult> countUnreadNotificationsForTopic(String koreanTopic) {
+        return pushNotificationJpaRepositoryAdapter.countUnreadNotificationsForTopic(koreanTopic);
+    }
+
+    public List<UnreadNotificationCountResult> countUnreadNotificationsForKeyword(String encodedKeyword) {
+        return pushNotificationJpaRepositoryAdapter.countUnreadNotificationsForKeyword(encodedKeyword);
+    }
+
 
     public Slice<PushNotification> findByMemberAndNotificationType(
         Member member, NotificationType notificationType, Pageable pageable) {

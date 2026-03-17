@@ -39,4 +39,20 @@ public class TokenRepositoryPort {
     public Optional<Token> findByTokenValueAndMember(String tokenValue, Member member) {
         return tokenJpaRepositoryAdapter.findByTokenValueAndMember(tokenValue, member);
     }
+
+    public List<Token> findActiveTokensByValues(List<String> tokenValues) {
+        return tokenJpaRepositoryAdapter.findByTokenValueInAndIsDeletedFalse(tokenValues);
+    }
+
+    public void batchSoftDeleteByTokenValues(List<String> tokenValues) {
+        tokenBulkRepositoryAdapter.batchSoftDeleteByTokenValues(tokenValues);
+    }
+
+    public List<Token> findAllActiveTokens() {
+        return tokenJpaRepositoryAdapter.findByIsDeletedFalse();
+    }
+
+    public List<Token> findActiveTokensByMembers(List<Member> members) {
+        return tokenJpaRepositoryAdapter.findByMemberInAndIsDeletedFalse(members);
+    }
 }

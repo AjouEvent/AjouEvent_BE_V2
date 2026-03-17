@@ -12,6 +12,7 @@ import com.example.ajouevent_be_v2.repository.port.keyword.KeywordTokenRepositor
 import com.example.ajouevent_be_v2.repository.port.topic.TopicTokenRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.token.TokenRepositoryPort;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -110,5 +111,19 @@ public class TokenService {
         if (!keywordTokens.isEmpty()) {
             keywordTokenBulkAdapter.saveAll(keywordTokens);
         }
+    }
+
+    public List<Token> findAllActiveTokens() {
+        return tokenRepositoryPort.findAllActiveTokens();
+    }
+
+    public Optional<Token> findByTokenValueAndMember(String tokenValue, Member member) {
+        return tokenRepositoryPort.findByTokenValueAndMember(tokenValue, member);
+    }
+
+    @Transactional
+    public void softDeleteInvalidTokens(List<Token> invalidTokens) {
+        invalidTokens.forEach(Token::markAsDeleted);
+        tokenRepositoryPort.batchSoftDeleteTokens(invalidTokens);
     }
 }
