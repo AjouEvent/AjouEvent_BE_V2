@@ -4,7 +4,7 @@ import com.example.ajouevent_be_v2.common.auth.AuthOptional;
 import com.example.ajouevent_be_v2.common.auth.AuthUser;
 import com.example.ajouevent_be_v2.common.dto.SliceResponse;
 import com.example.ajouevent_be_v2.controller.docs.ClubEventControllerDocs;
-import com.example.ajouevent_be_v2.domain.event.Type;
+import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventDetailResponse;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventResponse;

@@ -3,12 +3,12 @@ package com.example.ajouevent_be_v2.service.clubevent;
 import com.example.ajouevent_be_v2.common.dto.SliceResult;
 import com.example.ajouevent_be_v2.common.exception.clubevent.ClubEventErrorCode;
 import com.example.ajouevent_be_v2.common.exception.clubevent.ClubEventException;
-import com.example.ajouevent_be_v2.domain.event.ClubEvent;
-import com.example.ajouevent_be_v2.domain.event.Type;
+import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
+import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.member.Member;
-import com.example.ajouevent_be_v2.repository.port.event.ClubEventRepositoryPort;
-import com.example.ajouevent_be_v2.repository.port.notice.NoticeCachePort;
+import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventRepositoryPort;
+import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventCachePort;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 public class ClubEventQueryService {
 
     private final ClubEventRepositoryPort clubEventRepositoryPort;
-    private final NoticeCachePort noticeCachePort;
+    private final ClubEventCachePort clubEventCachePort;
 
     public ClubEvent getEventById(Long eventId) {
         return clubEventRepositoryPort.findById(eventId)
@@ -40,14 +40,14 @@ public class ClubEventQueryService {
      */
     public void handleViewCount(ClubEvent clubEvent, Member member, String clientIp, String userAgent) {
         if (member != null) {
-            if (noticeCachePort.isFirstUserRequest(member.getEmail(), clubEvent.getEventId())) {
-                noticeCachePort.recordUserRequest(member.getEmail(), clubEvent.getEventId());
-                noticeCachePort.incrementViewCount(clubEvent.getEventId(), clubEvent.getViewCount());
+            if (clubEventCachePort.isFirstUserRequest(member.getEmail(), clubEvent.getEventId())) {
+                clubEventCachePort.recordUserRequest(member.getEmail(), clubEvent.getEventId());
+                clubEventCachePort.incrementViewCount(clubEvent.getEventId(), clubEvent.getViewCount());
             }
         } else {
-            if (noticeCachePort.isFirstAnonymousRequest(clientIp, userAgent, clubEvent.getEventId())) {
-                noticeCachePort.recordAnonymousRequest(clientIp, userAgent, clubEvent.getEventId());
-                noticeCachePort.incrementViewCount(clubEvent.getEventId(), clubEvent.getViewCount());
+            if (clubEventCachePort.isFirstAnonymousRequest(clientIp, userAgent, clubEvent.getEventId())) {
+                clubEventCachePort.recordAnonymousRequest(clientIp, userAgent, clubEvent.getEventId());
+                clubEventCachePort.incrementViewCount(clubEvent.getEventId(), clubEvent.getViewCount());
             }
         }
     }

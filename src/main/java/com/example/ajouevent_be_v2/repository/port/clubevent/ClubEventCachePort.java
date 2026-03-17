@@ -1,8 +1,8 @@
-package com.example.ajouevent_be_v2.repository.port.notice;
+package com.example.ajouevent_be_v2.repository.port.clubevent;
 
 import java.util.Set;
 
-public interface NoticeCachePort {
+public interface ClubEventCachePort {
 
     // View count deduplication for authenticated users (email-based)
     boolean isFirstUserRequest(String userEmail, Long eventId);

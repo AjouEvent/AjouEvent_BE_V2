@@ -1,6 +1,6 @@
-package com.example.ajouevent_be_v2.repository.adapter.notice;
+package com.example.ajouevent_be_v2.repository.adapter.clubevent;
 
-import com.example.ajouevent_be_v2.repository.port.notice.NoticeCachePort;
+import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventCachePort;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class NoticeCacheAdapter implements NoticeCachePort {
+public class ClubEventCacheAdapter implements ClubEventCachePort {
 
     private static final String VIEW_KEY_PREFIX = "ClubEvent:views:";
     private static final String USER_REQUEST_PREFIX = "ClubEvent:user:";

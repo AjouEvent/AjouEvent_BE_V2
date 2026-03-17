@@ -1,7 +1,7 @@
-package com.example.ajouevent_be_v2.repository.port.event;
+package com.example.ajouevent_be_v2.repository.port.clubevent;
 
-import com.example.ajouevent_be_v2.domain.event.EventBanner;
-import com.example.ajouevent_be_v2.repository.adapter.event.EventBannerJpaRepositoryAdapter;
+import com.example.ajouevent_be_v2.domain.clubevent.EventBanner;
+import com.example.ajouevent_be_v2.repository.adapter.clubevent.EventBannerJpaRepositoryAdapter;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

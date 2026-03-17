@@ -1,6 +1,6 @@
-package com.example.ajouevent_be_v2.repository.adapter.event;
+package com.example.ajouevent_be_v2.repository.adapter.clubevent;
 
-import com.example.ajouevent_be_v2.domain.event.EventBanner;
+import com.example.ajouevent_be_v2.domain.clubevent.EventBanner;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EventBannerJpaRepositoryAdapter extends JpaRepository<EventBanner, Long> {

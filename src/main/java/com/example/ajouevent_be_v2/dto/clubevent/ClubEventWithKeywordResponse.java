@@ -1,6 +1,6 @@
 package com.example.ajouevent_be_v2.dto.clubevent;
 
-import com.example.ajouevent_be_v2.domain.event.ClubEvent;
+import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,7 +12,7 @@ public record ClubEventWithKeywordResponse(
     LocalDateTime createdAt,
     Long likesCount,
     Long viewCount,
-    boolean star,
+    boolean star, // 찜(like) 여부 — FE 호환을 위해 star 필드명 유지
     String subject,
     String type,
     String url,

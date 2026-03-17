@@ -1,8 +1,8 @@
-package com.example.ajouevent_be_v2.repository.port.event;
+package com.example.ajouevent_be_v2.repository.port.clubevent;
 
-import com.example.ajouevent_be_v2.domain.event.ClubEvent;
-import com.example.ajouevent_be_v2.domain.event.Type;
-import com.example.ajouevent_be_v2.repository.adapter.event.ClubEventJpaRepositoryAdapter;
+import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
+import com.example.ajouevent_be_v2.domain.clubevent.Type;
+import com.example.ajouevent_be_v2.repository.adapter.clubevent.ClubEventJpaRepositoryAdapter;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

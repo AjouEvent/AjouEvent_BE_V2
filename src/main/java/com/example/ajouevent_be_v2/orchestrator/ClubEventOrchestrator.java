@@ -2,9 +2,9 @@ package com.example.ajouevent_be_v2.orchestrator;
 
 import com.example.ajouevent_be_v2.common.dto.SliceResponse;
 import com.example.ajouevent_be_v2.common.dto.SliceResult;
-import com.example.ajouevent_be_v2.domain.event.ClubEvent;
-import com.example.ajouevent_be_v2.domain.event.EventLike;
-import com.example.ajouevent_be_v2.domain.event.Type;
+import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
+import com.example.ajouevent_be_v2.domain.clubevent.ClubEventLike;
+import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.member.Member;
@@ -13,8 +13,8 @@ import com.example.ajouevent_be_v2.dto.clubevent.ClubEventKeywordPair;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventResponse;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventWithKeywordResponse;
 import com.example.ajouevent_be_v2.service.clubevent.ClubEventQueryService;
-import com.example.ajouevent_be_v2.service.clubevent.EventLikeCommandService;
-import com.example.ajouevent_be_v2.service.clubevent.EventLikeQueryService;
+import com.example.ajouevent_be_v2.service.clubevent.ClubEventLikeCommandService;
+import com.example.ajouevent_be_v2.service.clubevent.ClubEventLikeQueryService;
 import com.example.ajouevent_be_v2.service.keyword.KeywordCommandService;
 import com.example.ajouevent_be_v2.service.keyword.KeywordQueryService;
 import com.example.ajouevent_be_v2.service.topic.TopicCommandService;
@@ -39,8 +39,8 @@ import org.springframework.stereotype.Component;
 public class ClubEventOrchestrator {
 
     private final ClubEventQueryService clubEventQueryService;
-    private final EventLikeCommandService eventLikeCommandService;
-    private final EventLikeQueryService eventLikeQueryService;
+    private final ClubEventLikeCommandService clubEventLikeCommandService;
+    private final ClubEventLikeQueryService clubEventLikeQueryService;
     private final TopicQueryService topicQueryService;
     private final TopicCommandService topicCommandService;
     private final KeywordQueryService keywordQueryService;
@@ -59,7 +59,7 @@ public class ClubEventOrchestrator {
         Long eventId, Member member, String clientIp, String userAgent) {
         ClubEvent event = clubEventQueryService.getEventById(eventId);
         clubEventQueryService.handleViewCount(event, member, clientIp, userAgent);
-        boolean star = eventLikeQueryService.isEventLiked(member, event);
+        boolean star = clubEventLikeQueryService.isEventLiked(member, event);
         return ClubEventDetailResponse.from(event, star);
     }
 
@@ -70,7 +70,7 @@ public class ClubEventOrchestrator {
      * 2. 해당 type의 게시글 목록 조회 (keyword 있으면 title LIKE 필터 적용)
      * 3. 내가 찜한 게시글 ID 목록 조회
      * 4. 인증 사용자에 한해 TopicMember.isRead 갱신 → 알림 뱃지 초기화
-     * 5. 각 게시글에 찜 여부(star) 포함해 응답 조립 후 반환
+     * 5. 각 게시글에 찜(like) 여부(star 필드) 포함해 응답 조립 후 반환
      */
     public SliceResponse<ClubEventResponse> getEventTypeList(
         String type, String keyword, Pageable pageable, Member member) {
@@ -79,7 +79,7 @@ public class ClubEventOrchestrator {
             return SliceResponse.empty(pageable.getPageNumber());
         }
         SliceResult<ClubEvent> result = clubEventQueryService.getEventsByType(eventType.get(), keyword, pageable);
-        Set<Long> likedIds = eventLikeQueryService.getLikedEventIds(member);
+        Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
         if (member != null) {
             topicCommandService.markTopicAsRead(member, eventType.get().getEnglishTopic());
         }
@@ -92,11 +92,11 @@ public class ClubEventOrchestrator {
      * 1. 이번 주(월~일) 생성 게시글 중 DB view_count 기준 상위 10개 조회
      *       (Redis에 미flush된 조회수는 미반영)
      * 2. 내가 찜한 게시글 ID 목록 조회
-     * 3. 각 게시글에 찜 여부(star) 포함해 응답 조립 후 반환
+     * 3. 각 게시글에 찜(like) 여부(star 필드) 포함해 응답 조립 후 반환
      */
     public List<ClubEventResponse> getTopPopularEvents(Member member) {
         List<ClubEvent> events = clubEventQueryService.getPopularEvents();
-        Set<Long> likedIds = eventLikeQueryService.getLikedEventIds(member);
+        Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
         return events.stream()
             .map(e -> ClubEventResponse.from(e, likedIds.contains(e.getEventId())))
             .toList();
@@ -110,7 +110,7 @@ public class ClubEventOrchestrator {
      * 1. 구독 중인 Topic 목록 조회 → Type 목록 추출
      * 2. 해당 Type 목록으로 게시글 목록 조회 (keyword 있으면 title LIKE 필터 적용)
      * 3. 내가 찜한 게시글 ID 목록 조회
-     * 4. 각 게시글에 찜 여부(star) 포함해 응답 조립 후 반환
+     * 4. 각 게시글에 찜(like) 여부(star 필드) 포함해 응답 조립 후 반환
      *
      * * TopicMember.isRead 갱신 없음 — 여러 카테고리가 합산되어 어느 TopicMember를 읽음 처리할지 특정 불가.
      *   읽음 처리는 단일 카테고리 조회(getEventTypeList)를 통해서만 이루어진다.
@@ -124,7 +124,7 @@ public class ClubEventOrchestrator {
             return SliceResponse.empty(pageable.getPageNumber());
         }
         SliceResult<ClubEvent> result = clubEventQueryService.getEventsByTypes(subscribedTypes, keyword, pageable);
-        Set<Long> likedIds = eventLikeQueryService.getLikedEventIds(member);
+        Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
         return SliceResponse.from(result, e -> ClubEventResponse.from(e, likedIds.contains(e.getEventId())));
     }
 
@@ -135,11 +135,11 @@ public class ClubEventOrchestrator {
      * 2. type 문자열 → Type enum 변환 (유효하지 않으면 빈 응답 반환)
      * 3. type/keyword 조합에 따라 DB 쿼리 선택 후 게시글 목록 조회
      *       (type O + keyword O / type O + keyword X / type X + keyword O / type X + keyword X — 총 4가지)
-     * 4. 모든 결과의 star = true 고정 후 응답 조립 반환 (찜 목록이므로 별도 확인 불필요)
+     * 4. 모든 결과의 찜여부(star 필드) = true 고정 후 응답 조립 반환 (찜 목록이므로 별도 확인 불필요)
      */
     public SliceResponse<ClubEventResponse> getLikedEvents(
         String type, String keyword, Pageable pageable, Member member) {
-        List<Long> eventIds = eventLikeQueryService.getLikedEventsWithDetails(member).stream()
+        List<Long> eventIds = clubEventLikeQueryService.getLikedEventsWithDetails(member).stream()
             .map(el -> el.getClubEvent().getEventId())
             .toList();
         if (eventIds.isEmpty()) {
@@ -172,7 +172,7 @@ public class ClubEventOrchestrator {
         List<Keyword> keywords = keywordQueryService.getUserKeywords(member).stream()
             .map(KeywordMember::getKeyword)
             .toList();
-        Set<Long> likedIds = eventLikeQueryService.getLikedEventIds(member);
+        Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
         List<ClubEventKeywordPair> allPairs = new ArrayList<>();
         boolean hasNext = false;
         for (Keyword keyword : keywords) {
@@ -201,14 +201,14 @@ public class ClubEventOrchestrator {
      * 2. KeywordMember.isRead 갱신 → 알림 뱃지 초기화 (이미 true이면 UPDATE 생략)
      * 3. keyword.topic.type + keyword.koreanKeyword 조건으로 게시글 목록 조회
      * 4. 내가 찜한 게시글 ID 목록 조회
-     * 5. 각 게시글에 찜 여부(star)와 키워드 포함해 응답 조립 후 반환
+     * 5. 각 게시글에 찜(like) 여부(star 필드)와 키워드 포함해 응답 조립 후 반환
      */
     public SliceResponse<ClubEventWithKeywordResponse> getByKeyword(
         String searchKeyword, Member member, Pageable pageable) {
         Keyword keyword = keywordQueryService.getSubscribedKeywordByName(member, searchKeyword);
         keywordCommandService.markKeywordMemberAsRead(member, keyword);
         SliceResult<ClubEvent> result = clubEventQueryService.getEventsByKeyword(keyword, pageable);
-        Set<Long> likedIds = eventLikeQueryService.getLikedEventIds(member);
+        Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
         return SliceResponse.from(result, e -> ClubEventWithKeywordResponse.from(
             e, keyword.getKoreanKeyword(), likedIds.contains(e.getEventId())));
     }
@@ -222,7 +222,7 @@ public class ClubEventOrchestrator {
      */
     public void likeEvent(Long eventId, Member member) {
         ClubEvent event = clubEventQueryService.getEventById(eventId);
-        eventLikeCommandService.likeEvent(event, member);
+        clubEventLikeCommandService.likeEvent(event, member);
     }
 
     /**
@@ -234,8 +234,8 @@ public class ClubEventOrchestrator {
      */
     public void cancelLikeEvent(Long eventId, Member member) {
         ClubEvent event = clubEventQueryService.getEventById(eventId);
-        EventLike eventLike = eventLikeQueryService.getEventLike(event, member);
-        eventLikeCommandService.cancelLike(event, eventLike);
+        ClubEventLike clubEventLike = clubEventLikeQueryService.getEventLike(event, member);
+        clubEventLikeCommandService.cancelLike(event, clubEventLike);
     }
 
     private List<ClubEventWithKeywordResponse> toKeywordResponses(
