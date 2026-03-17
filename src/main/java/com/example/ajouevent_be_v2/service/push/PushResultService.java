@@ -72,9 +72,10 @@ public class PushResultService {
     }
 
     @Transactional
-    public void markBatchAsFailAndSave(List<PushClusterToken> batch) {
+    public void markBatchAsFailAndSave(Long pushClusterId, List<PushClusterToken> batch) {
         batch.forEach(PushClusterToken::markAsFail);
         updatePushClusterTokens(batch);
+        pushClusterRepositoryPort.incrementCountsAndUpdateStatus(pushClusterId, 0, batch.size());
     }
 
     private void updatePushClusterTokens(List<PushClusterToken> clusterTokens) {

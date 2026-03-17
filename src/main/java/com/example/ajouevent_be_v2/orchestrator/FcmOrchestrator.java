@@ -60,7 +60,7 @@ public class FcmOrchestrator {
                 @Override
                 public void onFailure(Throwable t) {
                     log.error("FCM 알림 전송 실패 - pushClusterId={}", cluster.getId(), t);
-                    pushResultService.markBatchAsFailAndSave(batch);
+                    pushResultService.markBatchAsFailAndSave(cluster.getId(), batch);
                 }
             });
         }
