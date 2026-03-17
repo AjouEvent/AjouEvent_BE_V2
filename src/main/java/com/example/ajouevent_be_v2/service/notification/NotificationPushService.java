@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class PushNotificationService {
+public class NotificationPushService {
 
     private final PushNotificationRepositoryPort pushNotificationRepositoryPort;
 
