@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.service.push;
+package com.example.ajouevent_be_v2.service.webhook;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -11,7 +11,7 @@ import com.example.ajouevent_be_v2.domain.push.PushCluster;
 import com.example.ajouevent_be_v2.domain.push.PushClusterToken;
 import com.example.ajouevent_be_v2.repository.port.push.PushClusterRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.push.PushClusterTokenRepositoryPort;
-import com.example.ajouevent_be_v2.service.token.TokenService;
+import com.example.ajouevent_be_v2.repository.port.token.TokenRepositoryPort;
 import com.google.firebase.messaging.BatchResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class PushResultService {
 
     private final PushClusterRepositoryPort pushClusterRepositoryPort;
     private final PushClusterTokenRepositoryPort pushClusterTokenRepositoryPort;
-    private final TokenService tokenService;
+    private final TokenRepositoryPort tokenRepositoryPort;
 
     @Transactional
     public void markAsInProgressAndSave(PushCluster pushCluster) {
@@ -50,13 +50,13 @@ public class PushResultService {
 
         for (int i = 0; i < clusterTokens.size(); i++) {
             PushClusterToken pushClusterToken = clusterTokens.get(i);
-            if (response.getResponses().get(i).isSuccessful()) {
+            if (response.getResponses().get(i).isSuccessful()) { // FCM 전송 성공
                 pushClusterToken.markAsSuccess();
                 successCount++;
-            } else {
+            } else {                                             // FCM 전송 실패
                 pushClusterToken.markAsFail();
                 failCount++;
-                Optional<Token> token = tokenService.findByTokenValueAndMember(
+                Optional<Token> token = tokenRepositoryPort.findByTokenValueAndMember(
                     pushClusterToken.getTokenValue(), pushClusterToken.getMember());
                 token.ifPresent(tokensToSoftDelete::add);
             }
@@ -65,7 +65,8 @@ public class PushResultService {
         updatePushClusterTokens(clusterTokens);
 
         if (!tokensToSoftDelete.isEmpty()) {
-            tokenService.softDeleteInvalidTokens(tokensToSoftDelete);
+            tokensToSoftDelete.forEach(Token::markAsDeleted);
+            tokenRepositoryPort.batchSoftDeleteTokens(tokensToSoftDelete);
         }
 
         pushCluster.updateCountsAndStatus(successCount, failCount);
@@ -76,7 +77,7 @@ public class PushResultService {
     @Transactional
     public void markBatchAsSendingAndSave(List<PushClusterToken> batch) {
         batch.forEach(PushClusterToken::markAsSending);
-        pushClusterTokenRepositoryPort.bulkSaveAll(batch);
+        pushClusterTokenRepositoryPort.bulkUpdateAll(batch);
     }
 
     @Transactional
@@ -86,7 +87,6 @@ public class PushResultService {
     }
 
     private void updatePushClusterTokens(List<PushClusterToken> clusterTokens) {
-        pushClusterTokenRepositoryPort.saveAll(clusterTokens);
         pushClusterTokenRepositoryPort.bulkUpdateAll(clusterTokens);
     }
 }

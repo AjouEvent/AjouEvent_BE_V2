@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.service.push;
+package com.example.ajouevent_be_v2.service.webhook;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 import com.example.ajouevent_be_v2.domain.push.PushClusterToken;
+import com.example.ajouevent_be_v2.dto.push.FcmMessageCommand;
 import com.google.api.core.ApiFutureCallback;
 import com.google.api.core.ApiFutures;
 import com.google.firebase.messaging.BatchResponse;
@@ -33,7 +34,20 @@ public class FcmService {
         );
     }
 
-    public Message buildMessage(
+    public List<Message> buildMessages(
+        Long clusterId,
+        List<PushClusterToken> tokens,
+        FcmMessageCommand command,
+        Map<Long, Long> unreadCountMap
+    ) {
+        return tokens.stream()
+            .map(token -> buildMessage(clusterId, token,
+                command.title(), command.body(), command.imageUrl(), command.clickUrl(),
+                unreadCountMap))
+            .toList();
+    }
+
+    private Message buildMessage(
         Long pushClusterId,
         PushClusterToken token,
         String title,

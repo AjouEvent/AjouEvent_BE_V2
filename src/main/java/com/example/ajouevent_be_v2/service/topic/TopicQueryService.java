@@ -24,6 +24,11 @@ public class TopicQueryService {
     private final TopicRepositoryPort topicRepositoryPort;
     private final TopicMemberRepositoryPort topicMemberRepositoryPort;
 
+    public Topic findByKoreanTopic(String koreanTopic) {
+        return topicRepositoryPort.findByKoreanTopic(koreanTopic)
+                .orElseThrow(() -> new TopicException(TopicErrorCode.TOPIC_NOT_FOUND));
+    }
+
     public List<Topic> getAllTopics() {
         return topicRepositoryPort.findAll();
     }

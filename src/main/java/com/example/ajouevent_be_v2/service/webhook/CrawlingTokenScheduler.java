@@ -1,4 +1,4 @@
-package com.example.ajouevent_be_v2.service.push;
+package com.example.ajouevent_be_v2.service.webhook;
 
 import com.example.ajouevent_be_v2.config.properties.WebhookProperties;
 import lombok.RequiredArgsConstructor;

@@ -1,13 +1,13 @@
 package com.example.ajouevent_be_v2.service.clubevent;
 
-import com.example.ajouevent_be_v2.domain.event.ClubEvent;
+import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventCommand;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class ClubEventService {
+public class ClubEventCommandService {
 
     public ClubEvent createClubEvent(ClubEventCommand command) {
 
