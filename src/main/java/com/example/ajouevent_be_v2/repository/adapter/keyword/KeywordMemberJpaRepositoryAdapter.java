@@ -26,6 +26,9 @@ public interface KeywordMemberJpaRepositoryAdapter extends JpaRepository<Keyword
     @Query("SELECT km FROM KeywordMember km JOIN FETCH km.keyword WHERE km.member = :member")
     List<KeywordMember> findByMemberWithKeyword(@Param("member") Member member);
 
+    @Query("SELECT km FROM KeywordMember km JOIN FETCH km.member WHERE km.keyword = :keyword")
+    List<KeywordMember> findByKeywordWithMember(@Param("keyword") Keyword keyword);
+
     @Modifying
     @Query("DELETE FROM KeywordMember km WHERE km.id IN :ids")
     void deleteAllByIds(@Param("ids") List<Long> ids);
