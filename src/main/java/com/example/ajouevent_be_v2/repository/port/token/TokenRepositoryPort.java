@@ -40,6 +40,10 @@ public class TokenRepositoryPort {
         return tokenJpaRepositoryAdapter.findByTokenValueAndMember(tokenValue, member);
     }
 
+    public List<Token> findActiveTokensByValues(List<String> tokenValues) {
+        return tokenJpaRepositoryAdapter.findByTokenValueInAndIsDeletedFalse(tokenValues);
+    }
+
     public List<Token> findAllActiveTokens() {
         return tokenJpaRepositoryAdapter.findByIsDeletedFalse();
     }

@@ -2,7 +2,6 @@ package com.example.ajouevent_be_v2.service.push;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import com.example.ajouevent_be_v2.domain.member.Token;
 import com.example.ajouevent_be_v2.domain.push.PushCluster;
@@ -40,25 +39,24 @@ public class PushResultService {
     public void processPushResult(Long pushClusterId, List<PushClusterToken> clusterTokens, BatchResponse response) {
         int successCount = 0;
         int failCount = 0;
-        List<Token> tokensToSoftDelete = new ArrayList<>();
+        List<String> failedTokenValues = new ArrayList<>();
 
         for (int i = 0; i < clusterTokens.size(); i++) {
             PushClusterToken pushClusterToken = clusterTokens.get(i);
-            if (response.getResponses().get(i).isSuccessful()) {
+            if (response.getResponses().get(i).isSuccessful()) {  // FCM 전송 성공시
                 pushClusterToken.markAsSuccess();
                 successCount++;
-            } else {
+            } else {  // FCM 전솔 실패시
                 pushClusterToken.markAsFail();
                 failCount++;
-                Optional<Token> token = tokenRepositoryPort.findByTokenValueAndMember(
-                    pushClusterToken.getTokenValue(), pushClusterToken.getMember());
-                token.ifPresent(tokensToSoftDelete::add);
+                failedTokenValues.add(pushClusterToken.getTokenValue());
             }
         }
 
         updatePushClusterTokens(clusterTokens);
 
-        if (!tokensToSoftDelete.isEmpty()) {
+        if (!failedTokenValues.isEmpty()) {
+            List<Token> tokensToSoftDelete = tokenRepositoryPort.findActiveTokensByValues(failedTokenValues);
             tokensToSoftDelete.forEach(Token::markAsDeleted);
             tokenRepositoryPort.batchSoftDeleteTokens(tokensToSoftDelete);
         }

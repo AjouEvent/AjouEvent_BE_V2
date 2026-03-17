@@ -22,6 +22,9 @@ public interface TokenJpaRepositoryAdapter extends JpaRepository<Token, Long> {
 
     Optional<Token> findByTokenValueAndMember(String tokenValue, Member member);
 
+    @Query("SELECT t FROM Token t WHERE t.tokenValue IN :tokenValues AND t.isDeleted = false")
+    List<Token> findByTokenValueInAndIsDeletedFalse(@Param("tokenValues") List<String> tokenValues);
+
     @Modifying
     @Query("DELETE FROM Token t WHERE t.id IN :tokenIds")
     void deleteAllByTokenIds(@Param("tokenIds") List<Long> tokenIds);
