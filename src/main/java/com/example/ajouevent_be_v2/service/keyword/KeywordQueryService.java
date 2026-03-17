@@ -1,5 +1,8 @@
 package com.example.ajouevent_be_v2.service.keyword;
 
+import com.example.ajouevent_be_v2.common.exception.keyword.KeywordErrorCode;
+import com.example.ajouevent_be_v2.common.exception.keyword.KeywordException;
+import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.repository.port.keyword.KeywordMemberRepositoryPort;
@@ -25,5 +28,11 @@ public class KeywordQueryService {
     // FCM 토큰 등록 시 KeywordToken 매핑용 — Topic join 불필요
     public List<KeywordMember> getSubscribedKeywords(Member member) {
         return keywordMemberRepositoryPort.findByMemberWithKeyword(member);
+    }
+
+    public Keyword getSubscribedKeywordByName(Member member, String keyword) {
+        return keywordMemberRepositoryPort.findByMemberAndKeywordName(member, keyword)
+            .map(KeywordMember::getKeyword)
+            .orElseThrow(() -> new KeywordException(KeywordErrorCode.KEYWORD_NOT_FOUND));
     }
 }

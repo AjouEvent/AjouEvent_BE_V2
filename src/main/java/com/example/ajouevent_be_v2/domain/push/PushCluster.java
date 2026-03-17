@@ -3,8 +3,8 @@ package com.example.ajouevent_be_v2.domain.push;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.example.ajouevent_be_v2.domain.event.ClubEvent;
-import com.example.ajouevent_be_v2.domain.event.JobStatus;
+import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
+import com.example.ajouevent_be_v2.domain.clubevent.JobStatus;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

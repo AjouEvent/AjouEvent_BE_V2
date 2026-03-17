@@ -60,6 +60,13 @@ public class TopicCommandService {
     }
 
     @Transactional
+    public void markTopicAsRead(Member member, String topicName) {
+        topicRepositoryPort.findByDepartment(topicName).ifPresent(topic ->
+            topicMemberRepositoryPort.findByMemberAndTopic(member, topic).ifPresent(TopicMember::markAsRead)
+        );
+    }
+
+    @Transactional
     public void updateNotificationPreference(Member member, String topicName, boolean receiveNotification) {
         Topic topic = topicRepositoryPort.findByDepartment(topicName)
             .orElseThrow(() -> new TopicException(TopicErrorCode.TOPIC_NOT_FOUND));
