@@ -1,7 +1,7 @@
 package com.example.ajouevent_be_v2.controller.docs;
 
-import com.example.ajouevent_be_v2.common.exception.ErrorResponse;
 import com.example.ajouevent_be_v2.common.auth.AuthUser;
+import com.example.ajouevent_be_v2.common.exception.ErrorResponse;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
 import com.example.ajouevent_be_v2.dto.member.MemberInfoResponse;
@@ -36,7 +36,7 @@ public interface MemberControllerDocs {
 
             [V1 대비 변경]
             - V1: GET /api/users/info — 응답에 phone 필드 포함
-            - V2: GET /api/v2/members/info — phone 필드 제거
+            - V2: GET /api/v2/members — phone 필드 제거
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
@@ -56,7 +56,7 @@ public interface MemberControllerDocs {
 
             [V1 대비 변경]
             - V1: PATCH /api/users/update-info — 요청에 phone 필드 포함, 성공 시 문자열 응답
-            - V2: PATCH /api/v2/members/info — phone 필드 제거, 성공 시 204 No Content
+            - V2: PATCH /api/v2/members — phone 필드 제거, 성공 시 204 No Content
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
@@ -91,6 +91,8 @@ public interface MemberControllerDocs {
         summary = "Google 캘린더 연동",
         description = """
             Google OAuth 인가 코드로 캘린더를 연동합니다.
+            - 인가 코드는 Google OAuth2 인증 흐름에서 발급된 code 값입니다.
+            - 연동 성공 시 서버가 Access Token을 발급받아 캘린더 이벤트를 추가할 수 있게 됩니다.
 
             [V1 대비 변경]
             - V1: POST /api/users/connect-calendar — 성공 시 이메일 문자열 응답
@@ -100,6 +102,8 @@ public interface MemberControllerDocs {
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "연동 성공"),
         @ApiResponse(responseCode = "400", description = "잘못된 인가 코드",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "401", description = "인증 필요",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<Void> connectCalendar(@RequestBody OauthRequest request, @AuthUser Member member);

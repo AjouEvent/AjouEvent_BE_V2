@@ -1,8 +1,5 @@
 package com.example.ajouevent_be_v2.controller.docs;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-
 import com.example.ajouevent_be_v2.common.auth.AuthUser;
 import com.example.ajouevent_be_v2.common.dto.SliceResponse;
 import com.example.ajouevent_be_v2.common.exception.ErrorResponse;
@@ -10,14 +7,16 @@ import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.notification.KeywordNotificationResponse;
 import com.example.ajouevent_be_v2.dto.notification.TopicNotificationResponse;
 import com.example.ajouevent_be_v2.dto.notification.UnreadNotificationCountResponse;
-
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 
 @Tag(name = "Notification", description = """
     알림 조회 및 읽음 처리 관련 API
@@ -40,7 +39,9 @@ public interface NotificationControllerDocs {
         summary = "토픽 알림 목록 조회",
         description = """
             현재 로그인한 사용자의 토픽 알림 목록을 반환합니다.
-            조회 시 해당 페이지의 미읽음 알림을 즉시 읽음 처리합니다.
+            - 조회 시 해당 페이지의 미읽음 알림을 즉시 읽음 처리합니다.
+            - 기본 정렬: notifiedAt DESC, 기본 페이지 크기: 10
+            - 응답은 SliceResponse<TopicNotificationResponse> 형태로 반환됩니다.
 
             [V1 대비 변경]
             - V1: GET /api/notification/topic
@@ -48,8 +49,7 @@ public interface NotificationControllerDocs {
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = TopicNotificationResponse.class))),
+        @ApiResponse(responseCode = "200", description = "조회 성공 (SliceResponse<TopicNotificationResponse> 형태로 반환)"),
         @ApiResponse(responseCode = "401", description = "인증 필요",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -60,7 +60,9 @@ public interface NotificationControllerDocs {
         summary = "키워드 알림 목록 조회",
         description = """
             현재 로그인한 사용자의 키워드 알림 목록을 반환합니다.
-            조회 시 해당 페이지의 미읽음 알림을 즉시 읽음 처리합니다.
+            - 조회 시 해당 페이지의 미읽음 알림을 즉시 읽음 처리합니다.
+            - 기본 정렬: notifiedAt DESC, 기본 페이지 크기: 10
+            - 응답은 SliceResponse<KeywordNotificationResponse> 형태로 반환됩니다.
 
             [V1 대비 변경]
             - V1: GET /api/notification/keyword
@@ -68,8 +70,7 @@ public interface NotificationControllerDocs {
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = KeywordNotificationResponse.class))),
+        @ApiResponse(responseCode = "200", description = "조회 성공 (SliceResponse<KeywordNotificationResponse> 형태로 반환)"),
         @ApiResponse(responseCode = "401", description = "인증 필요",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -93,12 +94,15 @@ public interface NotificationControllerDocs {
         @ApiResponse(responseCode = "404", description = "존재하지 않는 알림",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    ResponseEntity<Void> markNotificationAsRead(Long id, @AuthUser Member member);
+    ResponseEntity<Void> markNotificationAsRead(
+        @Parameter(description = "알림 ID", required = true, example = "1") Long id,
+        @AuthUser Member member);
 
     @Operation(
         summary = "미읽음 알림 수 조회",
         description = """
             현재 로그인한 사용자의 미읽음 알림 수를 반환합니다.
+            - 토픽 알림과 키워드 알림을 합산하여 반환합니다.
 
             [V1 대비 변경]
             - V1: GET /api/notification/unread-count
@@ -117,6 +121,7 @@ public interface NotificationControllerDocs {
         summary = "전체 알림 읽음 처리",
         description = """
             현재 로그인한 사용자의 모든 미읽음 알림을 읽음 처리합니다.
+            - 토픽 알림과 키워드 알림 모두 일괄 처리됩니다.
 
             [V1 대비 변경]
             - V1: POST /api/notification/readAll — 200 OK + ResponseDto
