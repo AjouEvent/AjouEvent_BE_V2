@@ -10,6 +10,7 @@ import com.example.ajouevent_be_v2.dto.topic.TopicStatusResponse;
 import com.example.ajouevent_be_v2.dto.topic.TopicSubscribeRequest;
 import com.example.ajouevent_be_v2.dto.topic.TopicUnsubscribeRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -51,7 +52,7 @@ public interface TopicControllerDocs {
             """)
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = TopicDetailResponse.class)))
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = TopicDetailResponse.class))))
     })
     ResponseEntity<List<TopicDetailResponse>> getAllTopics();
 
@@ -67,7 +68,7 @@ public interface TopicControllerDocs {
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = TopicResponse.class))),
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = TopicResponse.class)))),
         @ApiResponse(responseCode = "401", description = "인증 필요",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -142,7 +143,7 @@ public interface TopicControllerDocs {
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = TopicStatusResponse.class))),
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = TopicStatusResponse.class)))),
         @ApiResponse(responseCode = "401", description = "인증 필요",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
