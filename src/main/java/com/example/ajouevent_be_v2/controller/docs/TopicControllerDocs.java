@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
     [공통 변경]
     - 뮤테이션 응답: 200 OK + ResponseDto body → 204 No Content
-    - 인증 방식: @PreAuthorize + SecurityContext → Bearer JWT (@AuthUser Member)
+    - 인증 방식: @PreAuthorize + SecurityContext → Bearer JWT (Authorization 헤더)
     """)
 public interface TopicControllerDocs {
 
