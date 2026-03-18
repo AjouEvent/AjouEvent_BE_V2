@@ -4,7 +4,7 @@ import com.example.ajouevent_be_v2.domain.push.PushCluster;
 import com.example.ajouevent_be_v2.domain.push.PushClusterToken;
 import com.example.ajouevent_be_v2.dto.push.FcmMessageCommand;
 import com.example.ajouevent_be_v2.dto.push.PushClusterSendRequest;
-import com.example.ajouevent_be_v2.service.notification.PushNotificationService;
+import com.example.ajouevent_be_v2.service.notification.NotificationPushService;
 import com.example.ajouevent_be_v2.service.push.PushClusterQueryService;
 import com.example.ajouevent_be_v2.service.webhook.FcmPushResultService;
 import com.example.ajouevent_be_v2.service.webhook.FcmPushService;
@@ -26,7 +26,7 @@ public class FcmOrchestrator {
     private final FcmPushService fcmPushService;
     private final PushClusterQueryService pushClusterQueryService;
     private final FcmPushResultService fcmPushResultService;
-    private final PushNotificationService pushNotificationService;
+    private final NotificationPushService notificationPushService;
 
     public void dispatch(List<PushClusterSendRequest> sendRequests) {
         sendRequests.forEach(req -> sendToCluster(req.fcmMessageCommand(), req.pushClusterId()));
@@ -44,7 +44,7 @@ public class FcmOrchestrator {
 
         fcmPushResultService.markAsInProgressAndSave(cluster);
 
-        Map<Long, Long> unreadCountMap = pushNotificationService.countUnreadByCommand(command);
+        Map<Long, Long> unreadCountMap = notificationPushService.countUnreadByCommand(command);
 
         List<List<PushClusterToken>> batches = splitIntoBatches(clusterTokens, 400);
         for (List<PushClusterToken> batch : batches) {
