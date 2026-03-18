@@ -6,7 +6,7 @@ import com.example.ajouevent_be_v2.domain.topic.Topic;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventCommand;
 import com.example.ajouevent_be_v2.dto.push.PushClusterSendRequest;
 import com.example.ajouevent_be_v2.service.keyword.KeywordQueryService;
-import com.example.ajouevent_be_v2.service.notification.PushNotificationService;
+import com.example.ajouevent_be_v2.service.notification.NotificationPushService;
 import com.example.ajouevent_be_v2.service.push.PushClusterCommandService;
 import com.example.ajouevent_be_v2.service.topic.TopicQueryService;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 public class PushOrchestrator {
 
     private final PushClusterCommandService pushClusterCommandService;
-    private final PushNotificationService pushNotificationService;
+    private final NotificationPushService notificationPushService;
     private final TopicQueryService topicQueryService;
     private final KeywordQueryService keywordQueryService;
 
@@ -32,7 +32,7 @@ public class PushOrchestrator {
 
         pushClusterCommandService.createTopicPushCluster(clubEvent, topic, command)
                 .ifPresent(result -> {
-                            pushNotificationService.saveAll(result.cluster(), topic, null, result.members(), NotificationType.TOPIC);
+                            notificationPushService.saveAll(result.cluster(), topic, null, result.members(), NotificationType.TOPIC);
                             results.add(result.sendRequest());
                         }
                 );
@@ -40,7 +40,7 @@ public class PushOrchestrator {
         keywordQueryService.findMatchingByClubEvent(topic, command).forEach(keyword ->
                 pushClusterCommandService.createKeywordPushCluster(clubEvent, keyword, command)
                         .ifPresent(result -> {
-                            pushNotificationService.saveAll(result.cluster(), null, keyword, result.members(), NotificationType.KEYWORD);
+                            notificationPushService.saveAll(result.cluster(), null, keyword, result.members(), NotificationType.KEYWORD);
                             results.add(result.sendRequest());
                         })
         );
