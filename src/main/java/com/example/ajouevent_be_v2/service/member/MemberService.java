@@ -39,6 +39,16 @@ public class MemberService {
     }
 
     @Transactional
+    public Member findOrCreateByInfo(String email, String name, String major) {
+        return memberRepositoryPort.findByEmail(email)
+            .orElseGet(() -> {
+                Member member = Member.builder().email(email).name(name).major(major).build();
+                log.info("테스트 계정 생성 - email: {}", email);
+                return memberRepositoryPort.save(member);
+            });
+    }
+
+    @Transactional
     public void updateMemberInfo(MemberUpdateRequest request, Member member) {
         member.updateInfo(request.name(), request.major());
         memberRepositoryPort.save(member);

@@ -4,10 +4,12 @@ import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.auth.AuthTokenResult;
 import com.example.ajouevent_be_v2.dto.auth.GoogleUserInfoResult;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
+import com.example.ajouevent_be_v2.dto.auth.TestLoginResponse;
 import com.example.ajouevent_be_v2.dto.member.MemberLoginResult;
 import com.example.ajouevent_be_v2.service.auth.AuthService;
 import com.example.ajouevent_be_v2.service.auth.OauthService;
 import com.example.ajouevent_be_v2.service.member.MemberService;
+import com.example.ajouevent_be_v2.service.token.FcmTokenCommandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,7 @@ public class AuthOrchestrator {
     private final OauthService oauthService;
     private final AuthService authService;
     private final MemberService memberService;
+    private final FcmTokenCommandService fcmTokenCommandService;
 
     public AuthTokenResult socialLogin(OauthRequest request) {
         // TODO : [#10 subscription 완료 후 연결] topicService.saveFCMToken(request.fcmToken())
@@ -32,8 +35,17 @@ public class AuthOrchestrator {
         return authService.issueTokens(member, null);
     }
 
-    public AuthTokenResult testLogin(String email) {
+    public TestLoginResponse testLogin(String email, String fcmToken) {
         Member member = memberService.findByEmail(email);
-        return authService.issueTokens(member, false);
+        AuthTokenResult authResult = authService.issueTokens(member, false);
+        fcmTokenCommandService.registerTestToken(member, fcmToken);
+        return new TestLoginResponse(
+            authResult.accessToken(),
+            member.getName(),
+            member.getMajor(),
+            member.getEmail(),
+            false,
+            fcmToken
+        );
     }
 }
