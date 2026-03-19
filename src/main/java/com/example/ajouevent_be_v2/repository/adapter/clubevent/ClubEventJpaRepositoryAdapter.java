@@ -32,6 +32,8 @@ public interface ClubEventJpaRepositoryAdapter extends JpaRepository<ClubEvent, 
     List<ClubEvent> findTop10ByCreatedAtBetweenOrderByViewCountDesc(
         LocalDateTime startOfWeek, LocalDateTime endOfWeek);
 
+    List<ClubEvent> findTop10ByTypeOrderByCreatedAtDesc(Type type);
+
     @Modifying
     @Query("UPDATE ClubEvent e SET e.viewCount = :viewCount WHERE e.eventId = :eventId")
     void updateViews(@Param("viewCount") Long viewCount, @Param("eventId") Long eventId);

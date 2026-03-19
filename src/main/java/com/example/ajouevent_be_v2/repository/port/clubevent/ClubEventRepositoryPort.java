@@ -60,6 +60,10 @@ public class ClubEventRepositoryPort {
         return clubEventJpaRepositoryAdapter.findTop10ByCreatedAtBetweenOrderByViewCountDesc(start, end);
     }
 
+    public List<ClubEvent> findTop10ByTypeOrderByCreatedAtDesc(Type type) {
+        return clubEventJpaRepositoryAdapter.findTop10ByTypeOrderByCreatedAtDesc(type);
+    }
+
     public void updateViews(Long viewCount, Long eventId) {
         clubEventJpaRepositoryAdapter.updateViews(viewCount, eventId);
     }
