@@ -19,4 +19,8 @@ public class WebhookService {
             throw new WebhookException(WebhookErrorCode.INVALID_CRAWLING_TOKEN);
         }
     }
+
+    public String generateToken() {
+        return crawlingTokenCachePort.generateAndStoreToken(webhookProperties.getCrawlingTokenKey());
+    }
 }

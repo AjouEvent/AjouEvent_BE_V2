@@ -5,6 +5,7 @@ import com.example.ajouevent_be_v2.dto.webhook.WebhookRequest;
 import com.example.ajouevent_be_v2.dto.webhook.WebhookResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -43,6 +44,6 @@ public interface WebhookControllerDocs {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<WebhookResponse> handleWebhook(
-        @Parameter(description = "크롤링 전용 인증 토큰", required = true, example = "dGVzdHRva2Vu") String token,
+        @Parameter(name = "crawling-token", in = ParameterIn.HEADER, description = "크롤링 전용 인증 토큰 (POST /api/v2/auth/test-crawling-token 으로 발급)", required = true, example = "dGVzdHRva2Vu") String token,
         WebhookRequest webhookRequest);
 }

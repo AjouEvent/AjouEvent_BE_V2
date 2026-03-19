@@ -46,7 +46,8 @@ public class SecurityConfig implements WebMvcConfigurer {
     };
 
     private static final String[] LOCAL_AUTH_WHITELIST = {
-            "/api/v2/auth/test-login", "/api/v2/auth/test-login/fcm"
+            "/api/v2/auth/test-login", "/api/v2/auth/test-login/fcm",
+            "/api/v2/auth/test-crawling-token"
     };
 
     @Bean
