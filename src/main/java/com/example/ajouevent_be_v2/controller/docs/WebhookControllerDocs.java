@@ -6,11 +6,13 @@ import com.example.ajouevent_be_v2.dto.webhook.WebhookResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.http.ResponseEntity;
 
 @Tag(name = "Webhook", description = """
@@ -43,7 +45,14 @@ public interface WebhookControllerDocs {
         @ApiResponse(responseCode = "409", description = "이미 처리된 중복 공지사항",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    ResponseEntity<WebhookResponse> handleWebhook(
+        @Parameter(
+            in = ParameterIn.HEADER,
+            name = "crawling-token",
+            description = "크롤링 전용 인증 토큰",
+            required = true,
+            example = "dGVzdHRva2Vu"
+        )
+        @RequestHeader("crawling-token") String token,
         @Parameter(name = "crawling-token", in = ParameterIn.HEADER, description = "크롤링 전용 인증 토큰 (POST /api/v2/auth/test-crawling-token 으로 발급)", required = true, example = "dGVzdHRva2Vu") String token,
         WebhookRequest webhookRequest);
 }
