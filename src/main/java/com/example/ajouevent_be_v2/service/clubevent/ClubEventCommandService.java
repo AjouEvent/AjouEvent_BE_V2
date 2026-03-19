@@ -20,17 +20,24 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ClubEventCommandService {
 
-    private static final String DEFAULT_IMAGE_URL =
-            "https://www.ajou.ac.kr/_res/ajou/kr/img/intro/img-symbol.png";
+    private static final String DEFAULT_IMAGE_URL = "https://www.ajou.ac.kr/_res/ajou/kr/img/intro/img-symbol.png";
 
     private final ClubEventRepositoryPort clubEventRepositoryPort;
 
+    public void isDuplicateNotice(String englishTopic, String title, String url) {
+        Type type = parseType(englishTopic);
+        List<ClubEvent> recentEvents = clubEventRepositoryPort.findTop10ByTypeOrderByCreatedAtDesc(type);
+
+        boolean isDuplicate = recentEvents.stream()
+                .anyMatch(e -> e.getTitle().equals(title) && e.getUrl().equals(url));
+        if (isDuplicate) {
+            throw new ClubEventException(ClubEventErrorCode.DUPLICATE_NOTICE);
+        }
+    }
+
     @Transactional
-    public ClubEvent createClubEvent(ClubEventCommand command) {
+    public ClubEvent save(ClubEventCommand command) {
         Type type = parseType(command.englishTopic());
-
-        validateDuplicateNotice(type, command.title(), command.url());
-
         List<String> imageUrls = resolveImages(command.images());
 
         ClubEvent clubEvent = ClubEvent.builder()
@@ -58,16 +65,6 @@ public class ClubEventCommandService {
         ClubEvent saved = clubEventRepositoryPort.save(clubEvent);
         log.info("공지사항 저장 완료 - eventId: {}, type: {}", saved.getEventId(), type);
         return saved;
-    }
-
-    private void validateDuplicateNotice(Type type, String title, String url) {
-        List<ClubEvent> recentEvents =
-                clubEventRepositoryPort.findTop10ByTypeOrderByCreatedAtDesc(type);
-        boolean isDuplicate = recentEvents.stream()
-                .anyMatch(e -> e.getTitle().equals(title) && e.getUrl().equals(url));
-        if (isDuplicate) {
-            throw new ClubEventException(ClubEventErrorCode.DUPLICATE_NOTICE);
-        }
     }
 
     private Type parseType(String englishTopic) {
