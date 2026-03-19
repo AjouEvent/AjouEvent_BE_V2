@@ -45,6 +45,15 @@ public class MemberService {
     }
 
     @Transactional
+    public Member findOrCreateByInfo(String email, String name, String major) {
+        return memberRepositoryPort.findByEmail(email)
+            .orElseGet(() -> {
+                Member member = new Member(email, name, major);
+                return memberRepositoryPort.save(member);
+            });
+    }
+
+    @Transactional
     public void deleteMember(Member member) {
         // Token 은 (CascadeType.REMOVE + orphanRemoval = true 설정으로) 자동 삭제
         memberRepositoryPort.delete(member);

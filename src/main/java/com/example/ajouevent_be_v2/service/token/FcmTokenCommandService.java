@@ -46,4 +46,5 @@ public class FcmTokenCommandService {
         log.info("FCM 토큰 신규 등록 - member: {}, token: {}", member.getEmail(), fcmToken);
         return Optional.of(saved);
     }
+
 }
