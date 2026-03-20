@@ -8,13 +8,15 @@ import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.member.Member;
+import com.example.ajouevent_be_v2.dto.clubevent.ClubEventCommand;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventDetailResponse;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventKeywordPair;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventResponse;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventWithKeywordResponse;
-import com.example.ajouevent_be_v2.service.clubevent.ClubEventQueryService;
+import com.example.ajouevent_be_v2.service.clubevent.ClubEventCommandService;
 import com.example.ajouevent_be_v2.service.clubevent.ClubEventLikeCommandService;
 import com.example.ajouevent_be_v2.service.clubevent.ClubEventLikeQueryService;
+import com.example.ajouevent_be_v2.service.clubevent.ClubEventQueryService;
 import com.example.ajouevent_be_v2.service.keyword.KeywordCommandService;
 import com.example.ajouevent_be_v2.service.keyword.KeywordQueryService;
 import com.example.ajouevent_be_v2.service.topic.TopicCommandService;
@@ -38,6 +40,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ClubEventOrchestrator {
 
+    private final ClubEventCommandService clubEventCommandService;
     private final ClubEventQueryService clubEventQueryService;
     private final ClubEventLikeCommandService clubEventLikeCommandService;
     private final ClubEventLikeQueryService clubEventLikeQueryService;
@@ -45,6 +48,17 @@ public class ClubEventOrchestrator {
     private final TopicCommandService topicCommandService;
     private final KeywordQueryService keywordQueryService;
     private final KeywordCommandService keywordCommandService;
+
+    /**
+     * 공지사항 생성 (Webhook 플로우 전용)
+     *
+     * 1. 중복 공지사항 검증 — 같은 타입 최근 10건 중 title+url 일치 시 409
+     * 2. ClubEvent 빌드 및 저장
+     */
+    public ClubEvent createClubEvent(ClubEventCommand command) {
+        clubEventCommandService.isDuplicateNotice(command.englishTopic(), command.title(), command.url());
+        return clubEventCommandService.save(command);
+    }
 
     /**
      * 게시글 상세 조회

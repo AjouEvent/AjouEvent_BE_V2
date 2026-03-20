@@ -41,11 +41,13 @@ public class SecurityConfig implements WebMvcConfigurer {
     private static final String[] AUTH_WHITELIST = {
             "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
             "/api/v2/auth/login", "/api/v2/auth/reissue",
-            "/api/v2/topics"
+            "/api/v2/topics",
+            "/api/webhook/crawling"
     };
 
     private static final String[] LOCAL_AUTH_WHITELIST = {
-            "/api/v2/auth/test-login", "/api/v2/auth/test-login/fcm"
+            "/api/v2/auth/test-login", "/api/v2/auth/test-login/fcm",
+            "/api/v2/auth/test-crawling-token"
     };
 
     @Bean

@@ -149,8 +149,6 @@ CREATE TABLE IF NOT EXISTS push_clusters (
     registered_at  DATETIME     NOT NULL,
     success_count  INT          NOT NULL DEFAULT 0,
     fail_count     INT          NOT NULL DEFAULT 0,
-    received_count INT          NOT NULL DEFAULT 0,
-    clicked_count  INT          NOT NULL DEFAULT 0,
     start_at       DATETIME,
     end_at         DATETIME,
     PRIMARY KEY (id),
