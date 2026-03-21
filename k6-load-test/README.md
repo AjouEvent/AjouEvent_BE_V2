@@ -162,14 +162,6 @@ mysql -u <user> -p <database> < k6-load-test/scenarios/<group>/seed.sql
 
 ---
 
-## 현재 시나리오 목록
-
-| 시나리오 | 폴더 | 측정 목적 |
-|---------|------|---------|
-| async-vs-sync-webhook | `scenarios/async-vs-sync-webhook/` | FCM 비동기 vs 동기 전송의 서블릿 스레드 점유량·처리량 비교 |
-
----
-
 ## lib/auth.js — 공유 인증 유틸
 
 | 함수 | 설명 |
