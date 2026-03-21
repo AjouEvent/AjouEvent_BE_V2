@@ -44,10 +44,10 @@ Spring Boot 로컬 서버를 기동한 뒤 실행합니다.
 
 ```bash
 # 비동기 테스트
-./k6-load-test/run.sh k6-load-test/scenarios/async-vs-sync-webhook/async-webhook.js single
+./k6-load-test/run.sh k6-load-test/scenarios/async-vs-sync-webhook/async-webhook.js ramp
 
 # 동기 테스트 (서버 재기동 후 — 스레드 상태 초기화)
-./k6-load-test/run.sh k6-load-test/scenarios/async-vs-sync-webhook/sync-webhook.js single
+./k6-load-test/run.sh k6-load-test/scenarios/async-vs-sync-webhook/sync-webhook.js ramp
 ```
 
 ### Preset 옵션
