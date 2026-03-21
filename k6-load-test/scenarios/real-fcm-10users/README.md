@@ -20,7 +20,7 @@
 
 ### 1. FCM 토큰 10개 발급
 
-`fcm-test-frontend`를 서로 다른 브라우저 탭/창 10개에서 열어 각각 FCM 토큰을 발급합니다.
+서로 다른 브라우저 탭/창 10개에서 열어 각각 FCM 토큰을 발급합니다.
 
 ### 2. .env.local 설정
 
@@ -67,7 +67,7 @@ mysql -u <user> -p <database> < k6-load-test/scenarios/real-fcm-10users/seed.sql
 ./k6-load-test/run.sh k6-load-test/scenarios/real-fcm-10users/sync-webhook.js ramp
 ```
 
-> 테스트 중 실제 기기 10개에 알림이 전송됩니다. 무음 설정을 권장합니다.
+> 테스트 중 실제 기기 10개에 알림이 전송됩니다.
 
 ---
 
