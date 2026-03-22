@@ -36,4 +36,25 @@ public class WebhookOrchestrator {
                 command.title(),
                 clubEvent.getEventId());
     }
+
+
+    //  -------- TEST ---------------//
+
+    public WebhookResponse processWebhookSync(String crawlingToken, WebhookRequest request) {
+
+        webhookService.validateToken(crawlingToken);
+
+        ClubEventCommand command = request.toClubEventCommand();
+
+        ClubEvent clubEvent = clubEventOrchestrator.createClubEvent(command);
+
+        List<PushClusterSendRequest> sendRequests = pushOrchestrator.createClusters(clubEvent, command);
+        fcmOrchestrator.dispatchSync(sendRequests);
+
+        return new WebhookResponse(
+                "Webhook processed successfully.",
+                command.englishTopic(),
+                command.title(),
+                clubEvent.getEventId());
+    }
 }

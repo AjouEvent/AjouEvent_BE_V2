@@ -41,6 +41,9 @@ out/
 .env.local
 .env.*.local
 
+### k6 load test results ###
+k6-load-test/results/
+
 ### Node.js ###
 node_modules/
 

@@ -10,6 +10,8 @@ import com.example.ajouevent_be_v2.service.webhook.FcmPushResultService;
 import com.example.ajouevent_be_v2.service.webhook.FcmPushService;
 import com.google.api.core.ApiFutureCallback;
 import com.google.firebase.messaging.BatchResponse;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +65,40 @@ public class FcmOrchestrator {
                     fcmPushResultService.markBatchAsFailAndSave(cluster.getId(), batch);
                 }
             });
+        }
+    }
+
+    // <------- TEST --------->
+    public void dispatchSync(List<PushClusterSendRequest> sendRequests) {
+        sendRequests.forEach(req -> sendToClusterSync(req.fcmMessageCommand(), req.pushClusterId()));
+    }
+
+    private void sendToClusterSync(FcmMessageCommand command, Long pushClusterId) {
+        PushCluster cluster = pushClusterQueryService.findById(pushClusterId);
+        List<PushClusterToken> clusterTokens = pushClusterQueryService.findTokensByCluster(cluster);
+
+        if (clusterTokens.isEmpty()) {
+            log.info("푸시 전송 스킵 - PushClusterID: {}", cluster.getId());
+            fcmPushResultService.skipWithNoTargets(cluster);
+            return;
+        }
+
+        fcmPushResultService.markAsInProgressAndSave(cluster);
+
+        Map<Long, Long> unreadCountMap = notificationPushService.countUnreadByCommand(command);
+
+        List<List<PushClusterToken>> batches = splitIntoBatches(clusterTokens, 400);
+        for (List<PushClusterToken> batch : batches) {
+            fcmPushResultService.markBatchAsSendingAndSave(batch);
+
+            List<Message> messages = fcmPushService.buildMessages(cluster.getId(), batch, command, unreadCountMap);
+            try {
+                BatchResponse response = FirebaseMessaging.getInstance().sendEach(messages);
+                fcmPushResultService.processPushResult(cluster.getId(), batch, response);
+            } catch (FirebaseMessagingException e) {
+                log.error("FCM 동기 전송 실패 - pushClusterId={}", cluster.getId(), e);
+                fcmPushResultService.markBatchAsFailAndSave(cluster.getId(), batch);
+            }
         }
     }
 
