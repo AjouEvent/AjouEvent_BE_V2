@@ -28,7 +28,7 @@ INSERT INTO topics (id, classification, department, korean_order, korean_topic, 
 (27, '학과', 'History', 26, '사학과', 'HISTORY'),
 (28, '단과대', 'Humanities', 45, '인문대학', 'HUMANITIES'),
 (29, '학과', 'IndustrialEngineering', 29, '산업공학과', 'INDUSTRIALENGINEERING'),
-(30, '단과대', 'InformationTechnology', 49, '정보통신대학', 'INFORMATIONTECHNOLOGY'),
+(30, '단과대', 'InformationTechnology', 49, '첨단ICT융합대학', 'INFORMATIONTECHNOLOGY'),
 (31, '학과', 'IntegrativeSystemsEngineering', 40, '융합시스템공학과', 'INTEGRATIVESYSTEMSENGINEERING'),
 (32, '학과', 'IntelligenceSemiconductorEngineering', 51, '지능형반도체공학과', 'INTELLIGENCESEMICONDUCTORENGINEERING'),
 (33, '단과대', 'International', 13, '국제학부대학', 'INTERNATIONAL'),
@@ -56,7 +56,8 @@ INSERT INTO topics (id, classification, department, korean_order, korean_topic, 
 (55, '학과', 'AppliedChemistry', 41, '응용화학과', 'APPLIEDCHEMISTRY'),
 (56, '학과', 'EconomicPoliticalAndSocialStudies', 7, '경제정치사회융합학부', 'ECONOMICPOLITICALANDSOCIALSTUDIES'),
 (57, '학과', 'FrontierSciences', 54, '프런티어과학학부', 'FRONTIERSCIENCES'),
-(58, '학과', 'LiberalStudies', 47, '자유전공학부', 'LIBERALSTUDIES');
+(58, '학과', 'LiberalStudies', 47, '자유전공학부', 'LIBERALSTUDIES'),
+(59, '학과', 'BioConvergenceEngineering', 55, '첨단바이오융합대학', 'BIOCONVERGENCEENGINEERING');
 
 INSERT INTO club_events (event_id, title, content, writer, created_at, subject, url, likes_count, view_count, type) VALUES
 (1, '👉 전공설계 상담 바로가기 👈', '안녕하세요!\n아주대학교 전공설계지원센터 입니다 😄\n대학생이 되기 전 전공을 선택한 학생,\n입학 후 전공을 선택해야 하는 학생,\n새로운 꿈을 꾸며 전공을 바꿔보려는 학생,\n어떤 공부를 해야 할지 고민하는 학생,\n모두 환영합니다!\n지금 U-Chance 학생이력통합시스템에서 전공설계 상담을 신청해 보세요 🤗\n* 상담 관련해 학교 메일 또는 유선 전화(031-219-3121)로 연락을 드릴 예정이니 확인 부탁드립니다.\n* 온라인 상담 신청 시, ZOOM을 통해 상담이 진행됩니다. 상담 전 카메라와 마이크를 준비해 주세요.', '전공설계지원센터', '2026-03-20 17:23:12', '아주대학교-일반', 'https://ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=365442', 0, 0, 'AJOUNORMAL'),
@@ -67,11 +68,11 @@ INSERT INTO club_events (event_id, title, content, writer, created_at, subject, 
 (6, '2026학년도 교환학생 파견 프로그램 모집 안내', '국제처에서 2026학년도 하반기 교환학생 파견 프로그램 참가자를 모집합니다.\n파견 기간: 2026년 9월 ~ 2027년 2월\n파견 대학: 협정 대학 50개교 (미국, 유럽, 아시아 등)\n지원 자격: 2학년 이상, 평점 3.0 이상, 공인 어학 성적 보유자\n지원 기간: 2026.03.25(수) ~ 2026.04.15(수)\n자세한 사항은 국제처 홈페이지를 참고하세요.\n문의: 국제처 교류협력팀 (031-219-2965)', '국제처', '2026-03-17 11:30:00', '아주대학교-일반', 'https://ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=365400', 0, 0, 'AJOUNORMAL');
 
 INSERT INTO club_event_images (url, club_event_id) VALUES
-('https://www.ajou.ac.kr/_attach/ajou/editor-image/2026/03/nGslnfDHOYeianJkWndoecRVBL.png', 1),
-('https://www.ajou.ac.kr/_attach/ajou/editor-image/2026/03/XoxZNIKeYJfHIakoguhQKDFfMx.png', 1),
-('https://www.ajou.ac.kr/_attach/ajou/editor-image/2026/03/cXwtiwBUFuaottcjLJWNtOWouH.png', 1),
-('https://www.ajou.ac.kr/_attach/ajou/editor-image/2026/03/PJQhMcWKfojUUOcGfSSODOOwvF.png', 2),
-('https://www.ajou.ac.kr/_attach/ajou/editor-image/2026/03/scholarship_notice_2026.png', 3),
-('https://www.ajou.ac.kr/_attach/ajou/editor-image/2026/03/academic_festival_2026.png', 4),
-('https://www.ajou.ac.kr/_attach/ajou/editor-image/2026/03/library_guide_2026.png', 5),
-('https://www.ajou.ac.kr/_attach/ajou/editor-image/2026/03/exchange_student_2026.png', 6);
+('https://loremflickr.com/400/400?lock=7121882554272171', 1),
+('https://loremflickr.com/400/400?lock=3731325250506038', 1),
+('https://loremflickr.com/400/400?lock=4103286748377719', 1),
+('https://loremflickr.com/400/400?lock=3058466008830399', 2),
+('https://loremflickr.com/400/400?lock=7157520593144114', 3),
+('https://loremflickr.com/400/400?lock=8806107279805811', 4),
+('https://loremflickr.com/400/400?lock=8549980682647823', 5),
+('https://loremflickr.com/400/400?lock=2394674020496748', 6);
