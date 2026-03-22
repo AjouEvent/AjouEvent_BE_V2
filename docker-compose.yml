@@ -9,6 +9,7 @@ services:
       MYSQL_HOST: ajouevent-mysql
       MYSQL_PORT: 3306
       REDIS_HOST: ajouevent-redis
+      REDIS_PORT: 6379
     ports:
       - "8080:8080"
     depends_on:
