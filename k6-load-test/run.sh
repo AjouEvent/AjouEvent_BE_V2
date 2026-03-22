@@ -27,11 +27,7 @@ if [ -f "$ENV_FILE" ]; then
   done < "$ENV_FILE"
 fi
 
-RESULT_FILE="k6-load-test/results/result-$(basename "$FILE" .js)-${PRESET}-$(date +%Y%m%d-%H%M%S).json"
-mkdir -p "$(dirname "$RESULT_FILE")"
-
 k6 run \
   "${ENV_ARGS[@]}" \
   -e K6_PRESET="$PRESET" \
-  --out "json=$RESULT_FILE" \
   "$FILE"

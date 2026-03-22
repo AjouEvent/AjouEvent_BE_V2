@@ -14,7 +14,6 @@ k6-load-test/
 ├── run.sh                       ← 시나리오 실행 스크립트
 ├── lib/
 │   └── auth.js                  ← 공유 인증 유틸 (모든 시나리오에서 재사용)
-├── results/                     ← k6 결과 JSON (커밋 제외 — .gitignore)
 └── scenarios/
     └── <scenario-group>/        ← 시나리오 그룹 (기능·비교 단위)
         ├── README.md            ← 시나리오 목적, 실행 방법, 측정 지표 설명
@@ -155,10 +154,6 @@ mysql -u <user> -p <database> < k6-load-test/scenarios/<group>/seed.sql
 | `single` (기본값) | 1 VU, 1회 요청 | 동작 확인 |
 | `ramp` | VU 10 → 50 단계적 증가 | 부하 증가 패턴 측정 |
 | `rate` | 초당 고정 RPS | 처리량 한계 측정 |
-
-### 결과 파일
-
-`k6-load-test/results/result-<scenario>-<preset>-<datetime>.json`에 자동 저장됩니다.
 
 ---
 
