@@ -33,9 +33,6 @@ public interface AuthControllerDocs {
             - 신규 회원이면 자동 가입 후 로그인 처리 (isNewMember: true)
             - Google Workspace(@ajou.ac.kr) 프로필에서 학과 정보를 자동으로 가져옵니다
             - accessToken은 응답 바디, refreshToken은 HttpOnly 쿠키(Set-Cookie: refreshToken)로 반환됩니다
-
-            [응답 형식 변경]
-            - refreshToken이 바디에서 제거되고 HttpOnly 쿠키로만 전달
             """
     )
     @ApiResponses({
@@ -55,10 +52,6 @@ public interface AuthControllerDocs {
             쿠키의 refreshToken으로 accessToken과 refreshToken을 모두 재발급합니다.
             - 요청: Cookie에 refreshToken 포함 필요
             - 응답: 새 accessToken은 바디, 새 refreshToken은 HttpOnly 쿠키로 반환
-
-            [응답 형식 변경]
-            - refreshToken 전달 방식: RequestBody → Cookie
-            - refreshToken도 함께 재발급 (V1은 accessToken만 재발급)
             """
     )
     @ApiResponses({

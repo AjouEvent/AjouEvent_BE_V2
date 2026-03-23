@@ -26,46 +26,46 @@ public class TopicController implements TopicControllerDocs {
     private final TopicOrchestrator topicOrchestrator;
 
     @Override
-    @GetMapping("/api/v2/topics")
+    @GetMapping("/api/topic/all")
     public ResponseEntity<List<TopicDetailResponse>> getAllTopics() {
         return ResponseEntity.ok(topicOrchestrator.getAllTopics());
     }
 
     @Override
-    @GetMapping("/api/v2/topics/subscriptions")
+    @GetMapping("/api/topic/subscriptions")
     public ResponseEntity<List<TopicResponse>> getSubscribedTopics(@AuthUser Member member) {
         return ResponseEntity.ok(topicOrchestrator.getSubscribedTopics(member));
     }
 
     @Override
-    @PostMapping("/api/v2/topics/subscriptions")
+    @PostMapping("/api/topic/subscribe")
     public ResponseEntity<Void> subscribeToTopic(@RequestBody TopicSubscribeRequest request, @AuthUser Member member) {
         topicOrchestrator.subscribeToTopic(request, member);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    @DeleteMapping("/api/v2/topics/subscriptions")
+    @PostMapping("/api/topic/unsubscribe")
     public ResponseEntity<Void> unsubscribeFromTopic(@RequestBody TopicUnsubscribeRequest request, @AuthUser Member member) {
         topicOrchestrator.unsubscribeFromTopic(request, member);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    @DeleteMapping("/api/v2/topics/subscriptions/reset")
+    @DeleteMapping("/api/topic/subscriptions/reset")
     public ResponseEntity<Void> resetAllTopicSubscriptions(@AuthUser Member member) {
         topicOrchestrator.resetAllTopicSubscriptions(member);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    @GetMapping("/api/v2/topics/subscriptions/status")
+    @GetMapping("/api/topic/subscriptionsStatus")
     public ResponseEntity<List<TopicStatusResponse>> getTopicsWithSubscriptionStatus(@AuthUser Member member) {
         return ResponseEntity.ok(topicOrchestrator.getTopicsWithSubscriptionStatus(member));
     }
 
     @Override
-    @PostMapping("/api/v2/topics/subscriptions/notification")
+    @PostMapping("/api/topic/subscriptions/notification")
     public ResponseEntity<Void> updateNotificationPreference(
         @RequestBody TopicNotificationUpdateRequest request, @AuthUser Member member) {
         topicOrchestrator.updateNotificationPreference(request, member);

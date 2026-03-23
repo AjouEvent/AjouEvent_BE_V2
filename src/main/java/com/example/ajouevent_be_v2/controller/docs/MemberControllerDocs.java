@@ -33,9 +33,6 @@ public interface MemberControllerDocs {
         summary = "회원 정보 조회",
         description = """
             로그인된 사용자의 이름·이메일·전공을 반환합니다.
-
-            [응답 형식 변경]
-            - phone 필드 제거
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
@@ -52,9 +49,6 @@ public interface MemberControllerDocs {
         summary = "회원 정보 수정",
         description = """
             이름·전공을 수정합니다. null 필드는 변경하지 않습니다.
-
-            [응답 형식 변경]
-            - 요청에서 phone 필드 제거, 성공 시 문자열 응답 → 204 No Content
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
@@ -85,9 +79,6 @@ public interface MemberControllerDocs {
         summary = "회원 탈퇴",
         description = """
             로그인된 사용자의 계정과 관련 데이터를 삭제합니다.
-
-            [응답 형식 변경]
-            - 성공 시 문자열 응답 → 204 No Content
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
@@ -105,9 +96,6 @@ public interface MemberControllerDocs {
             Google OAuth 인가 코드로 캘린더를 연동합니다.
             - 인가 코드는 Google OAuth2 인증 흐름에서 발급된 code 값입니다.
             - 연동 성공 시 서버가 Access Token을 발급받아 캘린더 이벤트를 추가할 수 있게 됩니다.
-
-            [응답 형식 변경]
-            - 성공 시 이메일 문자열 응답 → 204 No Content
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({

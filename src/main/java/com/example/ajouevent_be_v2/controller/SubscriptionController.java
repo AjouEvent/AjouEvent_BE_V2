@@ -17,7 +17,7 @@ public class SubscriptionController implements SubscriptionControllerDocs {
     private final SubscriptionOrchestrator subscriptionOrchestrator;
 
     @Override
-    @GetMapping("/api/v2/subscriptions/read-status")
+    @GetMapping("/api/subscriptions/isSubscribedTabRead")
     public ResponseEntity<TabReadStatusResponse> isSubscribedTabRead(@AuthUser Member member) {
         return ResponseEntity.ok(subscriptionOrchestrator.isSubscribedTabRead(member));
     }
