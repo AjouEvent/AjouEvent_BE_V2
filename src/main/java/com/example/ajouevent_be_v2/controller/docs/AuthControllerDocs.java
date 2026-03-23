@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Tag(name = "Auth", description = """
     인증 관련 API
 
-    [V1 → V2 변경사항]
+    [응답 형식 변경]
     - 이메일/비밀번호 로그인 제거 → Google OAuth2 전용
     - 회원가입, 이메일 인증, 비밀번호 관련 엔드포인트 전체 제거
-    - refreshToken 전달 방식 변경: 응답 바디 → HttpOnly 쿠키 (Set-Cookie: refreshToken)
-    - 토큰 재발급 요청 방식 변경: RequestBody → Cookie
-    - 토큰 재발급 시 accessToken + refreshToken 모두 재발급 (V1은 accessToken만)
+    - refreshToken 전달 방식: 응답 바디 → HttpOnly 쿠키 (Set-Cookie: refreshToken)
+    - 토큰 재발급 요청 방식: RequestBody → Cookie
+    - 토큰 재발급 시 accessToken + refreshToken 모두 재발급
     - 로그인 응답에서 id, grantType, refreshToken 필드 제거
     """)
 public interface AuthControllerDocs {
@@ -34,12 +34,6 @@ public interface AuthControllerDocs {
             - 신규 회원이면 자동 가입 후 로그인 처리 (isNewMember: true)
             - Google Workspace(@ajou.ac.kr) 프로필에서 학과 정보를 자동으로 가져옵니다
             - accessToken은 응답 바디, refreshToken은 HttpOnly 쿠키(Set-Cookie: refreshToken)로 반환됩니다
-
-            [V1 대비 변경]
-            - V1: POST /api/users/oauth
-            - V2: POST /api/v2/auth/login
-            - refreshToken이 바디에서 쿠키로 이동
-            - 응답에서 id, grantType 필드 제거
             """
     )
     @ApiResponses({
@@ -59,11 +53,6 @@ public interface AuthControllerDocs {
             쿠키의 refreshToken으로 accessToken과 refreshToken을 모두 재발급합니다.
             - 요청: Cookie에 refreshToken 포함 필요
             - 응답: 새 accessToken은 바디, 새 refreshToken은 HttpOnly 쿠키로 반환
-
-            [V1 대비 변경]
-            - V1: PATCH /api/users/reissue-token, RequestBody로 refreshToken 전달
-            - V2: PATCH /api/v2/auth/reissue, Cookie로 refreshToken 전달
-            - V2: refreshToken도 함께 재발급 (V1은 accessToken만 재발급)
             """
     )
     @ApiResponses({

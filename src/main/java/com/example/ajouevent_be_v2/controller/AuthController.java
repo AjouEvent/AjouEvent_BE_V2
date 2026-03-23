@@ -26,7 +26,7 @@ public class AuthController implements AuthControllerDocs {
     private final AuthOrchestrator authOrchestrator;
     private final JwtProperties jwtProperties;
 
-    @PostMapping("/api/v2/auth/login")
+    @PostMapping("/api/users/oauth")
     public ResponseEntity<LoginResponse> login(@RequestBody OauthRequest request) {
         AuthTokenResult result = authOrchestrator.socialLogin(request);
         return ResponseEntity.ok()
@@ -34,7 +34,7 @@ public class AuthController implements AuthControllerDocs {
             .body(toLoginResponse(result));
     }
 
-    @PatchMapping("/api/v2/auth/reissue")
+    @PatchMapping("/api/users/reissue-token")
     public ResponseEntity<LoginResponse> reissueToken(@CookieValue(name = REFRESH_TOKEN_COOKIE) String refreshToken) {
         AuthTokenResult result = authOrchestrator.reissueToken(refreshToken);
         return ResponseEntity.ok()
