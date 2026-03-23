@@ -43,7 +43,7 @@ public class AuthController implements AuthControllerDocs {
     }
 
     private LoginResponse toLoginResponse(AuthTokenResult result) {
-        return new LoginResponse(result.accessToken(), result.name(), result.major(), result.email(), result.isNewMember());
+        return new LoginResponse(result.id(), "Authorization", result.accessToken(), result.name(), result.major(), result.email(), result.isNewMember());
     }
 
     private ResponseCookie refreshCookie(String value) {

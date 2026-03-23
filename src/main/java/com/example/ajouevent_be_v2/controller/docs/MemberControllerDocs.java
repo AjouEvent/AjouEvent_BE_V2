@@ -6,6 +6,8 @@ import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
 import com.example.ajouevent_be_v2.dto.member.MemberInfoResponse;
 import com.example.ajouevent_be_v2.dto.member.MemberUpdateRequest;
+import com.example.ajouevent_be_v2.dto.member.RegisterMemberInfoRequest;
+import com.example.ajouevent_be_v2.dto.member.RegisterMemberInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -57,6 +59,21 @@ public interface MemberControllerDocs {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<Void> updateMember(@RequestBody MemberUpdateRequest request, @AuthUser Member member);
+
+    @Operation(
+        summary = "신규 회원 학과 등록",
+        description = """
+            최초 로그인(isNewMember=true) 후 회원의 학과를 등록합니다.
+            """,
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "등록 성공",
+            content = @Content(schema = @Schema(implementation = RegisterMemberInfoResponse.class))),
+        @ApiResponse(responseCode = "401", description = "인증 필요",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<RegisterMemberInfoResponse> registerMemberInfo(
+        @RequestBody RegisterMemberInfoRequest request, @AuthUser Member member);
 
     @Operation(
         summary = "회원 탈퇴",

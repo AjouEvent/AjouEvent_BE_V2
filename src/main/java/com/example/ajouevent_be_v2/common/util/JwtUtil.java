@@ -29,12 +29,14 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateAccessToken(String email, Role role) {
+    public String generateAccessToken(Long memberId, String email, Role role) {
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + jwtProperties.getAccessTokenExpiration());
 
         return Jwts.builder()
-                .subject(email)
+                .subject(String.valueOf(memberId))
+                .claim("memberId", memberId)
+                .claim("email", email)
                 .claim("role", role.name())
                 .issuer(jwtProperties.getIssuer())
                 .issuedAt(now)
@@ -43,12 +45,12 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String generateRefreshToken(String email) {
+    public String generateRefreshToken(Long memberId) {
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + jwtProperties.getRefreshTokenExpiration());
 
         return Jwts.builder()
-                .subject(email)
+                .subject(String.valueOf(memberId))
                 .issuer(jwtProperties.getIssuer())
                 .issuedAt(now)
                 .expiration(expireDate)
@@ -56,8 +58,8 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String getEmailFromToken(String token) {
-        return parseClaims(token).getSubject();
+    public Long getMemberIdFromToken(String token) {
+        return Long.valueOf(parseClaims(token).getSubject());
     }
 
     public void validateToken(String token) {

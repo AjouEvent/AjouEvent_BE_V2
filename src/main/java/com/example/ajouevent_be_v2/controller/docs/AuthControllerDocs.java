@@ -20,10 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
     [응답 형식 변경]
     - 이메일/비밀번호 로그인 제거 → Google OAuth2 전용
     - 회원가입, 이메일 인증, 비밀번호 관련 엔드포인트 전체 제거
-    - refreshToken 전달 방식: 응답 바디 → HttpOnly 쿠키 (Set-Cookie: refreshToken)
-    - 토큰 재발급 요청 방식: RequestBody → Cookie
-    - 토큰 재발급 시 accessToken + refreshToken 모두 재발급
-    - 로그인 응답에서 id, grantType, refreshToken 필드 제거
+    - refreshToken 전달 방식 변경: 응답 바디 → HttpOnly 쿠키 (Set-Cookie: refreshToken)
+    - 토큰 재발급 요청 방식 변경: RequestBody → Cookie
+    - 토큰 재발급 시 accessToken + refreshToken 모두 재발급 (V1은 accessToken만)
     """)
 public interface AuthControllerDocs {
 
