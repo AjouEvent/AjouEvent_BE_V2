@@ -23,6 +23,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Topic", description = """
     토픽 구독 관련 API
+
+    [응답 형식 변경]
+    - 뮤테이션 응답: 200 OK + ResponseDto body → 204 No Content
+    - 인증 방식: @PreAuthorize + SecurityContext → Bearer JWT (Authorization 헤더)
     """)
 public interface TopicControllerDocs {
 

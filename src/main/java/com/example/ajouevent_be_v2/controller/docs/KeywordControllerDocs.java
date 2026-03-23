@@ -20,6 +20,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Keyword", description = """
     키워드 구독 관련 API
+
+    [응답 형식 변경]
+    - 응답 형식: ResponseDto 바디 래퍼 제거 → HTTP 상태 코드 직접 반환
+      · 구독 생성: 200 OK + ResponseDto → 201 Created (바디 없음)
+      · 구독 취소: 200 OK + ResponseDto → 204 No Content (바디 없음)
+      · 전체 초기화: 200 OK + ResponseDto → 204 No Content (바디 없음)
+    - 목록 조회 응답 구조 변경 없음: encodedKeyword, koreanKeyword, searchKeyword, topicName, isRead, lastReadAt 동일
     """)
 public interface KeywordControllerDocs {
 

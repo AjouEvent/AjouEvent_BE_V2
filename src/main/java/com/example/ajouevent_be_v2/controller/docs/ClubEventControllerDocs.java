@@ -24,6 +24,9 @@ import org.springframework.http.ResponseEntity;
 
 @Tag(name = "ClubEvent", description = """
     공지사항 조회 관련 API
+
+    [응답 형식 변경]
+    - 뮤테이션 응답: 200 OK + ResponseDto body → 204 No Content
     """)
 public interface ClubEventControllerDocs {
 

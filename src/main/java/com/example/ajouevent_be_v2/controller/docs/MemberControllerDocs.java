@@ -18,6 +18,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Member", description = """
     회원 관련 API
+
+    [응답 형식 변경]
+    - phone(전화번호) 필드 전체 제거: 회원 정보 조회/수정 응답·요청에서 삭제
+    - 회원 정보 수정 응답: 기존 문자열 응답 → 204 No Content
+    - 회원 탈퇴 응답: 기존 문자열 응답 → 204 No Content
+    - Google 캘린더 연동 응답: 기존 이메일 문자열 응답 → 204 No Content
     """)
 public interface MemberControllerDocs {
 

@@ -21,6 +21,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Notification", description = """
     알림 조회 및 읽음 처리 관련 API
+
+    [응답 형식 변경]
+    - 뮤테이션 응답: 200 OK + ResponseDto body → 204 No Content
+    - click: RequestBody { pushNotificationId } 로 수신
+    - readAll: POST 메서드 사용
     """)
 public interface NotificationControllerDocs {
 
