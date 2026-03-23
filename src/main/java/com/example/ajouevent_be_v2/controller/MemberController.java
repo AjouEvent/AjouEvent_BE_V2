@@ -22,24 +22,24 @@ public class MemberController implements MemberControllerDocs {
 
     private final MemberOrchestrator memberOrchestrator;
 
-    @GetMapping("/api/v2/members")
+    @GetMapping("/api/users")
     public ResponseEntity<MemberInfoResponse> getMember(@AuthUser Member member) {
         return ResponseEntity.ok(memberOrchestrator.getMemberInfo(member));
     }
 
-    @PatchMapping("/api/v2/members")
+    @PatchMapping("/api/users")
     public ResponseEntity<Void> updateMember(@RequestBody MemberUpdateRequest request, @AuthUser Member member) {
         memberOrchestrator.updateMemberInfo(request, member);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/api/v2/members")
+    @DeleteMapping("/api/users")
     public ResponseEntity<Void> deleteMember(@AuthUser Member member) {
         memberOrchestrator.deleteMember(member);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/api/v2/members/calendar")
+    @PostMapping("/api/users/calendar")
     public ResponseEntity<Void> connectCalendar(@RequestBody OauthRequest request, @AuthUser Member member) {
         memberOrchestrator.connectCalendar(request);
         return ResponseEntity.noContent().build();
