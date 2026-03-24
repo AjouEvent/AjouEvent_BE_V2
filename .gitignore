@@ -53,5 +53,5 @@ node_modules/
 
 ### firebase ###
 **/src/main/resources/firebase/
-fcm-test-frontend/!/k6-load-test/.env.local
-!/fcm-test-frontend/
+/fcm-test-frontend/
+/k6-load-test/.env.local
