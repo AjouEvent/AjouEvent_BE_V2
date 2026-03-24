@@ -6,8 +6,11 @@ import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
 import com.example.ajouevent_be_v2.dto.member.MemberInfoResponse;
 import com.example.ajouevent_be_v2.dto.member.MemberUpdateRequest;
+import com.example.ajouevent_be_v2.dto.member.RegisterMemberInfoRequest;
+import com.example.ajouevent_be_v2.dto.member.RegisterMemberInfoResponse;
 import com.example.ajouevent_be_v2.orchestrator.MemberOrchestrator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,24 +25,31 @@ public class MemberController implements MemberControllerDocs {
 
     private final MemberOrchestrator memberOrchestrator;
 
-    @GetMapping("/api/v2/members")
+    @GetMapping("/api/users")
     public ResponseEntity<MemberInfoResponse> getMember(@AuthUser Member member) {
         return ResponseEntity.ok(memberOrchestrator.getMemberInfo(member));
     }
 
-    @PatchMapping("/api/v2/members")
+    @PatchMapping("/api/users")
     public ResponseEntity<Void> updateMember(@RequestBody MemberUpdateRequest request, @AuthUser Member member) {
         memberOrchestrator.updateMemberInfo(request, member);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/api/v2/members")
+    @PostMapping("/api/users/register-info")
+    public ResponseEntity<RegisterMemberInfoResponse> registerMemberInfo(
+        @RequestBody RegisterMemberInfoRequest request, @AuthUser Member member) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(memberOrchestrator.registerMemberInfo(request, member));
+    }
+
+    @DeleteMapping("/api/users")
     public ResponseEntity<Void> deleteMember(@AuthUser Member member) {
         memberOrchestrator.deleteMember(member);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/api/v2/members/calendar")
+    @PostMapping("/api/users/connect-calendar")
     public ResponseEntity<Void> connectCalendar(@RequestBody OauthRequest request, @AuthUser Member member) {
         memberOrchestrator.connectCalendar(request);
         return ResponseEntity.noContent().build();

@@ -16,10 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "FcmToken", description = """
     FCM 디바이스 토큰 등록 API
-
-    [V1 → V2 변경사항]
-    - API 경로 오타 수정: /send/registeration-token → /send/registration-token
-    - 응답 형식 변경: void → 200 OK (ResponseEntity<Void>)
     """)
 public interface FcmTokenControllerDocs {
 
@@ -29,10 +25,6 @@ public interface FcmTokenControllerDocs {
             클라이언트의 FCM 디바이스 토큰을 서버에 등록합니다.
             - 이미 존재하는 토큰이면 만료일만 갱신 (10주)
             - 신규 토큰이면 저장 후 기존 구독 중인 모든 Topic/Keyword에 매핑
-
-            [V1 대비 변경]
-            - V1: POST /send/registeration-token (오타) + { email, fcmToken } body
-            - V2: POST /send/registration-token + { fcmToken } body (JWT 인증)
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({

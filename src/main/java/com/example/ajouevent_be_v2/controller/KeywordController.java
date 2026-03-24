@@ -23,7 +23,7 @@ public class KeywordController implements KeywordControllerDocs {
 
     private final KeywordOrchestrator keywordOrchestrator;
 
-    @PostMapping("/api/v2/keywords/subscriptions")
+    @PostMapping("/api/keyword/subscribe")
     public ResponseEntity<Void> subscribeToKeyword(
         @AuthUser Member member,
         @RequestBody KeywordSubscribeRequest request
@@ -32,7 +32,7 @@ public class KeywordController implements KeywordControllerDocs {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @DeleteMapping("/api/v2/keywords/subscriptions")
+    @PostMapping("/api/keyword/unsubscribe")
     public ResponseEntity<Void> unsubscribeFromKeyword(
         @AuthUser Member member,
         @RequestBody KeywordUnsubscribeRequest request
@@ -41,12 +41,12 @@ public class KeywordController implements KeywordControllerDocs {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/api/v2/keywords/subscriptions")
+    @GetMapping("/api/keyword/userKeywords")
     public ResponseEntity<List<KeywordResponse>> getUserKeywords(@AuthUser Member member) {
         return ResponseEntity.ok(keywordOrchestrator.getUserKeywords(member));
     }
 
-    @DeleteMapping("/api/v2/keywords/subscriptions/reset")
+    @DeleteMapping("/api/keyword/subscriptions/reset")
     public ResponseEntity<Void> resetKeywordSubscriptions(@AuthUser Member member) {
         keywordOrchestrator.resetAllKeywordSubscriptions(member);
         return ResponseEntity.noContent().build();

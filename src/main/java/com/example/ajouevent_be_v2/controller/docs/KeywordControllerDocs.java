@@ -21,19 +21,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Tag(name = "Keyword", description = """
     키워드 구독 관련 API
 
-    [V1 → V2 변경사항]
-    - API 경로 재설계: /api/keyword/* → /api/v2/keywords/subscriptions/*
-      · V1 동사 기반: POST /subscribe, POST /unsubscribe
-      · V2 리소스 기반: POST/DELETE/GET /api/v2/keywords/subscriptions
-    - 응답 형식 변경: ResponseDto 바디 래퍼 제거 → HTTP 상태 코드 직접 반환
+    [응답 형식 변경]
+    - 응답 형식: ResponseDto 바디 래퍼 제거 → HTTP 상태 코드 직접 반환
       · 구독 생성: 200 OK + ResponseDto → 201 Created (바디 없음)
       · 구독 취소: 200 OK + ResponseDto → 204 No Content (바디 없음)
       · 전체 초기화: 200 OK + ResponseDto → 204 No Content (바디 없음)
-    - 구독 취소 HTTP 메서드 변경: POST → DELETE (리소스 삭제 의미에 맞게 수정)
-      · V1: POST /api/keyword/unsubscribe + { encodedKeyword }
-      · V2: DELETE /api/v2/keywords/subscriptions + { encodedKeyword } (RequestBody 형식 유지)
-    - 목록 조회 경로 변경: GET /api/keyword/userKeywords → GET /api/v2/keywords/subscriptions
-      · 응답 구조 변경 없음: encodedKeyword, koreanKeyword, searchKeyword, topicName, isRead, lastReadAt 동일
+    - 목록 조회 응답 구조 변경 없음: encodedKeyword, koreanKeyword, searchKeyword, topicName, isRead, lastReadAt 동일
     """)
 public interface KeywordControllerDocs {
 
@@ -44,10 +37,6 @@ public interface KeywordControllerDocs {
             - 최대 10개 구독 가능. 초과 시 400 반환
             - 구독 시 회원의 모든 FCM 토큰 × Keyword → KeywordToken 생성 (BulkInsert)
             - encodedKeyword 생성 규칙: URLEncode(koreanKeyword).replace("+", "%20") + "_" + topicName
-
-            [V1 대비 변경]
-            - V1: POST /api/keyword/subscribe → 200 OK + { successStatus, successContent } 바디
-            - V2: POST /api/v2/keywords/subscriptions → 201 Created (바디 없음)
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
@@ -68,12 +57,6 @@ public interface KeywordControllerDocs {
         description = """
             구독 중인 키워드를 취소합니다.
             - KeywordMember 삭제 후 해당 KeywordToken 삭제
-
-            [V1 대비 변경]
-            - V1: POST /api/keyword/unsubscribe + { encodedKeyword } → 200 OK + ResponseDto 바디
-            - V2: DELETE /api/v2/keywords/subscriptions + { encodedKeyword } → 204 No Content (바디 없음)
-            - HTTP 메서드 변경: POST → DELETE
-            - 요청 형식 유지: RequestBody { encodedKeyword } 동일
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
@@ -90,11 +73,6 @@ public interface KeywordControllerDocs {
         description = """
             로그인된 사용자의 구독 키워드 목록을 반환합니다.
             - KeywordMember JOIN FETCH Keyword JOIN FETCH Topic 으로 조회
-
-            [V1 대비 변경]
-            - V1: GET /api/keyword/userKeywords
-            - V2: GET /api/v2/keywords/subscriptions (경로 변경)
-            - 응답 구조 변경 없음: encodedKeyword, koreanKeyword, searchKeyword, topicName, isRead, lastReadAt 동일
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
@@ -110,11 +88,6 @@ public interface KeywordControllerDocs {
         description = """
             로그인된 사용자의 모든 키워드 구독을 초기화합니다.
             - 회원의 TokenId 목록으로 KeywordToken 전체 삭제 후 KeywordMember 전체 삭제
-
-            [V1 대비 변경]
-            - V1: DELETE /api/keyword/subscriptions/reset → 200 OK + { successStatus, successContent } 바디
-            - V2: DELETE /api/v2/keywords/subscriptions/reset → 204 No Content (바디 없음)
-            - 응답 형식 변경: ResponseDto 래퍼 제거, 204 No Content 반환
             """,
         security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses({
