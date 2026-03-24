@@ -6,12 +6,12 @@
  *
  * 실행 전 준비:
  *   1. seed.sql 실행 (DB 멤버 + 토픽 구독 등록)
- *   2. ./load-test/run.sh load-test/scenarios/async-vs-sync-webhook/setup.js (FCM 토큰 등록)
+ *   2. ./k6-load-test/run.sh k6-load-test/scenarios/async-vs-sync-webhook/setup.js (FCM 토큰 등록)
  *
  * 실행:
- *   ./load-test/run.sh load-test/scenarios/async-vs-sync-webhook/sync-webhook.js single
- *   ./load-test/run.sh load-test/scenarios/async-vs-sync-webhook/sync-webhook.js ramp
- *   ./load-test/run.sh load-test/scenarios/async-vs-sync-webhook/sync-webhook.js rate
+ *   ./k6-load-test/run.sh k6-load-test/scenarios/async-vs-sync-webhook/sync-webhook.js single
+ *   ./k6-load-test/run.sh k6-load-test/scenarios/async-vs-sync-webhook/sync-webhook.js ramp
+ *   ./k6-load-test/run.sh k6-load-test/scenarios/async-vs-sync-webhook/sync-webhook.js rate
  */
 import http from 'k6/http';
 import { check } from 'k6';
