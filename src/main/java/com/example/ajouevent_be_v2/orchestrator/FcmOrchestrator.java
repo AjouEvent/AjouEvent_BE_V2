@@ -69,6 +69,44 @@ public class FcmOrchestrator {
     }
 
     // <------- TEST --------->
+    public void dispatchDirect(List<PushClusterSendRequest> sendRequests) {
+        sendRequests.forEach(req -> sendToClusterDirect(req.fcmMessageCommand(), req.pushClusterId()));
+    }
+
+    private void sendToClusterDirect(FcmMessageCommand command, Long pushClusterId) {
+        PushCluster cluster = pushClusterQueryService.findById(pushClusterId);
+        List<PushClusterToken> clusterTokens = pushClusterQueryService.findTokensByCluster(cluster);
+
+        if (clusterTokens.isEmpty()) {
+            log.info("푸시 전송 스킵 - PushClusterID: {} 알림 대상 토큰이 없습니다.", cluster.getId());
+            fcmPushResultService.skipWithNoTargets(cluster);
+            return;
+        }
+
+        fcmPushResultService.markAsInProgressAndSave(cluster);
+
+        Map<Long, Long> unreadCountMap = notificationPushService.countUnreadByCommand(command);
+
+        List<List<PushClusterToken>> batches = splitIntoBatches(clusterTokens, 400);
+        for (List<PushClusterToken> batch : batches) {
+            fcmPushResultService.markBatchAsSendingAndSave(batch);
+
+            List<Message> messages = fcmPushService.buildMessages(cluster.getId(), batch, command, unreadCountMap);
+            fcmPushService.sendBatchAsyncDirect(messages, new ApiFutureCallback<>() {
+                @Override
+                public void onSuccess(BatchResponse response) {
+                    fcmPushResultService.processPushResult(cluster.getId(), batch, response);
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    log.error("FCM 알림 전송 실패 (directExecutor) - pushClusterId={}", cluster.getId(), t);
+                    fcmPushResultService.markBatchAsFailAndSave(cluster.getId(), batch);
+                }
+            });
+        }
+    }
+
     public void dispatchSync(List<PushClusterSendRequest> sendRequests) {
         sendRequests.forEach(req -> sendToClusterSync(req.fcmMessageCommand(), req.pushClusterId()));
     }

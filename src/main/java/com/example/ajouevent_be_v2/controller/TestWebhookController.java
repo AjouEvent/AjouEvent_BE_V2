@@ -24,4 +24,11 @@ public class TestWebhookController {
             @RequestBody WebhookRequest webhookRequest) {
         return ResponseEntity.ok(webhookOrchestrator.processWebhookSync(token, webhookRequest));
     }
+
+    @PostMapping("/api/v2/test/webhook/direct-pool")
+    public ResponseEntity<WebhookResponse> handleWebhookDirect(
+            @RequestHeader("crawling-token") String token,
+            @RequestBody WebhookRequest webhookRequest) {
+        return ResponseEntity.ok(webhookOrchestrator.processWebhookDirect(token, webhookRequest));
+    }
 }
