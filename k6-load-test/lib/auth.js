@@ -64,7 +64,7 @@ export function login(email) {
 /**
  * 토픽 구독
  *
- * - POST /api/v2/topics/subscriptions
+ * - POST /api/topic/subscribe
  * - JWT 인증 필요
  *
  * @param {string} accessToken  JWT accessToken
@@ -72,7 +72,7 @@ export function login(email) {
  */
 export function subscribeToTopic(accessToken, topic) {
   const res = http.post(
-    `${BASE_URL}/api/v2/topics/subscriptions`,
+    `${BASE_URL}/api/topic/subscribe`,
     JSON.stringify({ topic }),
     {
       headers: {
