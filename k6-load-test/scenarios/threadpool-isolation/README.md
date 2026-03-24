@@ -48,37 +48,30 @@ Firebase.sendEachAsync(messages)         [firebase-worker-N 스레드]
 
 ## 실행 순서
 
-### 1. DB 시드 데이터 삽입
+### 실제 FCM 토큰 (실 네트워크 왕복, firebase-worker-* 스레드 점유 효과 극대화)
 
 ```bash
+# 1. DB 시드 (멤버만 등록, 가짜 FCM 토큰 없음)
 mysql -u <user> -p <database> < k6-load-test/scenarios/threadpool-isolation/seed.sql
-```
 
-### 2. 시나리오 1 실행 (directExecutor)
+# 2. .env.local 에 실제 FCM 토큰 설정 (브라우저 DevTools에서 획득)
+#    FCM_TOKENS=token1,token2,...,tokenN
+#    TOPIC=AjouNormal
 
-```bash
-# 동작 확인
-./k6-load-test/run.sh k6-load-test/scenarios/threadpool-isolation/direct-pool-webhook.js single
+# 3. 실제 FCM 토큰 등록 + 구독 (1회성)
+./k6-load-test/run.sh k6-load-test/scenarios/threadpool-isolation/setup.js
 
-# 부하 테스트 (ramp: 0→200 VU)
+# 4. 시나리오 1 — directExecutor
 ./k6-load-test/run.sh k6-load-test/scenarios/threadpool-isolation/direct-pool-webhook.js ramp
 
-# 고정 RPS (rate: 30 RPS, 60s)
-./k6-load-test/run.sh k6-load-test/scenarios/threadpool-isolation/direct-pool-webhook.js rate
-```
-
-### 3. 시나리오 2 실행 (격리 풀)
-
-```bash
-# 동작 확인
-./k6-load-test/run.sh k6-load-test/scenarios/threadpool-isolation/isolated-pool-webhook.js single
-
-# 부하 테스트 (ramp: 0→200 VU)
+# 5. 시나리오 2 — 격리 풀
 ./k6-load-test/run.sh k6-load-test/scenarios/threadpool-isolation/isolated-pool-webhook.js ramp
-
-# 고정 RPS (rate: 30 RPS, 60s)
-./k6-load-test/run.sh k6-load-test/scenarios/threadpool-isolation/isolated-pool-webhook.js rate
 ```
+
+> **가짜 토큰과 실제 토큰 혼용 방지**: seed.sql을 먼저 실행한 경우 가짜 토큰 정리 후 setup.js를 실행하세요.
+> ```sql
+> DELETE FROM tokens WHERE token_value LIKE 'load_test_token_%';
+> ```
 
 ## 관측 방법
 

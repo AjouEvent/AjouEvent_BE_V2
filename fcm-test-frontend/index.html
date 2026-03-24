@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>FCM Test Login</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+    input { width: 100%; padding: 8px; margin: 6px 0 12px; box-sizing: border-box; }
+    button { padding: 8px 16px; margin-right: 8px; cursor: pointer; }
+    #token-box { background: #f5f5f5; padding: 10px; word-break: break-all; border-radius: 4px; min-height: 24px; }
+    #response-box { background: #e8f5e9; padding: 10px; border-radius: 4px; margin-top: 12px; white-space: pre; display: none; }
+    .label { font-size: 13px; color: #555; margin-bottom: 2px; }
+    .hint { font-size: 12px; color: #888; margin-top: -8px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <h3>FCM 테스트 로그인</h3>
+
+  <div class="label">FCM 토큰 <span style="color:#888;font-size:12px">(최초 1회만 등록하면 이후 생략 가능)</span></div>
+  <div id="token-box">없음</div>
+  <br>
+  <button onclick="loadOrGetToken()">FCM 토큰 가져오기</button>
+  <button onclick="clearToken()" style="color:red">토큰 초기화</button>
+
+  <hr>
+
+  <div class="label">이메일</div>
+  <input id="email" type="email" value="test@ajou.ac.kr">
+  <div class="hint">FCM 토큰이 이미 DB에 등록되어 있으면 위 토큰 없이 바로 로그인 가능</div>
+
+  <button onclick="doLogin()">테스트 로그인</button>
+
+  <div id="response-box"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCFwu1ABxO454F3Q9ZzNvwKn5qBwOiewqc",
+      authDomain:        "hello-22d56.firebaseapp.com",
+      projectId:         "hello-22d56",
+      storageBucket:     "hello-22d56.firebasestorage.app",
+      messagingSenderId: "827125474375",
+      appId:             "1:827125474375:web:641871262fa276ff5c7d62",
+      measurementId:     "G-4N3M64QQHF",
+    };
+    const VAPID_KEY = "BGPw9G6rTDH6-xFXPsqsN2Gh2TON87ZL7-X4zWnrOwOLr6U5cTk5V148MdixxNgo1AzkH2nAaHgh3vnf8wmXzpQ";
+    const LS_FCM = "fcm_test_token";
+    const API_URL = "http://localhost:8080/api/v2/auth/test-login";
+
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
+
+    // 페이지 로드 시 캐시 확인
+    const cached = localStorage.getItem(LS_FCM);
+    if (cached) document.getElementById("token-box").textContent = cached;
+
+    // 포그라운드 알림 수신 핸들러
+    onMessage(messaging, (payload) => {
+      const { title, body } = payload.notification ?? {};
+      new Notification(title ?? "알림", { body });
+    });
+
+    window.loadOrGetToken = async () => {
+      const cached = localStorage.getItem(LS_FCM);
+      if (cached) {
+        document.getElementById("token-box").textContent = cached;
+        return;
+      }
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") { alert("알림 권한이 필요합니다."); return; }
+        const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+        localStorage.setItem(LS_FCM, token);
+        document.getElementById("token-box").textContent = token;
+      } catch (e) {
+        document.getElementById("token-box").textContent = "오류: " + e.message;
+      }
+    };
+
+    window.clearToken = () => {
+      localStorage.removeItem(LS_FCM);
+      document.getElementById("token-box").textContent = "없음";
+    };
+
+    window.doLogin = async () => {
+      const email = document.getElementById("email").value;
+      const fcmToken = localStorage.getItem(LS_FCM) || null;
+
+      const body = fcmToken ? { email, fcmToken } : { email };
+
+      const resp = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await resp.json();
+      const box = document.getElementById("response-box");
+      box.style.display = "block";
+      if (resp.ok) {
+        box.style.background = "#e8f5e9";
+        box.textContent = JSON.stringify(data, null, 2);
+        localStorage.setItem("access_token", data.accessToken);
+      } else {
+        box.style.background = "#ffebee";
+        box.textContent = JSON.stringify(data, null, 2);
+      }
+    };
+  </script>
+</body>
+</html>
