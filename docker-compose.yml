@@ -1,4 +1,25 @@
 services:
+  app:
+    build: .
+    container_name: ajouevent-app
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: ajouevent-mysql
+      MYSQL_PORT: 3306
+      REDIS_HOST: ajouevent-redis
+      REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ajouevent-network
+
   mysql:
     image: mysql:8.0
     container_name: ajouevent-mysql

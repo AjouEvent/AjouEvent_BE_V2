@@ -31,7 +31,7 @@ public class ClubEventController implements ClubEventControllerDocs {
     private final ClubEventOrchestrator clubEventOrchestrator;
 
     @Override
-    @GetMapping("/api/v2/event/detail/{eventId}")
+    @GetMapping("/api/event/detail/{eventId}")
     public ResponseEntity<ClubEventDetailResponse> getEventDetail(
         @PathVariable Long eventId,
         @AuthOptional Member member,
@@ -43,7 +43,7 @@ public class ClubEventController implements ClubEventControllerDocs {
     }
 
     @Override
-    @GetMapping("/api/v2/event/{type}")
+    @GetMapping("/api/event/{type}")
     public ResponseEntity<SliceResponse<ClubEventResponse>> getEventTypeList(
         @PathVariable(name = "type") String type,
         @RequestParam(defaultValue = "") String keyword,
@@ -53,13 +53,13 @@ public class ClubEventController implements ClubEventControllerDocs {
     }
 
     @Override
-    @GetMapping("/api/v2/event/popular")
+    @GetMapping("/api/event/popular")
     public ResponseEntity<List<ClubEventResponse>> getTopPopularEvents(@AuthOptional Member member) {
         return ResponseEntity.ok(clubEventOrchestrator.getTopPopularEvents(member));
     }
 
     @Override
-    @GetMapping("/api/v2/event/subscribed")
+    @GetMapping("/api/event/subscribed")
     public ResponseEntity<SliceResponse<ClubEventResponse>> getSubscribedEvents(
         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @AuthOptional Member member,
@@ -72,7 +72,7 @@ public class ClubEventController implements ClubEventControllerDocs {
     }
 
     @Override
-    @GetMapping("/api/v2/event/getSubscribedPostsByKeyword")
+    @GetMapping("/api/event/getSubscribedPostsByKeyword")
     public ResponseEntity<SliceResponse<ClubEventWithKeywordResponse>> getAllBySubscribedKeywords(
         @AuthUser Member member,
         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -80,7 +80,7 @@ public class ClubEventController implements ClubEventControllerDocs {
     }
 
     @Override
-    @GetMapping("/api/v2/event/getSubscribedPostsByKeyword/{keyword}")
+    @GetMapping("/api/event/getSubscribedPostsByKeyword/{keyword}")
     public ResponseEntity<SliceResponse<ClubEventWithKeywordResponse>> getByKeyword(
         @PathVariable String keyword,
         @AuthUser Member member,
@@ -89,7 +89,7 @@ public class ClubEventController implements ClubEventControllerDocs {
     }
 
     @Override
-    @PostMapping("/api/v2/event/like/{eventId}")
+    @PostMapping("/api/event/like/{eventId}")
     public ResponseEntity<Void> likeEvent(
         @PathVariable Long eventId,
         @AuthUser Member member) {
@@ -98,7 +98,7 @@ public class ClubEventController implements ClubEventControllerDocs {
     }
 
     @Override
-    @DeleteMapping("/api/v2/event/like/{eventId}")
+    @DeleteMapping("/api/event/like/{eventId}")
     public ResponseEntity<Void> cancelLikeEvent(
         @PathVariable Long eventId,
         @AuthUser Member member) {
@@ -107,7 +107,7 @@ public class ClubEventController implements ClubEventControllerDocs {
     }
 
     @Override
-    @GetMapping("/api/v2/event/liked")
+    @GetMapping("/api/event/liked")
     public ResponseEntity<SliceResponse<ClubEventResponse>> getLikedEvents(
         @RequestParam(required = false) String type,
         @RequestParam(defaultValue = "") String keyword,

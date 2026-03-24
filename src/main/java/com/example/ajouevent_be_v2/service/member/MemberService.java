@@ -6,6 +6,7 @@ import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.dto.auth.GoogleUserInfoResult;
 import com.example.ajouevent_be_v2.dto.member.MemberLoginResult;
 import com.example.ajouevent_be_v2.dto.member.MemberUpdateRequest;
+import com.example.ajouevent_be_v2.dto.member.RegisterMemberInfoRequest;
 import com.example.ajouevent_be_v2.repository.port.member.MemberRepositoryPort;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,11 @@ public class MemberService {
         return new MemberLoginResult(member, true);
     }
 
+    public Member findById(Long id) {
+        return memberRepositoryPort.findById(id)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+    }
+
     public Member findByEmail(String email) {
         return memberRepositoryPort.findByEmail(email)
             .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
@@ -42,6 +48,15 @@ public class MemberService {
     public void updateMemberInfo(MemberUpdateRequest request, Member member) {
         member.updateInfo(request.name(), request.major());
         memberRepositoryPort.save(member);
+    }
+
+    @Transactional
+    public Member registerMemberInfo(RegisterMemberInfoRequest request, Member member) {
+        if (request.major() != null) {
+            member.updateInfo(null, request.major());
+            memberRepositoryPort.save(member);
+        }
+        return member;
     }
 
     @Transactional

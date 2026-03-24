@@ -9,6 +9,7 @@ import com.example.ajouevent_be_v2.domain.push.PushClusterToken;
 import com.example.ajouevent_be_v2.dto.push.FcmMessageCommand;
 import com.google.api.core.ApiFutureCallback;
 import com.google.api.core.ApiFutures;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -33,6 +34,15 @@ public class FcmPushService {
             FirebaseMessaging.getInstance().sendEachAsync(messages),
             callback,
             fcmCallbackExecutor
+        );
+    }
+
+    // <------- TEST ------->
+    public void sendBatchAsyncDirect(List<Message> messages, ApiFutureCallback<BatchResponse> callback) {
+        ApiFutures.addCallback(
+            FirebaseMessaging.getInstance().sendEachAsync(messages),
+            callback,
+            MoreExecutors.directExecutor()
         );
     }
 

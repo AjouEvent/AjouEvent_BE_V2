@@ -13,13 +13,13 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     public AuthTokenResult issueTokens(Member member, Boolean isNewMember) {
-        String accessToken = jwtUtil.generateAccessToken(member.getEmail(), member.getRole());
-        String refreshToken = jwtUtil.generateRefreshToken(member.getEmail());
+        String accessToken = jwtUtil.generateAccessToken(member.getId(), member.getEmail(), member.getRole());
+        String refreshToken = jwtUtil.generateRefreshToken(member.getId());
         return AuthTokenResult.of(member, accessToken, refreshToken, isNewMember);
     }
 
-    public String extractEmail(String token) {
+    public Long extractMemberId(String token) {
         jwtUtil.validateToken(token);
-        return jwtUtil.getEmailFromToken(token);
+        return jwtUtil.getMemberIdFromToken(token);
     }
 }
