@@ -16,28 +16,12 @@ services:
     networks:
       - ajouevent-network
 
-  crawling:
-    build:
-      context: ../AjouEvent_Crawling
-      dockerfile: docker/Dockerfile
-      target: prod
-    container_name: ajouevent-crawling
-    restart: always
-    env_file:
-      - .env
-    environment:
-      REDIS_HOST: ajouevent-redis
-      REDIS_PORT: 6379
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - ajouevent-network
-
   redis:
     image: redis:7-alpine
     container_name: ajouevent-redis
     restart: always
+    ports:
+      - "6379:6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
