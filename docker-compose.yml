@@ -1,6 +1,6 @@
 services:
   app:
-    build: .
+    image: ${DOCKER_IMAGE}
     container_name: ajouevent-app
     restart: always
     env_file:
