@@ -190,3 +190,12 @@ CREATE TABLE IF NOT EXISTS push_notifications (
     CONSTRAINT fk_push_notifications_keyword      FOREIGN KEY (keyword_id)      REFERENCES keywords      (id),
     CONSTRAINT fk_push_notifications_member       FOREIGN KEY (member_id)       REFERENCES members       (id)
 );
+
+-- notice (crawling server)
+CREATE TABLE IF NOT EXISTS notice (
+    noticeId bigint       NOT NULL,
+    topicId  bigint       NOT NULL,
+    type     varchar(255) NOT NULL,
+    value    bigint       NOT NULL,
+    PRIMARY KEY (noticeId)
+);
