@@ -1,6 +1,5 @@
 package com.example.ajouevent_be_v2.service.member;
 
-import com.example.ajouevent_be_v2.common.discord.DiscordMessageService;
 import com.example.ajouevent_be_v2.common.exception.member.MemberErrorCode;
 import com.example.ajouevent_be_v2.common.exception.member.MemberException;
 import com.example.ajouevent_be_v2.domain.member.Member;
@@ -9,7 +8,6 @@ import com.example.ajouevent_be_v2.dto.member.MemberLoginResult;
 import com.example.ajouevent_be_v2.dto.member.MemberUpdateRequest;
 import com.example.ajouevent_be_v2.dto.member.RegisterMemberInfoRequest;
 import com.example.ajouevent_be_v2.repository.port.member.MemberRepositoryPort;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepositoryPort memberRepositoryPort;
-    private final DiscordMessageService discordMessageService;
 
     @Transactional
     public MemberLoginResult findOrCreateMember(GoogleUserInfoResult userInfo) {
@@ -34,7 +31,6 @@ public class MemberService {
         Member member = new Member(userInfo.email(), userInfo.name(), userInfo.department());
         memberRepositoryPort.save(member);
         log.info("신규 회원 가입 - email: {}", userInfo.email());
-        sendNewMemberDiscordNotification(member);
         return new MemberLoginResult(member, true);
     }
 
@@ -78,18 +74,4 @@ public class MemberService {
         memberRepositoryPort.delete(member);
     }
 
-    private void sendNewMemberDiscordNotification(Member member) {
-        try {
-            String message = String.format(
-                "🎉 신규 회원 가입\n가입 일시: %s\n이름: %s\n이메일: %s\n학과: %s",
-                LocalDateTime.now(),
-                member.getName(),
-                member.getEmail(),
-                member.getMajor() != null ? member.getMajor() : "미입력"
-            );
-            discordMessageService.sendMessage(message);
-        } catch (Exception e) {
-            log.warn("Discord 신규 회원 알림 전송 실패 - email: {}", member.getEmail(), e);
-        }
-    }
 }
