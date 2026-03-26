@@ -42,6 +42,9 @@ public class Member {
     @Column(name = "major")
     private String major;
 
+    @Column(name = "google_calendar_refresh_token")
+    private String googleCalendarRefreshToken;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role = Role.USER;
@@ -69,5 +72,9 @@ public class Member {
     public void updateInfo(String name, String major) {
         if (name != null) this.name = name;
         if (major != null) this.major = major;
+    }
+
+    public void updateGoogleCalendarRefreshToken(String token) {
+        this.googleCalendarRefreshToken = token;
     }
 }

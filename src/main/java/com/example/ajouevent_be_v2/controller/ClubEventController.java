@@ -6,9 +6,11 @@ import com.example.ajouevent_be_v2.common.dto.SliceResponse;
 import com.example.ajouevent_be_v2.controller.docs.ClubEventControllerDocs;
 import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.domain.member.Member;
+import com.example.ajouevent_be_v2.dto.clubevent.CalendarRequest;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventDetailResponse;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventResponse;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventWithKeywordResponse;
+import com.example.ajouevent_be_v2.dto.clubevent.EventBannerResponse;
 import com.example.ajouevent_be_v2.orchestrator.ClubEventOrchestrator;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -114,6 +117,20 @@ public class ClubEventController implements ClubEventControllerDocs {
         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         @AuthUser Member member) {
         return ResponseEntity.ok(clubEventOrchestrator.getLikedEvents(type, keyword, pageable, member));
+    }
+
+    @Override
+    @GetMapping("/api/event/banner")
+    public ResponseEntity<List<EventBannerResponse>> getBanners() {
+        return ResponseEntity.ok(clubEventOrchestrator.getBanners());
+    }
+
+    @Override
+    @PostMapping("/api/event/calendar")
+    public ResponseEntity<Void> addToCalendar(
+        @RequestBody CalendarRequest request, @AuthUser Member member) {
+        clubEventOrchestrator.addToCalendar(request, member);
+        return ResponseEntity.noContent().build();
     }
 
     private String resolveClientIp(HttpServletRequest request) {

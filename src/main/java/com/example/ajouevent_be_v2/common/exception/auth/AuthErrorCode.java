@@ -15,6 +15,8 @@ public enum AuthErrorCode implements ErrorCode {
     ILLEGAL_ARGUMENT_TOKEN(401, "AE-AUTH-ILLEGAL-ARGUMENT-TOKEN", "토큰 값이 올바르지 않습니다."),
 
     INVALID_AUTHORIZATION_CODE(400, "AE-AUTH-INVALID-AUTHORIZATION-CODE", "잘못된 인가 코드입니다."),
+    CALENDAR_REFRESH_TOKEN_NOT_FOUND(400, "AE-AUTH-CALENDAR-REFRESH-TOKEN-NOT-FOUND", "캘린더 연동을 위한 refresh token이 없습니다. prompt=consent&access_type=offline 파라미터를 포함하여 다시 시도해주세요."),
+    CALENDAR_NOT_CONNECTED(400, "AE-AUTH-CALENDAR-NOT-CONNECTED", "Google 캘린더가 연동되지 않았습니다."),
 
     FORBIDDEN(403, "AE-AUTH-FORBIDDEN", "접근 권한이 없습니다.");
 

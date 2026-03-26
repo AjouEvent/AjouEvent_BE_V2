@@ -8,11 +8,14 @@ import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.member.Member;
+import com.example.ajouevent_be_v2.dto.clubevent.CalendarRequest;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventCommand;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventDetailResponse;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventKeywordPair;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventResponse;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventWithKeywordResponse;
+import com.example.ajouevent_be_v2.dto.clubevent.EventBannerResponse;
+import com.example.ajouevent_be_v2.service.calendar.CalendarCommandService;
 import com.example.ajouevent_be_v2.service.clubevent.ClubEventCommandService;
 import com.example.ajouevent_be_v2.service.clubevent.ClubEventLikeCommandService;
 import com.example.ajouevent_be_v2.service.clubevent.ClubEventLikeQueryService;
@@ -48,6 +51,7 @@ public class ClubEventOrchestrator {
     private final TopicCommandService topicCommandService;
     private final KeywordQueryService keywordQueryService;
     private final KeywordCommandService keywordCommandService;
+    private final CalendarCommandService calendarCommandService;
 
     /**
      * 공지사항 생성 (Webhook 플로우 전용)
@@ -250,6 +254,16 @@ public class ClubEventOrchestrator {
         ClubEvent event = clubEventQueryService.getEventById(eventId);
         ClubEventLike clubEventLike = clubEventLikeQueryService.getEventLike(event, member);
         clubEventLikeCommandService.cancelLike(event, clubEventLike);
+    }
+
+    public List<EventBannerResponse> getBanners() {
+        return clubEventQueryService.getBanners().stream()
+            .map(EventBannerResponse::from)
+            .toList();
+    }
+
+    public void addToCalendar(CalendarRequest request, Member member) {
+        calendarCommandService.addEvent(member, request);
     }
 
     private List<ClubEventWithKeywordResponse> toKeywordResponses(

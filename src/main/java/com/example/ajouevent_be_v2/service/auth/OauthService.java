@@ -2,6 +2,7 @@ package com.example.ajouevent_be_v2.service.auth;
 
 import com.example.ajouevent_be_v2.common.exception.auth.AuthErrorCode;
 import com.example.ajouevent_be_v2.common.exception.auth.AuthException;
+import com.example.ajouevent_be_v2.config.properties.GoogleProperties;
 import com.example.ajouevent_be_v2.dto.auth.GooglePeopleResult;
 import com.example.ajouevent_be_v2.dto.auth.GoogleUserInfoResult;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
@@ -27,16 +28,17 @@ import org.springframework.web.client.RestClient;
 @Service
 public class OauthService {
 
-    private static final String GOOGLE_REGISTRATION_ID = "google";
-    private static final String GOOGLE_PEOPLE_API_URL = "https://people.googleapis.com/v1/people/me?personFields=organizations";
-
     private final ClientRegistrationRepository clientRegistrationRepository;
+    private final GoogleProperties googleProperties;
     private final RestClientAuthorizationCodeTokenResponseClient tokenResponseClient;
     private final DefaultOAuth2UserService userService;
     private final RestClient restClient;
 
-    public OauthService(ClientRegistrationRepository clientRegistrationRepository) {
+    public OauthService(
+        ClientRegistrationRepository clientRegistrationRepository,
+        GoogleProperties googleProperties) {
         this.clientRegistrationRepository = clientRegistrationRepository;
+        this.googleProperties = googleProperties;
         this.tokenResponseClient = new RestClientAuthorizationCodeTokenResponseClient();
         this.userService = new DefaultOAuth2UserService();
         this.restClient = RestClient.create();
@@ -44,7 +46,7 @@ public class OauthService {
 
     public GoogleUserInfoResult getUserInfo(OauthRequest request) {
         ClientRegistration clientRegistration =
-            clientRegistrationRepository.findByRegistrationId(GOOGLE_REGISTRATION_ID);
+            clientRegistrationRepository.findByRegistrationId(googleProperties.getRegistrationId());
 
         String decodedCode = URLDecoder.decode(request.authorizationCode(), StandardCharsets.UTF_8);
 
@@ -71,6 +73,9 @@ public class OauthService {
         try {
             var tokenResponse = tokenResponseClient.getTokenResponse(grantRequest);
             String accessToken = tokenResponse.getAccessToken().getTokenValue();
+            String googleRefreshToken = tokenResponse.getRefreshToken() != null
+                ? tokenResponse.getRefreshToken().getTokenValue()
+                : null;
 
             OAuth2User oAuth2User = userService.loadUser(
                 new OAuth2UserRequest(clientRegistration, tokenResponse.getAccessToken())
@@ -81,7 +86,8 @@ public class OauthService {
             return new GoogleUserInfoResult(
                 oAuth2User.getAttribute("email"),
                 oAuth2User.getAttribute("name"),
-                department
+                department,
+                googleRefreshToken
             );
         } catch (OAuth2AuthorizationException e) {
             log.warn("OAuth2 토큰 교환 실패: {}", e.getMessage());
@@ -89,10 +95,48 @@ public class OauthService {
         }
     }
 
+    public String exchangeForCalendarRefreshToken(OauthRequest request) {
+        ClientRegistration clientRegistration =
+            clientRegistrationRepository.findByRegistrationId(googleProperties.getRegistrationId());
+
+        String decodedCode = URLDecoder.decode(request.authorizationCode(), StandardCharsets.UTF_8);
+
+        OAuth2AuthorizationRequest authorizationRequest = OAuth2AuthorizationRequest
+            .authorizationCode()
+            .clientId(clientRegistration.getClientId())
+            .authorizationUri(clientRegistration.getProviderDetails().getAuthorizationUri())
+            .redirectUri(request.redirectUri())
+            .scopes(clientRegistration.getScopes())
+            .state("state")
+            .build();
+
+        OAuth2AuthorizationResponse authorizationResponse = OAuth2AuthorizationResponse
+            .success(decodedCode)
+            .redirectUri(request.redirectUri())
+            .state("state")
+            .build();
+
+        OAuth2AuthorizationCodeGrantRequest grantRequest = new OAuth2AuthorizationCodeGrantRequest(
+            clientRegistration,
+            new OAuth2AuthorizationExchange(authorizationRequest, authorizationResponse)
+        );
+
+        try {
+            var tokenResponse = tokenResponseClient.getTokenResponse(grantRequest);
+            if (tokenResponse.getRefreshToken() == null) {
+                throw new AuthException(AuthErrorCode.CALENDAR_REFRESH_TOKEN_NOT_FOUND);
+            }
+            return tokenResponse.getRefreshToken().getTokenValue();
+        } catch (OAuth2AuthorizationException e) {
+            log.warn("캘린더 OAuth2 토큰 교환 실패: {}", e.getMessage());
+            throw new AuthException(AuthErrorCode.INVALID_AUTHORIZATION_CODE);
+        }
+    }
+
     private String fetchDepartmentFromPeopleApi(String accessToken) {
         try {
             GooglePeopleResult result = restClient.get()
-                .uri(GOOGLE_PEOPLE_API_URL)
+                .uri(googleProperties.getPeopleApiUrl())
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .body(GooglePeopleResult.class);

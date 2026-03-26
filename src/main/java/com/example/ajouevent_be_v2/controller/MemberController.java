@@ -51,7 +51,7 @@ public class MemberController implements MemberControllerDocs {
 
     @PostMapping("/api/users/connect-calendar")
     public ResponseEntity<Void> connectCalendar(@RequestBody OauthRequest request, @AuthUser Member member) {
-        memberOrchestrator.connectCalendar(request);
+        memberOrchestrator.connectCalendar(request, member);
         return ResponseEntity.noContent().build();
     }
 }

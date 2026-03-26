@@ -6,6 +6,7 @@ import com.example.ajouevent_be_v2.dto.member.MemberInfoResponse;
 import com.example.ajouevent_be_v2.dto.member.MemberUpdateRequest;
 import com.example.ajouevent_be_v2.dto.member.RegisterMemberInfoRequest;
 import com.example.ajouevent_be_v2.dto.member.RegisterMemberInfoResponse;
+import com.example.ajouevent_be_v2.service.auth.OauthService;
 import com.example.ajouevent_be_v2.service.member.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class MemberOrchestrator {
 
     private final MemberService memberService;
+    private final OauthService oauthService;
 
     public MemberInfoResponse getMemberInfo(Member member) {
         return new MemberInfoResponse(member.getName(), member.getEmail(), member.getMajor());
@@ -33,7 +35,8 @@ public class MemberOrchestrator {
         memberService.deleteMember(member);
     }
 
-    public void connectCalendar(OauthRequest request) {
-        // TODO : 캘린더 연동
+    public void connectCalendar(OauthRequest request, Member member) {
+        String refreshToken = oauthService.exchangeForCalendarRefreshToken(request);
+        memberService.saveGoogleCalendarRefreshToken(member, refreshToken);
     }
 }
