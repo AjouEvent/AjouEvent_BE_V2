@@ -78,12 +78,6 @@ public class MemberService {
         memberRepositoryPort.delete(member);
     }
 
-    @Transactional
-    public void saveGoogleCalendarRefreshToken(Member member, String refreshToken) {
-        member.updateGoogleCalendarRefreshToken(refreshToken);
-        memberRepositoryPort.save(member);
-    }
-
     private void sendNewMemberDiscordNotification(Member member) {
         try {
             String message = String.format(

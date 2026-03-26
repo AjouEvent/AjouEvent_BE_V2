@@ -263,7 +263,7 @@ public class ClubEventOrchestrator {
     }
 
     public void addToCalendar(CalendarRequest request, Member member) {
-        calendarCommandService.addEvent(member, request);
+        calendarCommandService.addEvent(member.getEmail(), request);
     }
 
     private List<ClubEventWithKeywordResponse> toKeywordResponses(
