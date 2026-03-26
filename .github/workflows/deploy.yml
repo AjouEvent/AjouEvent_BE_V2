@@ -45,6 +45,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/ajouevent
-            docker compose pull app
-            docker compose up -d --no-deps app
+            DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/ajouevent-be:${{ github.sha }} docker compose pull app
+            DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/ajouevent-be:${{ github.sha }} docker compose up -d --no-deps app
             docker image prune -f
