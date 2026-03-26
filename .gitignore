@@ -39,7 +39,10 @@ out/
 ### Environment Variables ###
 .env
 .env.local
-.env.*.local
+.env.*
+
+### Crawling Server (별도 레포 - EC2에서 나란히 클론) ###
+AjouEvent_Crawling/
 
 ### Node.js ###
 node_modules/
@@ -51,3 +54,4 @@ node_modules/
 ### firebase ###
 **/src/main/resources/firebase/
 fcm-test-frontend/
+k6-load-test/
