@@ -9,7 +9,7 @@ public record ClubEventDetailResponse(
     Long eventId,
     String title,
     String writer,
-    List<String> imgUrls,
+    List<String> imgUrl,
     LocalDateTime createdAt,
     Long likesCount,
     Long viewCount,
@@ -20,14 +20,14 @@ public record ClubEventDetailResponse(
     String content
 ) {
     public static ClubEventDetailResponse from(ClubEvent event, boolean star) {
-        List<String> imgUrls = (event.getClubEventImageList() != null)
+        List<String> imgUrl = (event.getClubEventImageList() != null)
             ? event.getClubEventImageList().stream().map(ClubEventImage::getUrl).toList()
             : List.of();
         return new ClubEventDetailResponse(
             event.getEventId(),
             event.getTitle(),
             event.getWriter(),
-            imgUrls,
+            imgUrl,
             event.getCreatedAt(),
             event.getLikesCount(),
             event.getViewCount(),

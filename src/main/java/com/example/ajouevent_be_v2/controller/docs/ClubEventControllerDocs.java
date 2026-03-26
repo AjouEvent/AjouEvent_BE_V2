@@ -5,9 +5,11 @@ import com.example.ajouevent_be_v2.common.auth.AuthUser;
 import com.example.ajouevent_be_v2.common.dto.SliceResponse;
 import com.example.ajouevent_be_v2.common.exception.ErrorResponse;
 import com.example.ajouevent_be_v2.domain.member.Member;
+import com.example.ajouevent_be_v2.dto.clubevent.CalendarRequest;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventDetailResponse;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventResponse;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventWithKeywordResponse;
+import com.example.ajouevent_be_v2.dto.clubevent.EventBannerResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -21,6 +23,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "ClubEvent", description = """
     공지사항 조회 관련 API
@@ -183,4 +186,32 @@ public interface ClubEventControllerDocs {
         @Parameter(description = "제목 검색 키워드 (미입력 시 전체 조회)", example = "장학금") String keyword,
         Pageable pageable,
         @AuthUser Member member);
+
+    @Operation(
+        summary = "이벤트 배너 목록 조회",
+        description = """
+            현재 게시 중인 이벤트 배너 목록을 순서대로 반환합니다.
+            - bannerOrder 오름차순 정렬
+            """)
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "조회 성공",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = EventBannerResponse.class))))
+    })
+    ResponseEntity<List<EventBannerResponse>> getBanners();
+
+    @Operation(
+        summary = "Google 캘린더에 이벤트 추가",
+        description = """
+            로그인한 사용자의 Google 캘린더에 공지사항 이벤트를 추가합니다.
+            - 먼저 /api/users/connect-calendar로 캘린더를 연동해야 합니다.
+            """,
+        security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "캘린더 추가 성공"),
+        @ApiResponse(responseCode = "400", description = "캘린더 미연동 상태",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "401", description = "인증 필요",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<Void> addToCalendar(@RequestBody CalendarRequest request, @AuthUser Member member);
 }

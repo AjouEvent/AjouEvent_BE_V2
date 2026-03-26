@@ -4,11 +4,13 @@ import com.example.ajouevent_be_v2.common.dto.SliceResult;
 import com.example.ajouevent_be_v2.common.exception.clubevent.ClubEventErrorCode;
 import com.example.ajouevent_be_v2.common.exception.clubevent.ClubEventException;
 import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
+import com.example.ajouevent_be_v2.domain.clubevent.EventBanner;
 import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.member.Member;
-import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventCachePort;
+import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventRepositoryPort;
+import com.example.ajouevent_be_v2.repository.port.clubevent.EventBannerRepositoryPort;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +27,7 @@ public class ClubEventQueryService {
 
     private final ClubEventRepositoryPort clubEventRepositoryPort;
     private final ClubEventCachePort clubEventCachePort;
+    private final EventBannerRepositoryPort eventBannerRepositoryPort;
 
     public ClubEvent getEventById(Long eventId) {
         return clubEventRepositoryPort.findById(eventId)
@@ -94,5 +97,9 @@ public class ClubEventQueryService {
         Slice<ClubEvent> slice = clubEventRepositoryPort.findByTypeAndTitleContaining(
             type, keyword.getKoreanKeyword(), pageable);
         return SliceResult.from(slice, pageable);
+    }
+
+    public List<EventBanner> getBanners() {
+        return eventBannerRepositoryPort.findAllOrderByBannerOrder();
     }
 }

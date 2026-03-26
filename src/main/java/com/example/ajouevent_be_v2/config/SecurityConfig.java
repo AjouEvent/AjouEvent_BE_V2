@@ -40,9 +40,10 @@ public class SecurityConfig implements WebMvcConfigurer {
 
     private static final String[] AUTH_WHITELIST = {
             "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
-            "/api/users/oauth", "/api/users/reissue-token",
+            "/api/users/oauth", "/api/users/reissue-token", "/api/users/logout",
             "/api/topic/all",
-            "/api/webhook/crawling"
+            "/api/webhook/crawling",
+            "/api/event/banner"
     };
 
     private static final String[] LOCAL_AUTH_WHITELIST = {
@@ -92,7 +93,6 @@ public class SecurityConfig implements WebMvcConfigurer {
             )
             .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
             .allowedHeaders("Authorization", "Content-Type")
-            .exposedHeaders("Custom-Header")
             .allowCredentials(true)
             .maxAge(3600);
     }

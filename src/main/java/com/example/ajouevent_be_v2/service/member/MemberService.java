@@ -30,7 +30,7 @@ public class MemberService {
 
         Member member = new Member(userInfo.email(), userInfo.name(), userInfo.department());
         memberRepositoryPort.save(member);
-        log.info("신규 회원 가입 - email: {}", userInfo.email()); // TODO : discord 웹훅 전송
+        log.info("신규 회원 가입 - email: {}", userInfo.email());
         return new MemberLoginResult(member, true);
     }
 
@@ -73,4 +73,5 @@ public class MemberService {
         // Token 은 (CascadeType.REMOVE + orphanRemoval = true 설정으로) 자동 삭제
         memberRepositoryPort.delete(member);
     }
+
 }

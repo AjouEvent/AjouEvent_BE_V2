@@ -2,12 +2,14 @@ package com.example.ajouevent_be_v2.service.auth;
 
 import com.example.ajouevent_be_v2.common.exception.auth.AuthErrorCode;
 import com.example.ajouevent_be_v2.common.exception.auth.AuthException;
+import com.example.ajouevent_be_v2.config.properties.GoogleProperties;
 import com.example.ajouevent_be_v2.dto.auth.GooglePeopleResult;
 import com.example.ajouevent_be_v2.dto.auth.GoogleUserInfoResult;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.RestClientAuthorizationCodeTokenResponseClient;
@@ -25,26 +27,20 @@ import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class OauthService {
 
-    private static final String GOOGLE_REGISTRATION_ID = "google";
-    private static final String GOOGLE_PEOPLE_API_URL = "https://people.googleapis.com/v1/people/me?personFields=organizations";
-
     private final ClientRegistrationRepository clientRegistrationRepository;
-    private final RestClientAuthorizationCodeTokenResponseClient tokenResponseClient;
-    private final DefaultOAuth2UserService userService;
-    private final RestClient restClient;
+    private final GoogleProperties googleProperties;
 
-    public OauthService(ClientRegistrationRepository clientRegistrationRepository) {
-        this.clientRegistrationRepository = clientRegistrationRepository;
-        this.tokenResponseClient = new RestClientAuthorizationCodeTokenResponseClient();
-        this.userService = new DefaultOAuth2UserService();
-        this.restClient = RestClient.create();
-    }
+    private final RestClientAuthorizationCodeTokenResponseClient tokenResponseClient =
+        new RestClientAuthorizationCodeTokenResponseClient();
+    private final DefaultOAuth2UserService userService = new DefaultOAuth2UserService();
+    private final RestClient restClient = RestClient.create();
 
     public GoogleUserInfoResult getUserInfo(OauthRequest request) {
         ClientRegistration clientRegistration =
-            clientRegistrationRepository.findByRegistrationId(GOOGLE_REGISTRATION_ID);
+            clientRegistrationRepository.findByRegistrationId(googleProperties.getRegistrationId());
 
         String decodedCode = URLDecoder.decode(request.authorizationCode(), StandardCharsets.UTF_8);
 
@@ -92,7 +88,7 @@ public class OauthService {
     private String fetchDepartmentFromPeopleApi(String accessToken) {
         try {
             GooglePeopleResult result = restClient.get()
-                .uri(GOOGLE_PEOPLE_API_URL)
+                .uri(googleProperties.getPeopleApiUrl())
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .body(GooglePeopleResult.class);

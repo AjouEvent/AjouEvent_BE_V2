@@ -38,7 +38,7 @@ public interface AuthControllerDocs {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "로그인 성공",
             headers = @Header(name = "Set-Cookie",
-                description = "HttpOnly 쿠키로 리프레시 토큰 설정 (refreshToken=...; HttpOnly; Path=/; SameSite=Lax)",
+                description = "HttpOnly 쿠키로 리프레시 토큰 설정 (refreshToken=...; HttpOnly; Path=/; SameSite=None; Secure)",
                 schema = @Schema(type = "string")),
             content = @Content(schema = @Schema(implementation = LoginResponse.class))),
         @ApiResponse(responseCode = "400", description = "잘못된 인가 코드",
@@ -64,4 +64,19 @@ public interface AuthControllerDocs {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<LoginResponse> reissueToken(@CookieValue(name = "refreshToken") String refreshToken);
+
+    @Operation(
+        summary = "로그아웃",
+        description = """
+            refreshToken 쿠키를 만료시켜 로그아웃합니다.
+            - 클라이언트의 refreshToken 쿠키가 즉시 만료됩니다.
+            - accessToken은 만료 전까지 유효하므로 클라이언트에서 직접 제거해야 합니다.
+            """)
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "로그아웃 성공",
+            headers = @Header(name = "Set-Cookie",
+                description = "refreshToken 쿠키 만료 처리 (maxAge=0)",
+                schema = @Schema(type = "string")))
+    })
+    ResponseEntity<Void> logout();
 }

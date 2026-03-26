@@ -70,4 +70,5 @@ public class Member {
         if (name != null) this.name = name;
         if (major != null) this.major = major;
     }
+
 }

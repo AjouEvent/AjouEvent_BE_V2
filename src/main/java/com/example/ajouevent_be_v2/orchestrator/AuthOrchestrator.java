@@ -1,5 +1,6 @@
 package com.example.ajouevent_be_v2.orchestrator;
 
+import com.example.ajouevent_be_v2.common.discord.DiscordMessageService;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.domain.member.Token;
@@ -17,11 +18,14 @@ import com.example.ajouevent_be_v2.service.member.MemberService;
 import com.example.ajouevent_be_v2.service.token.FcmTokenCommandService;
 import com.example.ajouevent_be_v2.service.token.TokenService;
 import com.example.ajouevent_be_v2.service.topic.TopicQueryService;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuthOrchestrator {
@@ -33,10 +37,14 @@ public class AuthOrchestrator {
     private final TopicQueryService topicQueryService;
     private final KeywordQueryService keywordQueryService;
     private final TokenService tokenService;
+    private final DiscordMessageService discordMessageService;
 
     public AuthTokenResult socialLogin(OauthRequest request) {
         GoogleUserInfoResult userInfo = oauthService.getUserInfo(request);
         MemberLoginResult memberResult = memberService.findOrCreateMember(userInfo);
+        if (memberResult.isNewMember()) {
+            sendNewMemberDiscordNotification(memberResult.member());
+        }
         if (request.fcmToken() != null) {
             registerFcmToken(memberResult.member(), request.fcmToken());
         }
@@ -64,6 +72,21 @@ public class AuthOrchestrator {
         return new TestLoginResponse(
             authResult.accessToken(), authResult.name(), authResult.major(),
             authResult.email(), false, fcmToken);
+    }
+
+    private void sendNewMemberDiscordNotification(Member member) {
+        try {
+            String message = String.format(
+                "🎉 신규 회원 가입\n가입 일시: %s\n이름: %s\n이메일: %s\n학과: %s",
+                LocalDateTime.now(),
+                member.getName(),
+                member.getEmail(),
+                member.getMajor() != null ? member.getMajor() : "미입력"
+            );
+            discordMessageService.sendMessage(message);
+        } catch (Exception e) {
+            log.warn("Discord 신규 회원 알림 전송 실패 - email: {}", member.getEmail(), e);
+        }
     }
 
     private void registerFcmToken(Member member, String fcmToken) {
