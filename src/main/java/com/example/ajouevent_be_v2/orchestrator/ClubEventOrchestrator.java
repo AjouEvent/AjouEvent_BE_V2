@@ -256,12 +256,25 @@ public class ClubEventOrchestrator {
         clubEventLikeCommandService.cancelLike(event, clubEventLike);
     }
 
+    /**
+     * 이벤트 배너 목록 조회
+     *
+     * 1. 현재 날짜 기준 유효한 배너(startDate ≤ today ≤ endDate) 조회
+     * 2. bannerOrder 오름차순 정렬 후 반환
+     */
     public List<EventBannerResponse> getBanners() {
         return clubEventQueryService.getBanners().stream()
             .map(EventBannerResponse::from)
             .toList();
     }
 
+    /**
+     * Google 캘린더에 일정 추가
+     *
+     * 1. tokens/{email} 파일에서 refresh token 로드 — 파일 없으면 400 CALENDAR_NOT_CONNECTED
+     * 2. refresh token으로 Google token endpoint에 POST → access token 발급
+     * 3. access token으로 Google Calendar REST API에 이벤트 생성
+     */
     public void addToCalendar(CalendarRequest request, Member member) {
         calendarCommandService.addEvent(member.getEmail(), request);
     }

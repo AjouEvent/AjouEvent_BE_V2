@@ -35,6 +35,15 @@ public class MemberOrchestrator {
         memberService.deleteMember(member);
     }
 
+    /**
+     * Google 캘린더 연동
+     *
+     * 1. Google OAuth 인가 코드를 access token / refresh token으로 교환
+     * 2. refresh token을 서버 로컬 파일(tokens/{email})에 저장
+     *
+     * 이후 일정 추가 요청 시 파일에서 refresh token을 읽어 Calendar API를 호출한다.
+     * refresh token이 없으면(prompt=consent&access_type=offline 미포함) 400 반환.
+     */
     public void connectCalendar(OauthRequest request, Member member) {
         calendarCommandService.connect(request, member.getEmail());
     }
