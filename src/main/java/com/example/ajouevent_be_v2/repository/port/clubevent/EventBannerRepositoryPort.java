@@ -2,6 +2,7 @@ package com.example.ajouevent_be_v2.repository.port.clubevent;
 
 import com.example.ajouevent_be_v2.domain.clubevent.EventBanner;
 import com.example.ajouevent_be_v2.repository.adapter.clubevent.EventBannerJpaRepositoryAdapter;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -22,5 +23,9 @@ public class EventBannerRepositoryPort {
 
     public void delete(EventBanner eventBanner) {
         eventBannerJpaRepositoryAdapter.delete(eventBanner);
+    }
+
+    public List<EventBanner> findAllOrderByBannerOrder() {
+        return eventBannerJpaRepositoryAdapter.findAllByOrderByBannerOrderAsc();
     }
 }
