@@ -193,9 +193,9 @@ CREATE TABLE IF NOT EXISTS push_notifications (
 
 -- notice (crawling server)
 CREATE TABLE IF NOT EXISTS notice (
-    noticeId bigint       NOT NULL,
-    topicId  bigint       NOT NULL,
-    type     varchar(255) NOT NULL,
-    value    bigint       NOT NULL,
-    PRIMARY KEY (noticeId)
+    notice_id BIGINT       NOT NULL,
+    topic_id  BIGINT       NOT NULL,
+    type      VARCHAR(255) NOT NULL,
+    value     BIGINT       NOT NULL,
+    PRIMARY KEY (notice_id)
 );
