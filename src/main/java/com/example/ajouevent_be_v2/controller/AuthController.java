@@ -46,13 +46,30 @@ public class AuthController implements AuthControllerDocs {
         return new LoginResponse(result.id(), "Authorization", result.accessToken(), result.name(), result.major(), result.email(), result.isNewMember());
     }
 
+    @PostMapping("/api/users/logout")
+    public ResponseEntity<Void> logout() {
+        return ResponseEntity.noContent()
+            .header(HttpHeaders.SET_COOKIE, expiredRefreshCookie().toString())
+            .build();
+    }
+
     private ResponseCookie refreshCookie(String value) {
         return ResponseCookie.from(REFRESH_TOKEN_COOKIE, value)
             .httpOnly(true)
             .secure(jwtProperties.isCookieSecure())
             .path("/")
             .maxAge(Duration.ofMillis(jwtProperties.getRefreshTokenExpiration()))
-            .sameSite("Lax")
+            .sameSite("None")
+            .build();
+    }
+
+    private ResponseCookie expiredRefreshCookie() {
+        return ResponseCookie.from(REFRESH_TOKEN_COOKIE, "")
+            .httpOnly(true)
+            .secure(jwtProperties.isCookieSecure())
+            .path("/")
+            .maxAge(0)
+            .sameSite("None")
             .build();
     }
 }
