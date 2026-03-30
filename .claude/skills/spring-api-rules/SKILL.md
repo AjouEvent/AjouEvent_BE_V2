@@ -518,23 +518,68 @@ public class MemberException extends AjouBaseException {
 
 ## @Transactional Rules
 
-- **클래스 레벨 적용 금지** — 상태 변경 메서드에만 선언
-- `@Transactional(readOnly = true)` 사용 금지
-- 순수 조회 메서드에는 `@Transactional` 불필요
-- **외부 I/O(FCM, 이메일, 외부 API) 절대 트랜잭션 블록 내 포함 금지** — Orchestrator에서 분리
+### 전제 조건
+
+`open-in-view: false` 설정으로 인해 트랜잭션이 종료되는 순간 영속성 컨텍스트가 닫힌다.
+트랜잭션 밖에서 Lazy 연관 필드에 접근하면 `LazyInitializationException`이 발생하므로,
+**Orchestrator에서 트랜잭션 경계를 명시적으로 선언해야 한다.**
+
+### 레이어별 규칙
+
+| 레이어 | @Transactional | @Transactional(readOnly = true) |
+|--------|---------------|--------------------------------|
+| Orchestrator (쓰기 포함) | ✅ 선언 | ❌ |
+| Orchestrator (순수 조회) | ❌ | ✅ 선언 필수 |
+| CommandService | ✅ 상태 변경 메서드에만 | ❌ |
+| QueryService | ❌ 불필요 | ❌ |
+| 클래스 레벨 (어디서든) | ❌ 금지 | ❌ 금지 |
+
+### 이유
+
+- **Orchestrator**: 여러 Service를 거쳐 반환된 엔티티의 Lazy 필드를 DTO 변환 시 접근하므로 트랜잭션 범위가 필요. 순수 조회는 `readOnly = true`로 dirty checking 비활성화 + DB 슬레이브 라우팅 가능.
+- **QueryService**: Repository 메서드 자체가 단건 트랜잭션으로 실행되므로 별도 선언 불필요. 조회 후 추가 Lazy 접근은 Orchestrator 트랜잭션에 위임.
+- **CommandService**: 상태 변경 메서드에만 선언. 조회 전용 메서드가 섞여 있으면 Command/Query 분리를 재검토.
+
+### 예시
 
 ```java
-// ✅
+// ✅ Orchestrator — 순수 조회 (readOnly = true 필수)
+@Transactional(readOnly = true)
+public SliceResponse<ClubEventResponse> getSubscribedEvents(Pageable pageable, Member member) {
+    List<Type> types = topicQueryService.getSubscribedTopics(member).stream()
+        .map(tm -> tm.getTopic().getType())  // Lazy 접근 — 트랜잭션 필요
+        .toList();
+    ...
+}
+
+// ✅ Orchestrator — 쓰기 포함 (일반 @Transactional)
 @Transactional
-public void register(RegisterRequest request) { ... }  // 쓰기 메서드에만
+public SliceResponse<ClubEventResponse> getEventTypeList(String type, ...) {
+    ...
+    topicCommandService.markTopicAsRead(member, eventType);  // isRead 갱신 포함
+    ...
+}
 
-public Optional<Member> findById(Long id) { ... }  // 조회는 @Transactional 없음
+// ✅ CommandService — 쓰기 메서드에만
+@Transactional
+public void register(RegisterRequest request) { ... }
 
-// ❌
+// ✅ QueryService — @Transactional 없음
+public List<TopicMember> getSubscribedTopics(Member member) { ... }
+
+// ❌ 금지 — 클래스 레벨
 @Transactional
 @Service
-public class MemberCommandService { ... }  // 클래스 레벨 금지
+public class MemberCommandService { ... }
+
+// ❌ 금지 — QueryService에 readOnly = true
+@Transactional(readOnly = true)
+public List<TopicMember> getSubscribedTopics(Member member) { ... }
 ```
+
+### 외부 I/O
+
+**외부 I/O(FCM, 이메일, 외부 API) 절대 트랜잭션 블록 내 포함 금지** — Orchestrator에서 트랜잭션 메서드와 분리해 호출
 
 ---
 
