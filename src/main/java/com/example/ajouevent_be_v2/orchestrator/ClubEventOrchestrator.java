@@ -32,6 +32,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ClubEvent 도메인의 조합(Orchestration) 레이어.
@@ -73,8 +74,8 @@ public class ClubEventOrchestrator {
      * 3. 찜 여부 조회 (비인증이면 false 고정)
      * 4. 응답 조립 후 반환
      */
-    public ClubEventDetailResponse getEventDetail(
-        Long eventId, Member member, String clientIp, String userAgent) {
+    @Transactional(readOnly = true)
+    public ClubEventDetailResponse getEventDetail(Long eventId, Member member, String clientIp, String userAgent) {
         ClubEvent event = clubEventQueryService.getEventById(eventId);
         clubEventQueryService.handleViewCount(event, member, clientIp, userAgent);
         boolean star = clubEventLikeQueryService.isEventLiked(member, event);
@@ -90,8 +91,8 @@ public class ClubEventOrchestrator {
      * 4. 인증 사용자에 한해 TopicMember.isRead 갱신 → 알림 뱃지 초기화
      * 5. 각 게시글에 찜(like) 여부(star 필드) 포함해 응답 조립 후 반환
      */
-    public SliceResponse<ClubEventResponse> getEventTypeList(
-        String type, String keyword, Pageable pageable, Member member) {
+    @Transactional
+    public SliceResponse<ClubEventResponse> getEventTypeList(String type, String keyword, Pageable pageable, Member member) {
         Optional<Type> eventType = resolveEventType(type);
         if (eventType.isEmpty()) {
             return SliceResponse.empty(pageable.getPageNumber());
@@ -112,6 +113,7 @@ public class ClubEventOrchestrator {
      * 2. 내가 찜한 게시글 ID 목록 조회
      * 3. 각 게시글에 찜(like) 여부(star 필드) 포함해 응답 조립 후 반환
      */
+    @Transactional(readOnly = true)
     public List<ClubEventResponse> getTopPopularEvents(Member member) {
         List<ClubEvent> events = clubEventQueryService.getPopularEvents();
         Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
@@ -133,6 +135,7 @@ public class ClubEventOrchestrator {
      * * TopicMember.isRead 갱신 없음 — 여러 카테고리가 합산되어 어느 TopicMember를 읽음 처리할지 특정 불가.
      *   읽음 처리는 단일 카테고리 조회(getEventTypeList)를 통해서만 이루어진다.
      */
+    @Transactional(readOnly = true)
     public SliceResponse<ClubEventResponse> getSubscribedEvents(
         Pageable pageable, Member member, String keyword) {
         List<Type> subscribedTypes = topicQueryService.getSubscribedTopics(member).stream()
@@ -155,6 +158,7 @@ public class ClubEventOrchestrator {
      *       (type O + keyword O / type O + keyword X / type X + keyword O / type X + keyword X — 총 4가지)
      * 4. 모든 결과의 찜여부(star 필드) = true 고정 후 응답 조립 반환 (찜 목록이므로 별도 확인 불필요)
      */
+    @Transactional(readOnly = true)
     public SliceResponse<ClubEventResponse> getLikedEvents(
         String type, String keyword, Pageable pageable, Member member) {
         List<Long> eventIds = clubEventLikeQueryService.getLikedEventsWithDetails(member).stream()
@@ -185,6 +189,7 @@ public class ClubEventOrchestrator {
      *
      * * KeywordMember.isRead 갱신 없음 — 읽음 처리는 단일 키워드 조회(getByKeyword)에서만 이루어진다.
      */
+    @Transactional(readOnly = true)
     public SliceResponse<ClubEventWithKeywordResponse> getAllBySubscribedKeywords(
         Member member, Pageable pageable) {
         List<Keyword> keywords = keywordQueryService.getUserKeywords(member).stream()
@@ -221,6 +226,7 @@ public class ClubEventOrchestrator {
      * 4. 내가 찜한 게시글 ID 목록 조회
      * 5. 각 게시글에 찜(like) 여부(star 필드)와 키워드 포함해 응답 조립 후 반환
      */
+    @Transactional
     public SliceResponse<ClubEventWithKeywordResponse> getByKeyword(
         String searchKeyword, Member member, Pageable pageable) {
         Keyword keyword = keywordQueryService.getSubscribedKeywordByName(member, searchKeyword);
@@ -262,6 +268,7 @@ public class ClubEventOrchestrator {
      * 1. 현재 날짜 기준 유효한 배너(startDate ≤ today ≤ endDate) 조회
      * 2. bannerOrder 오름차순 정렬 후 반환
      */
+    @Transactional(readOnly = true)
     public List<EventBannerResponse> getBanners() {
         return clubEventQueryService.getBanners().stream()
             .map(EventBannerResponse::from)
