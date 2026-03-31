@@ -45,6 +45,7 @@ public class PushClusterToken {
     @Column(name = "token_value")
     private String tokenValue;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "job_status", nullable = false)
     private JobStatus jobStatus = JobStatus.PENDING;
@@ -54,6 +55,13 @@ public class PushClusterToken {
 
     @Column(name = "processed_time", nullable = true)
     private LocalDateTime processedTime;
+
+    @Builder.Default
+    @Column(name = "retry_count", nullable = false)
+    private int retryCount = 0;
+
+    @Column(name = "retry_after", nullable = true)
+    private LocalDateTime retryAfter;
 
     public void markAsSending() {
         this.jobStatus = JobStatus.IN_PROGRESS;
@@ -67,6 +75,24 @@ public class PushClusterToken {
 
     public void markAsFail() {
         this.jobStatus = JobStatus.FAIL;
+        this.processedTime = LocalDateTime.now();
+    }
+
+    public void markAsRetryPending(LocalDateTime retryAfter) {
+        this.jobStatus = JobStatus.RETRY_PENDING;
+        this.retryCount++;
+        this.retryAfter = retryAfter;
+        this.processedTime = LocalDateTime.now();
+    }
+
+    public void markAsPermanentFail() {
+        this.jobStatus = JobStatus.PERMANENT_FAIL;
+        this.processedTime = LocalDateTime.now();
+    }
+
+    public void markAsStaleRecovered() {
+        this.jobStatus = JobStatus.RETRY_PENDING;
+        this.retryAfter = LocalDateTime.now();
         this.processedTime = LocalDateTime.now();
     }
 }

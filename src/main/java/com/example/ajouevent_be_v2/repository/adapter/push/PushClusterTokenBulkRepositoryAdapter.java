@@ -22,7 +22,7 @@ public class PushClusterTokenBulkRepositoryAdapter {
     private EntityManager entityManager;
 
     public void saveAll(List<PushClusterToken> clusterTokens) {
-        String sql = "INSERT INTO push_cluster_tokens (push_cluster_id, member_id, token_value, job_status, request_time, processed_time) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO push_cluster_tokens (push_cluster_id, member_id, token_value, job_status, request_time, processed_time, retry_count, retry_after) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
@@ -35,6 +35,9 @@ public class PushClusterTokenBulkRepositoryAdapter {
                 ps.setTimestamp(5, java.sql.Timestamp.valueOf(token.getRequestTime()));
                 ps.setTimestamp(6, token.getProcessedTime() != null
                     ? java.sql.Timestamp.valueOf(token.getProcessedTime()) : null);
+                ps.setInt(7, token.getRetryCount());
+                ps.setTimestamp(8, token.getRetryAfter() != null
+                    ? java.sql.Timestamp.valueOf(token.getRetryAfter()) : null);
             }
 
             @Override
@@ -45,7 +48,7 @@ public class PushClusterTokenBulkRepositoryAdapter {
     }
 
     public void updateAll(List<PushClusterToken> clusterTokens) {
-        String sql = "UPDATE push_cluster_tokens SET job_status = ?, processed_time = ? WHERE id = ?";
+        String sql = "UPDATE push_cluster_tokens SET job_status = ?, processed_time = ?, retry_count = ?, retry_after = ? WHERE id = ?";
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
@@ -54,7 +57,10 @@ public class PushClusterTokenBulkRepositoryAdapter {
                 ps.setString(1, token.getJobStatus().name());
                 ps.setTimestamp(2, token.getProcessedTime() != null
                     ? java.sql.Timestamp.valueOf(token.getProcessedTime()) : null);
-                ps.setLong(3, token.getId());
+                ps.setInt(3, token.getRetryCount());
+                ps.setTimestamp(4, token.getRetryAfter() != null
+                    ? java.sql.Timestamp.valueOf(token.getRetryAfter()) : null);
+                ps.setLong(5, token.getId());
             }
 
             @Override

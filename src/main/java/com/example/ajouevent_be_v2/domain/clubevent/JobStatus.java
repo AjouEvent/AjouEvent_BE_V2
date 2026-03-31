@@ -4,7 +4,9 @@ public enum JobStatus {
     PENDING,
     IN_PROGRESS,
     SUCCESS,
+    RETRY_PENDING,
     PARTIAL_FAIL,
     FAIL,
+    PERMANENT_FAIL,
     NONE
 }
