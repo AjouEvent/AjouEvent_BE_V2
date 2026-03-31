@@ -65,4 +65,8 @@ public class PushNotificationRepositoryPort {
     public void updateAllUnreadByMember(Member member, LocalDateTime now) {
         pushNotificationJpaRepositoryAdapter.updateAllUnreadByMember(member, now);
     }
+
+    public Optional<PushNotification> findFirstByPushClusterId(Long pushClusterId) {
+        return pushNotificationJpaRepositoryAdapter.findFirstByPushClusterId(pushClusterId);
+    }
 }

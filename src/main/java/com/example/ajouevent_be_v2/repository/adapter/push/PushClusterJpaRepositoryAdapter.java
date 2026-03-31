@@ -1,5 +1,8 @@
 package com.example.ajouevent_be_v2.repository.adapter.push;
 
+import java.util.List;
+
+import com.example.ajouevent_be_v2.domain.clubevent.JobStatus;
 import com.example.ajouevent_be_v2.domain.push.PushCluster;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -7,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface PushClusterJpaRepositoryAdapter extends JpaRepository<PushCluster, Long> {
+
+    List<PushCluster> findAllByJobStatus(JobStatus jobStatus);
 
     @Modifying
     @Query("""

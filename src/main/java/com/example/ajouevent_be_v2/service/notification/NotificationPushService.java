@@ -12,6 +12,7 @@ import com.example.ajouevent_be_v2.repository.port.notification.PushNotification
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,26 @@ public class NotificationPushService {
     public Map<Long, Long> countUnreadByKeyword(String encodedKeyword) {
         return toUnreadCountMap(
             pushNotificationRepositoryPort.countUnreadNotificationsForKeyword(encodedKeyword));
+    }
+
+    public FcmMessageCommand buildCommandFromCluster(PushCluster cluster) {
+        Optional<PushNotification> notification =
+            pushNotificationRepositoryPort.findFirstByPushClusterId(cluster.getId());
+
+        String koreanTopic = notification
+            .map(PushNotification::getTopic)
+            .map(Topic::getKoreanTopic)
+            .orElse(null);
+
+        String encodedKeyword = notification
+            .map(PushNotification::getKeyword)
+            .map(Keyword::getEncodedKeyword)
+            .orElse(null);
+
+        return new FcmMessageCommand(
+            cluster.getTitle(), cluster.getBody(),
+            cluster.getImageUrl(), cluster.getClickUrl(),
+            koreanTopic, encodedKeyword);
     }
 
     private Map<Long, Long> toUnreadCountMap(List<UnreadNotificationCountResult> results) {
