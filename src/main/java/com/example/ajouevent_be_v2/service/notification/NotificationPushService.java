@@ -64,6 +64,7 @@ public class NotificationPushService {
             pushNotificationRepositoryPort.countUnreadNotificationsForKeyword(encodedKeyword));
     }
 
+    @Transactional(readOnly = true)
     public FcmMessageCommand buildCommandFromCluster(PushCluster cluster) {
         Optional<PushNotification> notification =
             pushNotificationRepositoryPort.findFirstByPushClusterId(cluster.getId());
