@@ -28,7 +28,7 @@ public class PushPollingPublisherScheduler {
     public void run() {
         log.info("PushPollingPublisher 실행 시작");
         recoverStaleTokens();
-        processPendingClusters();
+        recoverStalePendingClusters();
         processRetryTokens();
         log.info("PushPollingPublisher 실행 완료");
     }
@@ -39,20 +39,21 @@ public class PushPollingPublisherScheduler {
         fcmPushResultService.recoverStaleTokens(staleTokens);
     }
 
-    // PENDING 클러스터를 찾아 FCM 발송을 시작한다. (최초 발송 경로)
-    private void processPendingClusters() {
-        List<PushCluster> pendingClusters = pushClusterQueryService.findAllPendingClusters();
+    // 서버 장애로 staleThreshold 이상 PENDING 상태에 고착된 클러스터를 복구한다. (장애 복구 경로)
+    // 정상 흐름에서는 WebhookOrchestrator가 TX 커밋 직후 즉시 발송하므로, 이 메서드에 도달하지 않는다.
+    private void recoverStalePendingClusters() {
+        List<PushCluster> staleClusters = pushClusterQueryService.findStalePendingClusters();
 
-        if (pendingClusters.isEmpty()) {
+        if (staleClusters.isEmpty()) {
             return;
         }
 
-        log.info("PENDING 클러스터 발송 시작 - {}건", pendingClusters.size());
-        pendingClusters.forEach(cluster -> {
+        log.info("stale PENDING 클러스터 복구 발송 - {}건", staleClusters.size());
+        staleClusters.forEach(cluster -> {
             try {
                 fcmOrchestrator.dispatchCluster(cluster);
             } catch (Exception e) {
-                log.error("클러스터 발송 중 오류 - clusterId={}", cluster.getId(), e);
+                log.error("클러스터 복구 발송 중 오류 - clusterId={}", cluster.getId(), e);
             }
         });
     }

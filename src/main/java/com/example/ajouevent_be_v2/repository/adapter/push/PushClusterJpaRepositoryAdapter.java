@@ -1,5 +1,6 @@
 package com.example.ajouevent_be_v2.repository.adapter.push;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.example.ajouevent_be_v2.domain.clubevent.JobStatus;
@@ -12,6 +13,9 @@ import org.springframework.data.repository.query.Param;
 public interface PushClusterJpaRepositoryAdapter extends JpaRepository<PushCluster, Long> {
 
     List<PushCluster> findAllByJobStatus(JobStatus jobStatus);
+
+    // 서버 장애 복구용: staleThreshold 이전에 등록된 PENDING 클러스터만 조회한다.
+    List<PushCluster> findAllByJobStatusAndRegisteredAtBefore(JobStatus jobStatus, LocalDateTime threshold);
 
     @Modifying
     @Query("""

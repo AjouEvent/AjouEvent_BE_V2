@@ -6,7 +6,6 @@ import java.util.List;
 import com.example.ajouevent_be_v2.common.exception.push.PushErrorCode;
 import com.example.ajouevent_be_v2.common.exception.push.PushException;
 import com.example.ajouevent_be_v2.config.properties.PushProperties;
-import com.example.ajouevent_be_v2.domain.clubevent.JobStatus;
 import com.example.ajouevent_be_v2.domain.push.PushCluster;
 import com.example.ajouevent_be_v2.domain.push.PushClusterToken;
 import com.example.ajouevent_be_v2.repository.port.push.PushClusterRepositoryPort;
@@ -31,8 +30,10 @@ public class PushClusterQueryService {
         return pushClusterTokenRepositoryPort.findAllByPushClusterWithMember(cluster);
     }
 
-    public List<PushCluster> findAllPendingClusters() {
-        return pushClusterRepositoryPort.findAllByJobStatus(JobStatus.PENDING);
+    public List<PushCluster> findStalePendingClusters() {
+        LocalDateTime threshold = LocalDateTime.now()
+            .minusMinutes(pushProperties.getStaleThresholdMinutes());
+        return pushClusterRepositoryPort.findAllPendingOlderThan(threshold);
     }
 
     public List<PushClusterToken> findRetryPendingTokensReady() {
