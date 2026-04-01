@@ -41,6 +41,8 @@ public interface PushNotificationJpaRepositoryAdapter extends JpaRepository<Push
         "GROUP BY km.member.id")
     List<UnreadNotificationCountResult> countUnreadNotificationsForKeyword(@Param("encodedKeyword") String encodedKeyword);
 
+    Optional<PushNotification> findFirstByPushClusterId(Long pushClusterId);
+
     @Modifying(clearAutomatically = true)
     @Query("UPDATE PushNotification p SET p.isRead = true, p.clickedAt = :now WHERE p.id IN :ids")
     void updateReadStatusByIds(@Param("ids") List<Long> ids, @Param("now") LocalDateTime now);

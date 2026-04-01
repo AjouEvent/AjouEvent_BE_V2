@@ -53,9 +53,11 @@ public class ClubEvent {
     @Column(name = "url")
     private String url;
 
+    @Builder.Default
     @Column(name = "likes_count", nullable = false)
     private Long likesCount = 0L;
 
+    @Builder.Default
     @Column(name = "view_count", nullable = false)
     private Long viewCount = 0L;
 

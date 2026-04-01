@@ -16,3 +16,6 @@ spring:
 ajou:
   swagger:
     server-url: ${SWAGGER_SERVER_URL:http://localhost:8080}
+  push:
+    stale-threshold-minutes: 10
+    max-retry-count: 3

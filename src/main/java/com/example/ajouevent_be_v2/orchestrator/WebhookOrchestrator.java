@@ -27,8 +27,12 @@ public class WebhookOrchestrator {
 
         ClubEvent clubEvent = clubEventOrchestrator.createClubEvent(command);
 
+        // PENDING 상태의 PushCluster / PushClusterToken을 DB에 원자적으로 저장한 뒤 즉시 발송한다.
+        // TX 커밋 후 서버 장애 시(구간 A/B)에는 PushPollingPublisherScheduler가 10분 후 복구한다.
         List<PushClusterSendRequest> sendRequests = pushOrchestrator.createClusters(clubEvent, command);
-        fcmOrchestrator.dispatch(sendRequests);
+        if (!sendRequests.isEmpty()) {
+            fcmOrchestrator.dispatch(sendRequests);
+        }
 
         return new WebhookResponse(
                 "Webhook processed successfully.",

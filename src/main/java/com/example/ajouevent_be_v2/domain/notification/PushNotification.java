@@ -68,6 +68,7 @@ public class PushNotification {
     @Column(name = "click_url", nullable = false)
     private String clickUrl;
 
+    @Builder.Default
     @Column(name = "is_read", nullable = false)
     private boolean isRead = false;
 
