@@ -39,6 +39,7 @@ public class Token {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
