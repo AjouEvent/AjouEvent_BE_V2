@@ -83,6 +83,14 @@ public class FcmPushResultService {
         pushClusterRepositoryPort.incrementCountsAndUpdateStatus(pushClusterId, 0, batch.size());
     }
 
+    // onFailure는 FCM 에러 코드가 아닌 Java 레벨 예외 (네트워크 단절, SDK 타임아웃 등)다.
+    // 영구 실패가 아니라 인프라 일시 문제이므로 Exponential Backoff 재시도 흐름에 합류시킨다.
+    @Transactional
+    public void markBatchAsRetryPendingAndSave(List<PushClusterToken> batch) {
+        batch.forEach(token -> markAsRetryPendingOrPermanentFail(token, false));
+        updatePushClusterTokens(batch);
+    }
+
     @Transactional
     public void recoverStaleTokens(List<PushClusterToken> staleTokens) {
         if (staleTokens.isEmpty()) {
@@ -110,20 +118,29 @@ public class FcmPushResultService {
         switch (errorCode) {
             case INTERNAL:
             case UNAVAILABLE:
+                // FCM 서버 일시 오류 — 클라이언트 요청 자체에는 문제 없음. 재시도 대기
                 markAsRetryPendingOrPermanentFail(token, false);
                 return 0;
 
             case QUOTA_EXCEEDED:
+                // 프로젝트 전송 속도 제한 초과 — 쿼터 회복 여유를 위해 대기 시간 2배 적용
                 markAsRetryPendingOrPermanentFail(token, true);
                 return 0;
 
             case UNREGISTERED:
+                // 앱 삭제 또는 토큰 만료 — 재시도해도 동일 실패. 즉시 영구 실패 + 토큰 삭제
+                token.markAsFail();
+                invalidTokenValues.add(token.getTokenValue());
+                return 1;
+
             case INVALID_ARGUMENT:
+                // 잘못된 토큰 형식 또는 페이로드 오류 — 재시도해도 동일 실패. 즉시 영구 실패 + 토큰 삭제
                 token.markAsFail();
                 invalidTokenValues.add(token.getTokenValue());
                 return 1;
 
             case SENDER_ID_MISMATCH:
+                // Firebase 프로젝트 Sender ID 불일치 — 서버 설정 오류. 운영자 확인 필요
                 token.markAsPermanentFail();
                 discordMessageService.sendMessage(
                     String.format("[FCM SENDER_ID_MISMATCH] pushClusterId=%d, token=%s",
@@ -131,6 +148,7 @@ public class FcmPushResultService {
                 return 1;
 
             default:
+                // 알 수 없는 에러 — 즉시 영구 실패
                 token.markAsFail();
                 return 1;
         }
