@@ -73,10 +73,11 @@ public class FcmOrchestrator {
         for (List<PushClusterToken> batch : batches) {
             fcmPushResultService.markBatchAsSendingAndSave(batch);
             List<Message> messages = fcmPushService.buildMessages(cluster.getId(), batch, command, unreadCountMap);
-            sendFcmBatch(cluster, batch, messages);
+            sendRetryFcmBatch(cluster, batch, messages);
         }
     }
 
+    // 초기 발송 콜백 — 결과를 successCount/failCount에 반영한다.
     private void sendFcmBatch(PushCluster cluster, List<PushClusterToken> batch, List<Message> messages) {
         fcmPushService.sendBatchAsync(messages, new ApiFutureCallback<>() {
             @Override
@@ -87,6 +88,22 @@ public class FcmOrchestrator {
             @Override
             public void onFailure(Throwable t) {
                 log.error("FCM 발송 실패 - pushClusterId={}", cluster.getId(), t);
+                fcmPushResultService.markBatchAsRetryPendingAndSave(batch);
+            }
+        });
+    }
+
+    // 재시도 콜백 — 결과를 retrySuccessCount/retryFailCount에 반영한다.
+    private void sendRetryFcmBatch(PushCluster cluster, List<PushClusterToken> batch, List<Message> messages) {
+        fcmPushService.sendBatchAsync(messages, new ApiFutureCallback<>() {
+            @Override
+            public void onSuccess(BatchResponse response) {
+                fcmPushResultService.processRetryPushResult(cluster.getId(), batch, response);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                log.error("FCM 재시도 발송 실패 - pushClusterId={}", cluster.getId(), t);
                 fcmPushResultService.markBatchAsRetryPendingAndSave(batch);
             }
         });

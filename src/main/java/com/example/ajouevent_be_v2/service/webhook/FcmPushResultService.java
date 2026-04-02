@@ -71,6 +71,37 @@ public class FcmPushResultService {
         log.info("푸시 완료 - PushClusterID: {} 성공: {} 실패: {}", pushClusterId, successCount, failCount);
     }
 
+    // 재시도 경로 전용 — 토큰 상태를 업데이트하고 결과를 retrySuccessCount/retryFailCount에 누적한다.
+    // 초기 발송 결과(successCount/failCount)는 변경하지 않는다.
+    @Transactional
+    public void processRetryPushResult(Long pushClusterId, List<PushClusterToken> clusterTokens, BatchResponse response) {
+        int successCount = 0;
+        int failCount = 0;
+        List<String> invalidTokenValues = new ArrayList<>();
+
+        for (int i = 0; i < clusterTokens.size(); i++) {
+            PushClusterToken pushClusterToken = clusterTokens.get(i);
+            SendResponse sendResponse = response.getResponses().get(i);
+
+            if (sendResponse.isSuccessful()) {
+                pushClusterToken.markAsSuccess();
+                successCount++;
+            } else {
+                MessagingErrorCode errorCode = sendResponse.getException().getMessagingErrorCode();
+                failCount += handleFailedToken(pushClusterToken, errorCode, invalidTokenValues);
+            }
+        }
+
+        updatePushClusterTokens(clusterTokens);
+
+        if (!invalidTokenValues.isEmpty()) {
+            tokenRepositoryPort.batchSoftDeleteByTokenValues(invalidTokenValues);
+        }
+
+        pushClusterRepositoryPort.incrementRetryCounts(pushClusterId, successCount, failCount);
+        log.info("재시도 완료 - PushClusterID: {} 성공: {} 실패: {}", pushClusterId, successCount, failCount);
+    }
+
     @Transactional
     public void markBatchAsSendingAndSave(List<PushClusterToken> batch) {
         batch.forEach(PushClusterToken::markAsSending);

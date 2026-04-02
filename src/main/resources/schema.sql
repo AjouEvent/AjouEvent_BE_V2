@@ -147,10 +147,12 @@ CREATE TABLE IF NOT EXISTS push_clusters (
     job_status     VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
     total_count    INT          NOT NULL DEFAULT 0,
     registered_at  DATETIME     NOT NULL,
-    success_count  INT          NOT NULL DEFAULT 0,
-    fail_count     INT          NOT NULL DEFAULT 0,
-    start_at       DATETIME,
-    end_at         DATETIME,
+    success_count        INT          NOT NULL DEFAULT 0,
+    fail_count           INT          NOT NULL DEFAULT 0,
+    start_at             DATETIME,
+    end_at               DATETIME,
+    retry_success_count  INT          NOT NULL DEFAULT 0,
+    retry_fail_count     INT          NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
     CONSTRAINT fk_push_clusters_club_event FOREIGN KEY (club_event_id) REFERENCES club_events (event_id)
 );

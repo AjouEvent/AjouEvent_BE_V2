@@ -30,4 +30,17 @@ public interface PushClusterJpaRepositoryAdapter extends JpaRepository<PushClust
         @Param("successDelta") int successDelta,
         @Param("failDelta") int failDelta
     );
+
+    @Modifying
+    @Query("""
+        UPDATE PushCluster p
+        SET p.retrySuccessCount = p.retrySuccessCount + :successDelta,
+            p.retryFailCount    = p.retryFailCount    + :failDelta
+        WHERE p.id = :id
+        """)
+    void incrementRetryCounts(
+        @Param("id") Long id,
+        @Param("successDelta") int successDelta,
+        @Param("failDelta") int failDelta
+    );
 }

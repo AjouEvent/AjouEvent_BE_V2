@@ -27,6 +27,10 @@ public class PushClusterRepositoryPort {
         pushClusterJpaRepositoryAdapter.incrementCountsAndUpdateStatus(id, successDelta, failDelta);
     }
 
+    public void incrementRetryCounts(Long id, int successDelta, int failDelta) {
+        pushClusterJpaRepositoryAdapter.incrementRetryCounts(id, successDelta, failDelta);
+    }
+
     public List<PushCluster> findAllByJobStatus(JobStatus jobStatus) {
         return pushClusterJpaRepositoryAdapter.findAllByJobStatus(jobStatus);
     }
