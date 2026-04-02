@@ -2,12 +2,14 @@ package com.example.ajouevent_be_v2.scheduler;
 
 import com.example.ajouevent_be_v2.domain.push.PushCluster;
 import com.example.ajouevent_be_v2.domain.push.PushClusterToken;
+
 import com.example.ajouevent_be_v2.orchestrator.FcmOrchestrator;
 import com.example.ajouevent_be_v2.service.push.PushClusterQueryService;
 import com.example.ajouevent_be_v2.service.webhook.FcmPushResultService;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -27,56 +29,30 @@ public class PushPollingPublisherScheduler {
     @SchedulerLock(name = "pushPollingPublisher")
     public void run() {
         log.info("PushPollingPublisher 실행 시작");
-        recoverStaleTokens();
-        recoverStalePendingClusters();
-        processRetryTokens();
+        recoverAndRetry();
         log.info("PushPollingPublisher 실행 완료");
     }
 
-    // 서버 크래시로 IN_PROGRESS 상태에서 멈춘 토큰을 RETRY_PENDING으로 되돌린다.
-    private void recoverStaleTokens() {
-        List<PushClusterToken> staleTokens = pushClusterQueryService.findStaleInProgressTokens();
-        fcmPushResultService.recoverStaleTokens(staleTokens);
-    }
+    // PENDING(stale) / IN_PROGRESS(stale) / RETRY_PENDING(ready) 토큰을 단일 쿼리로 조회한 뒤
+    // stale 토큰은 RETRY_PENDING으로 전환하고, 전체를 클러스터별로 즉시 재발송한다.
+    private void recoverAndRetry() {
+        List<PushClusterToken> recoverableTokens = pushClusterQueryService.findRecoverableTokens();
+        List<PushClusterToken> tokens = fcmPushResultService.recoverStaleTokens(recoverableTokens);
 
-    // 서버 장애로 staleThreshold 이상 PENDING 상태에 고착된 클러스터를 복구한다. (장애 복구 경로)
-    // 정상 흐름에서는 WebhookOrchestrator가 TX 커밋 직후 즉시 발송하므로, 이 메서드에 도달하지 않는다.
-    private void recoverStalePendingClusters() {
-        List<PushCluster> staleClusters = pushClusterQueryService.findStalePendingClusters();
-
-        if (staleClusters.isEmpty()) {
+        if (tokens.isEmpty()) {
             return;
         }
 
-        log.info("stale PENDING 클러스터 복구 발송 - {}건", staleClusters.size());
-        staleClusters.forEach(cluster -> {
-            try {
-                fcmOrchestrator.dispatchCluster(cluster);
-            } catch (Exception e) {
-                log.error("클러스터 복구 발송 중 오류 - clusterId={}", cluster.getId(), e);
-            }
-        });
-    }
-
-    // retryAfter가 지난 RETRY_PENDING 토큰을 클러스터별로 그룹핑해 재발송한다.
-    private void processRetryTokens() {
-        List<PushClusterToken> retryTokens = pushClusterQueryService.findRetryPendingTokensReady();
-
-        if (retryTokens.isEmpty()) {
-            return;
-        }
-
-        Map<PushCluster, List<PushClusterToken>> tokensByCluster = retryTokens.stream()
+        Map<PushCluster, List<PushClusterToken>> tokensByCluster = tokens.stream()
             .collect(Collectors.groupingBy(PushClusterToken::getPushCluster));
 
-        log.info("RETRY_PENDING 토큰 재발송 시작 - {}건 ({}개 클러스터)",
-            retryTokens.size(), tokensByCluster.size());
+        log.info("복구 및 재발송 시작 - {}건 ({}개 클러스터)", tokens.size(), tokensByCluster.size());
 
-        tokensByCluster.forEach((cluster, tokens) -> {
+        tokensByCluster.forEach((cluster, clusterTokens) -> {
             try {
-                fcmOrchestrator.dispatchRetryTokens(cluster, tokens);
+                fcmOrchestrator.dispatchRetryTokens(cluster, clusterTokens);
             } catch (Exception e) {
-                log.error("재시도 발송 중 오류 - clusterId={}", cluster.getId(), e);
+                log.error("복구 발송 중 오류 - clusterId={}", cluster.getId(), e);
             }
         });
     }

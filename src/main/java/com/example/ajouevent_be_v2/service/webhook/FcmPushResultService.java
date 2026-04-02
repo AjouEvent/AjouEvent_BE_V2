@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.example.ajouevent_be_v2.common.discord.DiscordMessageService;
 import com.example.ajouevent_be_v2.config.properties.PushProperties;
+import com.example.ajouevent_be_v2.domain.clubevent.JobStatus;
 import com.example.ajouevent_be_v2.domain.push.PushCluster;
 import com.example.ajouevent_be_v2.domain.push.PushClusterToken;
 import com.example.ajouevent_be_v2.repository.port.push.PushClusterRepositoryPort;
@@ -76,13 +77,6 @@ public class FcmPushResultService {
         pushClusterTokenRepositoryPort.bulkUpdateAll(batch);
     }
 
-    @Transactional
-    public void markBatchAsFailAndSave(Long pushClusterId, List<PushClusterToken> batch) {
-        batch.forEach(PushClusterToken::markAsFail);
-        updatePushClusterTokens(batch);
-        pushClusterRepositoryPort.incrementCountsAndUpdateStatus(pushClusterId, 0, batch.size());
-    }
-
     // onFailure는 FCM 에러 코드가 아닌 Java 레벨 예외 (네트워크 단절, SDK 타임아웃 등)다.
     // 영구 실패가 아니라 인프라 일시 문제이므로 Exponential Backoff 재시도 흐름에 합류시킨다.
     @Transactional
@@ -91,14 +85,44 @@ public class FcmPushResultService {
         updatePushClusterTokens(batch);
     }
 
+    // PENDING / IN_PROGRESS(stale) / RETRY_PENDING(ready) 토큰을 retryCount 기준으로 분류한다.
+    // 상태(PENDING/IN_PROGRESS/RETRY_PENDING)는 "왜 여기 왔는가"만 다를 뿐,
+    // 앞으로의 처리는 retryCount 하나로 결정된다.
+    //   - retryCount < maxRetryCount  → RETRY_PENDING (dispatch 대상으로 반환)
+    //   - retryCount >= maxRetryCount → PERMANENT_FAIL (dispatch 제외)
     @Transactional
-    public void recoverStaleTokens(List<PushClusterToken> staleTokens) {
-        if (staleTokens.isEmpty()) {
-            return;
+    public List<PushClusterToken> recoverStaleTokens(List<PushClusterToken> recoverableTokens) {
+        if (recoverableTokens.isEmpty()) {
+            return recoverableTokens;
         }
-        staleTokens.forEach(PushClusterToken::markAsStaleRecovered);
-        pushClusterTokenRepositoryPort.bulkUpdateAll(staleTokens);
-        log.info("Stale IN_PROGRESS 토큰 RETRY_PENDING 복구 - {}건", staleTokens.size());
+
+        List<PushClusterToken> toRetry = new ArrayList<>();
+        List<PushClusterToken> staleConverted = new ArrayList<>();
+        List<PushClusterToken> toPermanentFail = new ArrayList<>();
+
+        for (PushClusterToken token : recoverableTokens) {
+            if (token.getRetryCount() >= pushProperties.getMaxRetryCount()) {
+                token.markAsPermanentFail();
+                toPermanentFail.add(token);
+            } else {
+                if (token.getJobStatus() != JobStatus.RETRY_PENDING) {
+                    token.markAsStaleRecovered();
+                    staleConverted.add(token);
+                }
+                toRetry.add(token);
+            }
+        }
+
+        if (!staleConverted.isEmpty()) {
+            pushClusterTokenRepositoryPort.bulkUpdateAll(staleConverted);
+            log.info("Stale 토큰 RETRY_PENDING 복구 - {}건", staleConverted.size());
+        }
+        if (!toPermanentFail.isEmpty()) {
+            pushClusterTokenRepositoryPort.bulkUpdateAll(toPermanentFail);
+            log.warn("최대 재시도 초과 PERMANENT_FAIL - {}건", toPermanentFail.size());
+        }
+
+        return toRetry;
     }
 
     /**
