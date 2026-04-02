@@ -25,7 +25,7 @@ public class PushPollingPublisherScheduler {
     private final PushClusterQueryService pushClusterQueryService;
     private final FcmPushResultService fcmPushResultService;
 
-    @Scheduled(cron = "0 * 9-18 * * *")
+    @Scheduled(cron = "0 */5 9-21 * * MON-FRI")
     @SchedulerLock(name = "pushPollingPublisher")
     public void run() {
         log.info("PushPollingPublisher 실행 시작");
