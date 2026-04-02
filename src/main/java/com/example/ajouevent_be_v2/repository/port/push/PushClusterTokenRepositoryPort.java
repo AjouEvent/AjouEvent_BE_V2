@@ -22,10 +22,6 @@ public class PushClusterTokenRepositoryPort {
         return pushClusterTokenJpaRepositoryAdapter.findAllByPushClusterWithMember(pushCluster);
     }
 
-    public List<PushClusterToken> saveAll(List<PushClusterToken> clusterTokens) {
-        return pushClusterTokenJpaRepositoryAdapter.saveAll(clusterTokens);
-    }
-
     public void bulkSaveAll(List<PushClusterToken> clusterTokens) {
         pushClusterTokenBulkRepositoryAdapter.saveAll(clusterTokens);
     }
@@ -34,13 +30,9 @@ public class PushClusterTokenRepositoryPort {
         pushClusterTokenBulkRepositoryAdapter.updateAll(clusterTokens);
     }
 
-    public List<PushClusterToken> findRetryPendingTokensReady(LocalDateTime now, int maxRetryCount) {
-        return pushClusterTokenJpaRepositoryAdapter.findRetryPendingTokensReady(
-            JobStatus.RETRY_PENDING, now, maxRetryCount);
-    }
-
-    public List<PushClusterToken> findStaleInProgressTokens(LocalDateTime threshold) {
-        return pushClusterTokenJpaRepositoryAdapter.findStaleInProgressTokens(
-            JobStatus.IN_PROGRESS, threshold);
+    public List<PushClusterToken> findRecoverableTokens(LocalDateTime staleThreshold, LocalDateTime now, int maxRetryCount) {
+        return pushClusterTokenJpaRepositoryAdapter.findRecoverableTokens(
+            JobStatus.PENDING, JobStatus.IN_PROGRESS, JobStatus.RETRY_PENDING,
+            staleThreshold, now, maxRetryCount);
     }
 }

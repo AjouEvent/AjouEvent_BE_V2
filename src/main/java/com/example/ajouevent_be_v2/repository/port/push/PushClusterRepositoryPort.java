@@ -1,6 +1,5 @@
 package com.example.ajouevent_be_v2.repository.port.push;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,10 +29,5 @@ public class PushClusterRepositoryPort {
 
     public List<PushCluster> findAllByJobStatus(JobStatus jobStatus) {
         return pushClusterJpaRepositoryAdapter.findAllByJobStatus(jobStatus);
-    }
-
-    public List<PushCluster> findAllPendingOlderThan(LocalDateTime threshold) {
-        return pushClusterJpaRepositoryAdapter.findAllByJobStatusAndRegisteredAtBefore(
-            JobStatus.PENDING, threshold);
     }
 }

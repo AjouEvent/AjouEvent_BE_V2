@@ -30,20 +30,8 @@ public class PushClusterQueryService {
         return pushClusterTokenRepositoryPort.findAllByPushClusterWithMember(cluster);
     }
 
-    public List<PushCluster> findStalePendingClusters() {
-        LocalDateTime threshold = LocalDateTime.now()
-            .minusMinutes(pushProperties.getStaleThresholdMinutes());
-        return pushClusterRepositoryPort.findAllPendingOlderThan(threshold);
-    }
-
-    public List<PushClusterToken> findRetryPendingTokensReady() {
-        return pushClusterTokenRepositoryPort.findRetryPendingTokensReady(
-            LocalDateTime.now(), pushProperties.getMaxRetryCount());
-    }
-
-    public List<PushClusterToken> findStaleInProgressTokens() {
-        LocalDateTime threshold = LocalDateTime.now()
-            .minusMinutes(pushProperties.getStaleThresholdMinutes());
-        return pushClusterTokenRepositoryPort.findStaleInProgressTokens(threshold);
+    public List<PushClusterToken> findRecoverableTokens() {
+        LocalDateTime staleThreshold = LocalDateTime.now().minusMinutes(pushProperties.getStaleThresholdMinutes());
+        return pushClusterTokenRepositoryPort.findRecoverableTokens(staleThreshold, LocalDateTime.now(), pushProperties.getMaxRetryCount());
     }
 }
