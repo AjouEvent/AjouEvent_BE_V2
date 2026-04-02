@@ -31,7 +31,7 @@ public class WebhookOrchestrator {
         // TX 커밋 후 서버 장애 시(구간 A/B)에는 PushPollingPublisherScheduler가 10분 후 복구한다.
         List<PushClusterSendRequest> sendRequests = pushOrchestrator.createClusters(clubEvent, command);
         if (!sendRequests.isEmpty()) {
-            fcmOrchestrator.dispatch(sendRequests);
+            fcmOrchestrator.dispatchClusters(sendRequests);
         }
 
         return new WebhookResponse(
