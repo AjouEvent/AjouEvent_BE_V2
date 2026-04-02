@@ -31,7 +31,8 @@ public class PushClusterQueryService {
     }
 
     public List<PushClusterToken> findRecoverableTokens() {
-        LocalDateTime staleThreshold = LocalDateTime.now().minusMinutes(pushProperties.getStaleThresholdMinutes());
-        return pushClusterTokenRepositoryPort.findRecoverableTokens(staleThreshold, LocalDateTime.now(), pushProperties.getMaxRetryCount());
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime staleThreshold = now.minusMinutes(pushProperties.getStaleThresholdMinutes());
+        return pushClusterTokenRepositoryPort.findRecoverableTokens(staleThreshold, now, pushProperties.getMaxRetryCount());
     }
 }
