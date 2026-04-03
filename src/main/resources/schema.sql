@@ -147,10 +147,12 @@ CREATE TABLE IF NOT EXISTS push_clusters (
     job_status     VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
     total_count    INT          NOT NULL DEFAULT 0,
     registered_at  DATETIME     NOT NULL,
-    success_count  INT          NOT NULL DEFAULT 0,
-    fail_count     INT          NOT NULL DEFAULT 0,
-    start_at       DATETIME,
-    end_at         DATETIME,
+    success_count        INT          NOT NULL DEFAULT 0,
+    fail_count           INT          NOT NULL DEFAULT 0,
+    start_at             DATETIME,
+    end_at               DATETIME,
+    retry_success_count  INT          NOT NULL DEFAULT 0,
+    retry_fail_count     INT          NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
     CONSTRAINT fk_push_clusters_club_event FOREIGN KEY (club_event_id) REFERENCES club_events (event_id)
 );
@@ -164,6 +166,8 @@ CREATE TABLE IF NOT EXISTS push_cluster_tokens (
     job_status       VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
     request_time     DATETIME     NOT NULL,
     processed_time   DATETIME,
+    retry_count      INT          NOT NULL DEFAULT 0,
+    retry_after      DATETIME,
     PRIMARY KEY (id),
     CONSTRAINT fk_push_cluster_tokens_push_cluster FOREIGN KEY (push_cluster_id) REFERENCES push_clusters (id),
     CONSTRAINT fk_push_cluster_tokens_member       FOREIGN KEY (member_id)       REFERENCES members       (id)
@@ -199,3 +203,12 @@ CREATE TABLE IF NOT EXISTS notice (
     value     BIGINT       NOT NULL,
     PRIMARY KEY (notice_id)
 );
+
+-- shedlock (for scheduler / distributed lock)
+CREATE TABLE IF NOT EXISTS shedlock (
+    name       VARCHAR(64)  NOT NULL,
+    lock_until TIMESTAMP(3) NOT NULL,
+    locked_at  TIMESTAMP(3) NOT NULL,
+    locked_by  VARCHAR(255) NOT NULL,
+    PRIMARY KEY (name)
+    );

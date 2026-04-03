@@ -19,23 +19,16 @@ public interface PushClusterTokenJpaRepositoryAdapter extends JpaRepository<Push
         SELECT pct FROM PushClusterToken pct
         JOIN FETCH pct.member
         JOIN FETCH pct.pushCluster
-        WHERE pct.jobStatus = :status
-          AND pct.retryAfter <= :now
-          AND pct.retryCount <= :maxRetryCount
+        WHERE (pct.jobStatus = :pending      AND pct.requestTime   < :staleThreshold)
+           OR (pct.jobStatus = :inProgress   AND pct.processedTime < :staleThreshold)
+           OR (pct.jobStatus = :retryPending AND pct.retryAfter   <= :now AND pct.retryCount <= :maxRetryCount)
         """)
-    List<PushClusterToken> findRetryPendingTokensReady(
-        @Param("status") JobStatus status,
+    List<PushClusterToken> findRecoverableTokens(
+        @Param("pending") JobStatus pending,
+        @Param("inProgress") JobStatus inProgress,
+        @Param("retryPending") JobStatus retryPending,
+        @Param("staleThreshold") LocalDateTime staleThreshold,
         @Param("now") LocalDateTime now,
         @Param("maxRetryCount") int maxRetryCount
-    );
-
-    @Query("""
-        SELECT pct FROM PushClusterToken pct
-        WHERE pct.jobStatus = :status
-          AND pct.processedTime < :threshold
-        """)
-    List<PushClusterToken> findStaleInProgressTokens(
-        @Param("status") JobStatus status,
-        @Param("threshold") LocalDateTime threshold
     );
 }

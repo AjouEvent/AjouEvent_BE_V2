@@ -81,6 +81,15 @@ public class PushCluster {
     @Column(name = "end_at", nullable = true)
     private LocalDateTime endAt = LocalDateTime.now();
 
+    // 재시도 경로에서만 누적되는 별도 카운터 — 초기 발송 결과와 분리해서 관리한다.
+    @Builder.Default
+    @Column(name = "retry_success_count", nullable = false)
+    private int retrySuccessCount = 0;
+
+    @Builder.Default
+    @Column(name = "retry_fail_count", nullable = false)
+    private int retryFailCount = 0;
+
     @OneToMany(mappedBy = "pushCluster", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PushClusterToken> tokens;
 
