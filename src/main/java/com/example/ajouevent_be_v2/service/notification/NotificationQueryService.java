@@ -8,7 +8,6 @@ import com.example.ajouevent_be_v2.common.dto.SliceResult;
 import com.example.ajouevent_be_v2.common.exception.notification.NotificationErrorCode;
 import com.example.ajouevent_be_v2.common.exception.notification.NotificationException;
 import com.example.ajouevent_be_v2.domain.member.Member;
-import com.example.ajouevent_be_v2.domain.notification.NotificationType;
 import com.example.ajouevent_be_v2.domain.notification.PushNotification;
 import com.example.ajouevent_be_v2.repository.port.notification.PushNotificationRepositoryPort;
 
@@ -22,13 +21,13 @@ public class NotificationQueryService {
 
     public SliceResult<PushNotification> getTopicNotifications(Member member, Pageable pageable) {
         Slice<PushNotification> slice = pushNotificationRepositoryPort
-            .findByMemberAndNotificationType(member, NotificationType.TOPIC, pageable);
+            .findTopicNotificationsByMemberWithTopic(member, pageable);
         return SliceResult.from(slice, pageable);
     }
 
     public SliceResult<PushNotification> getKeywordNotifications(Member member, Pageable pageable) {
         Slice<PushNotification> slice = pushNotificationRepositoryPort
-            .findByMemberAndNotificationType(member, NotificationType.KEYWORD, pageable);
+            .findKeywordNotificationsByMemberWithTopicAndKeyword(member, pageable);
         return SliceResult.from(slice, pageable);
     }
 

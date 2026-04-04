@@ -29,6 +29,12 @@ public interface PushNotificationJpaRepositoryAdapter extends JpaRepository<Push
     Slice<PushNotification> findByMemberAndNotificationType(
         Member member, NotificationType notificationType, Pageable pageable);
 
+    @Query("SELECT p FROM PushNotification p LEFT JOIN FETCH p.topic WHERE p.member = :member AND p.notificationType = 'TOPIC' ORDER BY p.notifiedAt DESC")
+    Slice<PushNotification> findTopicNotificationsByMemberWithTopic(@Param("member") Member member, Pageable pageable);
+
+    @Query("SELECT p FROM PushNotification p LEFT JOIN FETCH p.topic LEFT JOIN FETCH p.keyword WHERE p.member = :member AND p.notificationType = 'KEYWORD' ORDER BY p.notifiedAt DESC")
+    Slice<PushNotification> findKeywordNotificationsByMemberWithTopicAndKeyword(@Param("member") Member member, Pageable pageable);
+
     Optional<PushNotification> findByMemberAndId(Member member, Long id);
 
     long countByMemberAndIsReadFalse(Member member);
