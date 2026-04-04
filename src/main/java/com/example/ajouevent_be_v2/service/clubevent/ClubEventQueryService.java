@@ -9,6 +9,7 @@ import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventCachePort;
+import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventImageRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.clubevent.EventBannerRepositoryPort;
 import java.time.DayOfWeek;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -28,6 +30,7 @@ public class ClubEventQueryService {
     private final ClubEventRepositoryPort clubEventRepositoryPort;
     private final ClubEventCachePort clubEventCachePort;
     private final EventBannerRepositoryPort eventBannerRepositoryPort;
+    private final ClubEventImageRepositoryPort clubEventImageRepositoryPort;
 
     public ClubEvent getEventById(Long eventId) {
         return clubEventRepositoryPort.findById(eventId)
@@ -101,5 +104,14 @@ public class ClubEventQueryService {
 
     public List<EventBanner> getBanners() {
         return eventBannerRepositoryPort.findAllOrderByBannerOrder();
+    }
+
+    public SliceResult<ClubEvent> getEventsByTypeAndKeywords(Type type, List<Keyword> keywords, Pageable pageable) {
+        Slice<ClubEvent> slice = clubEventRepositoryPort.findByTypeAndAnyKeyword(type, keywords, pageable);
+        return SliceResult.from(slice, pageable);
+    }
+
+    public Map<Long, List<String>> getImageUrlsByEventIds(List<Long> eventIds) {
+        return clubEventImageRepositoryPort.findImageUrlsByEventIds(eventIds);
     }
 }
