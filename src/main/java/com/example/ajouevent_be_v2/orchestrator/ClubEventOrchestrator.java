@@ -94,10 +94,8 @@ public class ClubEventOrchestrator {
      *
      * 1. type 문자열 → Type enum 변환 (유효하지 않으면 빈 응답 반환)
      * 2. 해당 type의 게시글 목록 조회 (keyword 있으면 title LIKE 필터 적용)
-     * 3. 이미지 URL 배치 조회 (IN 절 단일 쿼리)
-     * 4. 내가 찜한 게시글 ID 목록 조회
-     * 5. 인증 사용자에 한해 TopicMember.isRead 갱신 → 알림 뱃지 초기화
-     * 6. 각 게시글에 찜(like) 여부(star 필드) 포함해 응답 조립 후 반환
+     * 3. 이미지·찜 여부 조립 후 반환
+     * 4. 인증 사용자에 한해 TopicMember.isRead 갱신 → 알림 뱃지 초기화
      */
     public SliceResponse<ClubEventResponse> getEventTypeList(String type, String keyword, Pageable pageable, Member member) {
         Optional<Type> eventType = resolveEventType(type);
@@ -105,12 +103,10 @@ public class ClubEventOrchestrator {
             return SliceResponse.empty(pageable.getPageNumber());
         }
         SliceResult<ClubEvent> result = clubEventQueryService.getEventsByType(eventType.get(), keyword, pageable);
-        Map<Long, List<String>> images = clubEventQueryService.getImageUrlsByEventIds(toEventIds(result));
-        Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
         if (member != null) {
             topicCommandService.markTopicAsRead(member, eventType.get().getEnglishTopic());
         }
-        return SliceResponse.from(result, e -> ClubEventResponse.from(e, likedIds.contains(e.getEventId()), images.get(e.getEventId())));
+        return buildClubEventSlice(result, member);
     }
 
     /**
@@ -118,9 +114,7 @@ public class ClubEventOrchestrator {
      *
      * 1. 이번 주(월~일) 생성 게시글 중 DB view_count 기준 상위 10개 조회
      *       (Redis에 미flush된 조회수는 미반영)
-     * 2. 이미지 URL 배치 조회 (IN 절 단일 쿼리)
-     * 3. 내가 찜한 게시글 ID 목록 조회
-     * 4. 각 게시글에 찜(like) 여부(star 필드) 포함해 응답 조립 후 반환
+     * 2. 이미지·찜 여부 조립 후 반환
      */
     public List<ClubEventResponse> getTopPopularEvents(Member member) {
         List<ClubEvent> events = clubEventQueryService.getPopularEvents();
@@ -137,11 +131,9 @@ public class ClubEventOrchestrator {
      *
      * 비인증 요청은 Controller에서 AJOUNORMAL 카테고리로 분기되므로, 이 메서드 진입 시 member는 항상 존재한다.
      *
-     * 1. 구독 중인 Topic 목록 조회 → Type 목록 추출 (JOIN FETCH로 topic 이미 로드)
+     * 1. 구독 중인 Topic → Type 목록 추출
      * 2. 해당 Type 목록으로 게시글 목록 조회 (keyword 있으면 title LIKE 필터 적용)
-     * 3. 이미지 URL 배치 조회 (IN 절 단일 쿼리)
-     * 4. 내가 찜한 게시글 ID 목록 조회
-     * 5. 각 게시글에 찜(like) 여부(star 필드) 포함해 응답 조립 후 반환
+     * 3. 이미지·찜 여부 조립 후 반환
      *
      * * TopicMember.isRead 갱신 없음 — 읽음 처리는 단일 카테고리 조회(getEventTypeList)를 통해서만 이루어진다.
      */
@@ -153,26 +145,22 @@ public class ClubEventOrchestrator {
             return SliceResponse.empty(pageable.getPageNumber());
         }
         SliceResult<ClubEvent> result = clubEventQueryService.getEventsByTypes(subscribedTypes, keyword, pageable);
-        Map<Long, List<String>> images = clubEventQueryService.getImageUrlsByEventIds(toEventIds(result));
-        Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
-        return SliceResponse.from(result, e -> ClubEventResponse.from(e, likedIds.contains(e.getEventId()), images.get(e.getEventId())));
+        return buildClubEventSlice(result, member);
     }
 
     /**
      * 찜한 게시글 목록 조회
      *
      * 1. 내가 찜한 전체 eventId 목록 조회
-     * 2. type 문자열 → Type enum 변환 (유효하지 않으면 빈 응답 반환)
-     * 3. type/keyword 조합에 따라 DB 쿼리 선택 후 게시글 목록 조회
+     * 2. type/keyword 조합에 따라 DB 쿼리 선택 후 게시글 목록 조회
      *       (type O + keyword O / type O + keyword X / type X + keyword O / type X + keyword X — 총 4가지)
-     * 4. 이미지 URL 배치 조회 (IN 절 단일 쿼리)
-     * 5. 모든 결과의 찜여부(star 필드) = true 고정 후 응답 조립 반환 (찜 목록이므로 별도 확인 불필요)
+     * 3. 이미지 URL 배치 조회 후 응답 조립 (찜 목록이므로 star 필드 = true 고정)
      */
     public SliceResponse<ClubEventResponse> getLikedEvents(String type, String keyword, Pageable pageable, Member member) {
-        List<Long> eventIds = clubEventLikeQueryService.getLikedEventsWithDetails(member).stream()
+        List<Long> likedEventIds = clubEventLikeQueryService.getLikedEventsWithDetails(member).stream()
             .map(el -> el.getClubEvent().getEventId())
             .toList();
-        if (eventIds.isEmpty()) {
+        if (likedEventIds.isEmpty()) {
             return SliceResponse.empty(pageable.getPageNumber());
         }
         boolean hasTypeFilter = type != null && !type.isBlank();
@@ -180,8 +168,7 @@ public class ClubEventOrchestrator {
         if (hasTypeFilter && resolvedType.isEmpty()) {
             return SliceResponse.empty(pageable.getPageNumber());
         }
-        Type eventType = resolvedType.orElse(null);
-        SliceResult<ClubEvent> result = clubEventQueryService.getEventsByIds(eventIds, eventType, keyword, pageable);
+        SliceResult<ClubEvent> result = clubEventQueryService.getEventsByIds(likedEventIds, resolvedType.orElse(null), keyword, pageable);
         Map<Long, List<String>> images = clubEventQueryService.getImageUrlsByEventIds(toEventIds(result));
         return SliceResponse.from(result, e -> ClubEventResponse.from(e, true, images.get(e.getEventId())));
     }
@@ -189,13 +176,10 @@ public class ClubEventOrchestrator {
     /**
      * 구독 키워드 전체 게시글 목록 조회
      *
-     * 1. 구독 중인 KeywordMember 목록 조회 → Keyword 엔티티 목록 추출 (JOIN FETCH keyword + topic)
-     * 2. 키워드를 type 기준으로 그룹핑 → type당 1번의 DB 쿼리 (N+1 → T 쿼리, T = 구독 타입 수)
-     *       (EXISTS 서브쿼리: type = :type AND EXISTS(keyword IN :keywords AND title LIKE keyword))
-     * 3. 각 결과 이벤트에 매칭 키워드를 Java에서 판별 (추가 DB 쿼리 없음)
-     * 4. 이미지 URL 배치 조회 (IN 절 단일 쿼리)
-     * 5. 전체 수집 결과를 createdAt 기준 내림차순 정렬 후 응답 조립 반환
-     *       hasNext: 하나의 타입 그룹이라도 다음 페이지가 있으면 true
+     * 1. 구독 중인 Keyword 목록 조회 → type 기준으로 그룹핑
+     * 2. type당 1번의 DB 쿼리 (EXISTS 서브쿼리: title LIKE any keyword of that type)
+     * 3. 각 이벤트에 첫 번째 매칭 키워드 할당 (Java-side, 추가 쿼리 없음)
+     * 4. 이미지·찜 여부 조립 후 createdAt 기준 내림차순 반환
      *
      * * KeywordMember.isRead 갱신 없음 — 읽음 처리는 단일 키워드 조회(getByKeyword)에서만 이루어진다.
      */
@@ -216,18 +200,11 @@ public class ClubEventOrchestrator {
         for (Map.Entry<Type, List<Keyword>> entry : keywordsByType.entrySet()) {
             SliceResult<ClubEvent> result = clubEventQueryService.getEventsByTypeAndKeywords(
                 entry.getKey(), entry.getValue(), pageable);
+            List<String> lowerKeywords = toLowerKeywords(entry.getValue());
             for (ClubEvent event : result.result()) {
-                for (Keyword kw : entry.getValue()) {
-                    if (event.getTitle() != null
-                        && event.getTitle().toLowerCase().contains(kw.getKoreanKeyword().toLowerCase())) {
-                        allPairs.add(new ClubEventKeywordPair(event, kw.getKoreanKeyword()));
-                        break;
-                    }
-                }
+                findFirstMatchingKeyword(event, entry.getValue(), lowerKeywords).ifPresent(allPairs::add);
             }
-            if (result.hasNext()) {
-                hasNext = true;
-            }
+            if (result.hasNext()) hasNext = true;
         }
 
         List<Long> eventIds = allPairs.stream().map(p -> p.event().getEventId()).distinct().toList();
@@ -246,13 +223,9 @@ public class ClubEventOrchestrator {
     /**
      * 단일 구독 키워드 게시글 목록 조회
      *
-     * 1. 내가 구독한 키워드 중 요청 키워드와 일치하는 Keyword 엔티티 조회 (JOIN FETCH topic)
-     *       (구독하지 않은 키워드이면 KeywordException(KEYWORD_NOT_FOUND))
-     * 2. KeywordMember.isRead 갱신 → 알림 뱃지 초기화
-     * 3. keyword.topic.type + keyword.koreanKeyword 조건으로 게시글 목록 조회
-     * 4. 이미지 URL 배치 조회 (IN 절 단일 쿼리)
-     * 5. 내가 찜한 게시글 ID 목록 조회
-     * 6. 각 게시글에 찜(like) 여부(star 필드)와 키워드 포함해 응답 조립 후 반환
+     * 1. 구독한 키워드 조회 (없으면 404) + KeywordMember.isRead 갱신 → 알림 뱃지 초기화
+     * 2. keyword.topic.type + keyword.koreanKeyword 조건으로 게시글 목록 조회
+     * 3. 이미지·찜 여부·키워드 조립 후 반환
      */
     public SliceResponse<ClubEventWithKeywordResponse> getByKeyword(String searchKeyword, Member member, Pageable pageable) {
         Keyword keyword = keywordQueryService.getSubscribedKeywordByName(member, searchKeyword);
@@ -291,9 +264,6 @@ public class ClubEventOrchestrator {
 
     /**
      * 이벤트 배너 목록 조회
-     *
-     * 1. 현재 날짜 기준 유효한 배너(startDate ≤ today ≤ endDate) 조회
-     * 2. bannerOrder 오름차순 정렬 후 반환
      */
     public List<EventBannerResponse> getBanners() {
         return clubEventQueryService.getBanners().stream()
@@ -303,13 +273,46 @@ public class ClubEventOrchestrator {
 
     /**
      * Google 캘린더에 일정 추가
-     *
-     * 1. tokens/{email} 파일에서 refresh token 로드 — 파일 없으면 400 CALENDAR_NOT_CONNECTED
-     * 2. refresh token으로 Google token endpoint에 POST → access token 발급
-     * 3. access token으로 Google Calendar REST API에 이벤트 생성
      */
     public void addToCalendar(CalendarRequest request, Member member) {
         calendarCommandService.addEvent(member.getEmail(), request);
+    }
+
+    // ── 헬퍼 메서드 ──────────────────────────────────────────────────────────
+
+    /**
+     * 이미지 배치 조회 + 찜 여부 조회 + SliceResponse 조립을 한 번에 처리한다.
+     * getEventTypeList / getSubscribedEvents 처럼 "일반 목록 조회" 패턴에서 공통으로 사용한다.
+     */
+    private SliceResponse<ClubEventResponse> buildClubEventSlice(SliceResult<ClubEvent> result, Member member) {
+        Map<Long, List<String>> images = clubEventQueryService.getImageUrlsByEventIds(toEventIds(result));
+        Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
+        return SliceResponse.from(result, e -> ClubEventResponse.from(e, likedIds.contains(e.getEventId()), images.get(e.getEventId())));
+    }
+
+    /**
+     * 이벤트 제목에서 첫 번째로 매칭되는 키워드를 찾아 ClubEventKeywordPair로 반환한다.
+     * 매칭 키워드가 없으면 Optional.empty()를 반환한다.
+     *
+     * @param lowerKeywords 반복 toLowerCase 호출을 피하기 위해 미리 소문자로 변환한 키워드 목록
+     */
+    private Optional<ClubEventKeywordPair> findFirstMatchingKeyword(
+        ClubEvent event, List<Keyword> keywords, List<String> lowerKeywords) {
+        if (event.getTitle() == null) return Optional.empty();
+        String lowerTitle = event.getTitle().toLowerCase();
+        for (int i = 0; i < lowerKeywords.size(); i++) {
+            if (lowerTitle.contains(lowerKeywords.get(i))) {
+                return Optional.of(new ClubEventKeywordPair(event, keywords.get(i).getKoreanKeyword()));
+            }
+        }
+        return Optional.empty();
+    }
+
+    /** 키워드 목록을 소문자 문자열 목록으로 변환한다 (반복 toLowerCase 방지용 사전 계산). */
+    private List<String> toLowerKeywords(List<Keyword> keywords) {
+        return keywords.stream()
+            .map(kw -> kw.getKoreanKeyword().toLowerCase())
+            .toList();
     }
 
     private List<Long> toEventIds(SliceResult<ClubEvent> result) {
