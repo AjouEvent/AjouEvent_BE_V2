@@ -42,6 +42,15 @@ public class PushNotificationRepositoryPort {
             .findByMemberAndNotificationType(member, notificationType, pageable);
     }
 
+    public Slice<PushNotification> findTopicNotificationsByMemberWithTopic(Member member, Pageable pageable) {
+        return pushNotificationJpaRepositoryAdapter.findTopicNotificationsByMemberWithTopic(member, pageable);
+    }
+
+    public Slice<PushNotification> findKeywordNotificationsByMemberWithTopicAndKeyword(Member member, Pageable pageable) {
+        return pushNotificationJpaRepositoryAdapter
+            .findKeywordNotificationsByMemberWithTopicAndKeyword(member, pageable);
+    }
+
     public Optional<PushNotification> findByMemberAndId(Member member, Long id) {
         return pushNotificationJpaRepositoryAdapter.findByMemberAndId(member, id);
     }

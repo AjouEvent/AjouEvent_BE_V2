@@ -521,43 +521,60 @@ public class MemberException extends AjouBaseException {
 ### 전제 조건
 
 `open-in-view: false` 설정으로 인해 트랜잭션이 종료되는 순간 영속성 컨텍스트가 닫힌다.
-트랜잭션 밖에서 Lazy 연관 필드에 접근하면 `LazyInitializationException`이 발생하므로,
-**Orchestrator에서 트랜잭션 경계를 명시적으로 선언해야 한다.**
+트랜잭션 밖에서 Lazy 연관 필드에 접근하면 `LazyInitializationException`이 발생한다.
+
+**목표: `@Transactional`은 Service 계층에만 선언한다. Orchestrator 조회 메서드는 트랜잭션 없이 동작해야 한다.**
+
+Orchestrator 조회에서 Lazy 로딩이 필요한 경우, Orchestrator에 `@Transactional`을 추가하는 것이 아니라
+**QueryService 내에서 JOIN FETCH 또는 IN 절 배치 조회로 선제 해결**한다.
 
 ### 레이어별 규칙
 
-| 레이어 | @Transactional | @Transactional(readOnly = true) |
-|--------|---------------|--------------------------------|
-| Orchestrator (쓰기 포함) | ✅ 선언 | ❌ |
-| Orchestrator (순수 조회) | ❌ | ✅ 선언 필수 |
-| CommandService | ✅ 상태 변경 메서드에만 | ❌ |
-| QueryService | ❌ 불필요 | ❌ |
-| 클래스 레벨 (어디서든) | ❌ 금지 | ❌ 금지 |
+| 레이어 | @Transactional | @Transactional(readOnly=true) | 근거 |
+|--------|---------------|-------------------------------|------|
+| Orchestrator — 복수 Service 원자적 쓰기 | ✅ | ❌ | 같은 DB에 두 번 쓰는 작업을 하나의 트랜잭션으로 묶기 위함 |
+| Orchestrator — 단일 Service 위임 쓰기 | ❌ | ❌ | CommandService의 @Transactional로 충분 |
+| Orchestrator — 조회 | ❌ | ❌ | Lazy 로딩을 QueryService 내에서 선제 해결 |
+| CommandService — 상태 변경 메서드 | ✅ | ❌ | 쓰기 단위 원자성 |
+| CommandService — 조회 메서드 | ❌ | ❌ | 조회는 QueryService로 분리 |
+| QueryService — 모든 메서드 | ❌ | ❌ | Repository가 자체 트랜잭션으로 실행 |
+| 클래스 레벨 (어느 레이어든) | ❌ | ❌ | 의도치 않은 트랜잭션 전파 방지 |
 
 ### 이유
 
-- **Orchestrator**: 여러 Service를 거쳐 반환된 엔티티의 Lazy 필드를 DTO 변환 시 접근하므로 트랜잭션 범위가 필요. 순수 조회는 `readOnly = true`로 dirty checking 비활성화 + DB 슬레이브 라우팅 가능.
-- **QueryService**: Repository 메서드 자체가 단건 트랜잭션으로 실행되므로 별도 선언 불필요. 조회 후 추가 Lazy 접근은 Orchestrator 트랜잭션에 위임.
+- **Orchestrator 복수 쓰기**: 두 개 이상의 CommandService가 같은 DB에 쓰는 작업을 원자적으로 묶어야 할 때 Orchestrator가 Unit of Work 역할을 한다.
+- **Orchestrator 단순 위임**: CommandService 하나만 호출하면 해당 CommandService의 `@Transactional`이 이미 원자성을 보장한다.
+- **Orchestrator 조회**: Lazy 연관 필드가 필요하면 QueryService 내에서 JOIN FETCH 또는 IN 절 배치 조회로 미리 로드한다. Orchestrator에 `@Transactional`을 추가하면 DB 커넥션을 HTTP 요청 전체에 걸쳐 불필요하게 점유하게 된다.
+- **QueryService**: Repository 메서드 자체가 단건 트랜잭션으로 실행되므로 별도 선언 불필요.
 - **CommandService**: 상태 변경 메서드에만 선언. 조회 전용 메서드가 섞여 있으면 Command/Query 분리를 재검토.
 
 ### 예시
 
 ```java
-// ✅ Orchestrator — 순수 조회 (readOnly = true 필수)
-@Transactional(readOnly = true)
-public SliceResponse<ClubEventResponse> getSubscribedEvents(Pageable pageable, Member member) {
-    List<Type> types = topicQueryService.getSubscribedTopics(member).stream()
-        .map(tm -> tm.getTopic().getType())  // Lazy 접근 — 트랜잭션 필요
-        .toList();
-    ...
+// ✅ Orchestrator — 복수 Service 원자적 쓰기
+@Transactional
+public void subscribeToTopic(TopicSubscribeRequest request, Member member) {
+    Topic topic = topicCommandService.subscribeToTopic(request.topic(), member); // topic_members INSERT
+    tokenService.subscribeToTopic(topic, member);  // topic_tokens INSERT — 원자성 필요
 }
 
-// ✅ Orchestrator — 쓰기 포함 (일반 @Transactional)
-@Transactional
-public SliceResponse<ClubEventResponse> getEventTypeList(String type, ...) {
-    ...
-    topicCommandService.markTopicAsRead(member, eventType);  // isRead 갱신 포함
-    ...
+// ✅ Orchestrator — 단일 Service 위임 쓰기 (@Transactional 없음)
+public void cancelLikeEvent(Long eventId, Member member) {
+    ClubEvent event = clubEventQueryService.getEventById(eventId);
+    ClubEventLike like = clubEventLikeQueryService.getEventLike(event, member);
+    clubEventLikeCommandService.cancelLike(event, like); // CommandService @Transactional이 보장
+}
+
+// ✅ Orchestrator — 조회 (@Transactional 없음, Lazy는 QueryService에서 해결)
+public SliceResponse<ClubEventResponse> getSubscribedEvents(Pageable pageable, Member member) {
+    List<Type> types = topicQueryService.getSubscribedTopics(member).stream()
+        .map(tm -> tm.getTopic().getType())  // JOIN FETCH로 이미 로드됨
+        .toList();
+    SliceResult<ClubEvent> result = clubEventQueryService.getEventsByTypes(types, pageable);
+    Map<Long, List<String>> images = clubEventQueryService.getImageUrlsByEventIds(
+        result.result().stream().map(ClubEvent::getEventId).toList()
+    );  // IN 절 배치 조회 — Lazy 접근 없음
+    return SliceResponse.from(result, e -> ClubEventResponse.from(e, images.get(e.getEventId())));
 }
 
 // ✅ CommandService — 쓰기 메서드에만
@@ -567,19 +584,39 @@ public void register(RegisterRequest request) { ... }
 // ✅ QueryService — @Transactional 없음
 public List<TopicMember> getSubscribedTopics(Member member) { ... }
 
+// ❌ 금지 — Lazy 로딩 회피 목적으로 조회 Orchestrator에 @Transactional 추가
+@Transactional(readOnly = true)
+public SliceResponse<ClubEventResponse> getTopPopularEvents(Member member) { ... }
+
 // ❌ 금지 — 클래스 레벨
 @Transactional
 @Service
 public class MemberCommandService { ... }
 
-// ❌ 금지 — QueryService에 readOnly = true
+// ❌ 금지 — QueryService에 @Transactional
 @Transactional(readOnly = true)
 public List<TopicMember> getSubscribedTopics(Member member) { ... }
 ```
 
+### Lazy 로딩 선제 해결 패턴
+
+Orchestrator 조회에서 Lazy 연관 필드가 필요할 때는 QueryService에서 해결한다.
+
+```java
+// ✅ QueryService — JOIN FETCH로 연관 엔티티 선제 로드
+@Query("SELECT p FROM PushNotification p JOIN FETCH p.topic WHERE p.member = :member")
+Slice<PushNotification> findByMemberWithTopic(@Param("member") Member member, Pageable pageable);
+
+// ✅ QueryService — IN 절 배치 조회로 컬렉션 선제 로드
+public Map<Long, List<String>> getImageUrlsByEventIds(List<Long> eventIds) {
+    // SELECT ci FROM ClubEventImage ci WHERE ci.clubEvent.eventId IN :eventIds
+    // → 단일 쿼리로 N개 이벤트의 이미지 일괄 조회
+}
+```
+
 ### 외부 I/O
 
-**외부 I/O(FCM, 이메일, 외부 API) 절대 트랜잭션 블록 내 포함 금지** — Orchestrator에서 트랜잭션 메서드와 분리해 호출
+**외부 I/O(FCM, 이메일, 외부 API) 절대 트랜잭션 블록 내 포함 금지** — Orchestrator에서 트랜잭션 메서드 호출 이후에 별도로 호출
 
 ---
 

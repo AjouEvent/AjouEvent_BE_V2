@@ -18,11 +18,8 @@ public record ClubEventWithKeywordResponse(
     String url,
     String keyword
 ) {
-    public static ClubEventWithKeywordResponse from(ClubEvent event, String keyword, boolean star) {
-        List<?> images = event.getClubEventImageList();
-        String imgUrl = (images != null && !images.isEmpty())
-            ? event.getClubEventImageList().get(0).getUrl()
-            : null;
+    public static ClubEventWithKeywordResponse from(ClubEvent event, String keyword, boolean star, List<String> imgUrls) {
+        String imgUrl = (imgUrls != null && !imgUrls.isEmpty()) ? imgUrls.get(0) : null;
         return new ClubEventWithKeywordResponse(
             event.getEventId(),
             event.getTitle(),

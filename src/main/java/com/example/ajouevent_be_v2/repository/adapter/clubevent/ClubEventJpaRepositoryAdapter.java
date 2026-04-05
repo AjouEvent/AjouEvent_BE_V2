@@ -2,6 +2,7 @@ package com.example.ajouevent_be_v2.repository.adapter.clubevent;
 
 import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
 import com.example.ajouevent_be_v2.domain.clubevent.Type;
+import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,17 @@ public interface ClubEventJpaRepositoryAdapter extends JpaRepository<ClubEvent, 
         LocalDateTime startOfWeek, LocalDateTime endOfWeek);
 
     List<ClubEvent> findTop10ByTypeOrderByCreatedAtDesc(Type type);
+
+    @Query(
+        "SELECT ce FROM ClubEvent ce "
+            + "WHERE ce.type = :type "
+            + "AND EXISTS ("
+            + "SELECT 1 FROM Keyword k "
+            + "WHERE k IN :keywords "
+            + "AND LOWER(ce.title) LIKE CONCAT('%', LOWER(k.koreanKeyword), '%')) "
+            + "ORDER BY ce.createdAt DESC")
+    Slice<ClubEvent> findByTypeAndAnyKeyword(
+        @Param("type") Type type, @Param("keywords") List<Keyword> keywords, Pageable pageable);
 
     @Modifying
     @Query("UPDATE ClubEvent e SET e.viewCount = :viewCount WHERE e.eventId = :eventId")

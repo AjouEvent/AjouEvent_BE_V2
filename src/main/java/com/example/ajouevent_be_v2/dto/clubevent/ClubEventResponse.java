@@ -17,11 +17,8 @@ public record ClubEventResponse(
     String type,
     String url
 ) {
-    public static ClubEventResponse from(ClubEvent event, boolean star) {
-        List<?> images = event.getClubEventImageList();
-        String imgUrl = (images != null && !images.isEmpty())
-            ? event.getClubEventImageList().get(0).getUrl()
-            : null;
+    public static ClubEventResponse from(ClubEvent event, boolean star, List<String> imgUrls) {
+        String imgUrl = (imgUrls != null && !imgUrls.isEmpty()) ? imgUrls.get(0) : null;
         return new ClubEventResponse(
             event.getEventId(),
             event.getTitle(),

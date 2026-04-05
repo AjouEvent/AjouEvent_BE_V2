@@ -1,7 +1,6 @@
 package com.example.ajouevent_be_v2.dto.clubevent;
 
 import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
-import com.example.ajouevent_be_v2.domain.clubevent.ClubEventImage;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,15 +18,12 @@ public record ClubEventDetailResponse(
     String url,
     String content
 ) {
-    public static ClubEventDetailResponse from(ClubEvent event, boolean star) {
-        List<String> imgUrl = (event.getClubEventImageList() != null)
-            ? event.getClubEventImageList().stream().map(ClubEventImage::getUrl).toList()
-            : List.of();
+    public static ClubEventDetailResponse from(ClubEvent event, boolean star, List<String> imgUrls) {
         return new ClubEventDetailResponse(
             event.getEventId(),
             event.getTitle(),
             event.getWriter(),
-            imgUrl,
+            imgUrls != null ? imgUrls : List.of(),
             event.getCreatedAt(),
             event.getLikesCount(),
             event.getViewCount(),

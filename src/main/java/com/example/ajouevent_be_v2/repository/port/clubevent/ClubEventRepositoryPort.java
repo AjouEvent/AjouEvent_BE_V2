@@ -2,6 +2,7 @@ package com.example.ajouevent_be_v2.repository.port.clubevent;
 
 import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
 import com.example.ajouevent_be_v2.domain.clubevent.Type;
+import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.repository.adapter.clubevent.ClubEventJpaRepositoryAdapter;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -62,6 +63,10 @@ public class ClubEventRepositoryPort {
 
     public List<ClubEvent> findTop10ByTypeOrderByCreatedAtDesc(Type type) {
         return clubEventJpaRepositoryAdapter.findTop10ByTypeOrderByCreatedAtDesc(type);
+    }
+
+    public Slice<ClubEvent> findByTypeAndAnyKeyword(Type type, List<Keyword> keywords, Pageable pageable) {
+        return clubEventJpaRepositoryAdapter.findByTypeAndAnyKeyword(type, keywords, pageable);
     }
 
     public void updateViews(Long viewCount, Long eventId) {
