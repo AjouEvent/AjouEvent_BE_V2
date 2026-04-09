@@ -1,3 +1,8 @@
+server:
+  tomcat:
+    mbean-registry:
+      enabled: true
+
 spring:
   application:
     name: ajouevent-be-v2
