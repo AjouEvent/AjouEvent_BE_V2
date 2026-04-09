@@ -69,6 +69,10 @@ dependencies {
     // ShedLock
     implementation 'net.javacrumbs.shedlock:shedlock-spring:6.3.0'
     implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.3.0'
+
+    // Monitoring
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 dependencyManagement {
@@ -79,6 +83,23 @@ dependencyManagement {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+// 로컬 실행 시 .env 파일을 자동으로 환경변수로 주입
+// Docker Compose는 .env를 자동 로드하지만 ./gradlew bootRun은 그렇지 않으므로 명시적으로 처리
+tasks.named('bootRun') {
+    def envFile = file('.env')
+    if (envFile.exists()) {
+        envFile.eachLine { line ->
+            def trimmed = line.trim()
+            if (!trimmed.startsWith('#') && trimmed.contains('=')) {
+                def idx = trimmed.indexOf('=')
+                def key = trimmed.substring(0, idx).trim()
+                def value = trimmed.substring(idx + 1).trim()
+                environment(key, value)
+            }
+        }
+    }
 }
 
 spotless {
