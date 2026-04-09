@@ -43,6 +43,8 @@ ajou:
     await-termination-seconds: 30
   swagger:
     server-url: ${SWAGGER_SERVER_URL:http://localhost:8080}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
   push:
     stale-threshold-minutes: 10
     max-retry-count: 3

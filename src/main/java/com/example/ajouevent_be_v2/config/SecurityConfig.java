@@ -4,6 +4,7 @@ import com.example.ajouevent_be_v2.common.auth.AuthArgumentResolver;
 import com.example.ajouevent_be_v2.common.auth.CustomAccessDeniedHandler;
 import com.example.ajouevent_be_v2.common.auth.CustomAuthenticationEntryPoint;
 import com.example.ajouevent_be_v2.common.auth.JwtAuthFilter;
+import com.example.ajouevent_be_v2.config.properties.CorsProperties;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +39,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final AuthArgumentResolver authArgumentResolver;
     private final Environment environment;
+    private final CorsProperties corsProperties;
 
     private static final String[] AUTH_WHITELIST = {
             "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
@@ -101,9 +103,7 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-            .allowedOriginPatterns(
-                "http://localhost:3000"
-            )
+            .allowedOriginPatterns(corsProperties.getAllowedOrigins().toArray(String[]::new))
             .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
             .allowedHeaders("Authorization", "Content-Type")
             .allowCredentials(true)
