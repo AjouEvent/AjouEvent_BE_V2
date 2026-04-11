@@ -7,6 +7,7 @@ import java.util.List;
 public record ClubEventWithKeywordResponse(
     Long eventId,
     String title,
+    String content,
     String writer,
     String imgUrl,
     LocalDateTime createdAt,
@@ -23,6 +24,7 @@ public record ClubEventWithKeywordResponse(
         return new ClubEventWithKeywordResponse(
             event.getEventId(),
             event.getTitle(),
+            event.getContent(),
             event.getWriter(),
             imgUrl,
             event.getCreatedAt(),
