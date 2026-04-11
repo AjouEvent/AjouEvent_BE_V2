@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -53,18 +52,6 @@ public class SecurityConfig implements WebMvcConfigurer {
             "/api/v2/auth/test-login", "/api/v2/auth/test-login/fcm",
             "/api/v2/auth/test-crawling-token"
     };
-
-    // @Order(1)로 최우선 적용되는 전용 FilterChain을 등록해 Actuator 엔드포인트를 인증 없이 허용.
-    // 네트워크 접근 제어는 AWS 보안 그룹에서 9090 포트를 모니터링 EC2 IP로만 제한하여 보장.
-    @Bean
-    @Order(1)
-    public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/actuator/**")
-                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
-                .csrf(AbstractHttpConfigurer::disable);
-        return http.build();
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

@@ -1,26 +1,32 @@
 package com.example.ajouevent_be_v2.config;
 
+import com.example.ajouevent_be_v2.config.properties.FcmExecutorProperties;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
+@RequiredArgsConstructor
 public class FcmConfig {
+
+    private final FcmExecutorProperties fcmExecutorProperties;
 
     @Bean(name = "fcmCallbackExecutor")
     public ThreadPoolTaskExecutor fcmCallbackExecutor() {
+        FcmExecutorProperties.Pool pool = fcmExecutorProperties.getCallback();
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(16);
-        executor.setQueueCapacity(100);
+        executor.setCorePoolSize(pool.getCorePoolSize());
+        executor.setMaxPoolSize(pool.getMaxPoolSize());
+        executor.setQueueCapacity(pool.getQueueCapacity());
         executor.setThreadNamePrefix("fcm-callback-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(30);
+        executor.setAwaitTerminationSeconds(pool.getAwaitTerminationSeconds());
         executor.initialize();
         return executor;
     }
@@ -37,13 +43,14 @@ public class FcmConfig {
 
     @Bean(name = "fcmDefaultExecutor")
     public ThreadPoolTaskExecutor fcmDefaultExecutor() {
+        FcmExecutorProperties.Pool pool = fcmExecutorProperties.getDefaultPool();
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(16);
-        executor.setQueueCapacity(100);
+        executor.setCorePoolSize(pool.getCorePoolSize());
+        executor.setMaxPoolSize(pool.getMaxPoolSize());
+        executor.setQueueCapacity(pool.getQueueCapacity());
         executor.setThreadNamePrefix("fcm-default-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(30);
+        executor.setAwaitTerminationSeconds(pool.getAwaitTerminationSeconds());
         executor.initialize();
         return executor;
     }

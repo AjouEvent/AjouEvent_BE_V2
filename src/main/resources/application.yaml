@@ -20,8 +20,9 @@ spring:
 
 management:
   server:
-    # 앱 포트(8080)와 분리 — Spring Security SecurityFilterChain 밖에서 동작하므로
-    # SecurityConfig 수정 없이 AWS 보안 그룹으로만 접근 제어 가능
+    # 앱 포트(8080)와 분리 — 관리 서버는 별도 서블릿 컨텍스트로 기동되므로
+    # 메인 앱의 SecurityFilterChain이 적용되지 않음
+    # 접근 제어는 AWS 보안 그룹에서 9090 포트를 모니터링 EC2 IP로만 제한
     port: ${MANAGEMENT_PORT:9090}
   endpoints:
     web:

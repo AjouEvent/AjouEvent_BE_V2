@@ -4,3 +4,14 @@ ajou:
     default-image-url: https://www.ajou.ac.kr/_res/ajou/kr/img/intro/img-symbol.png
     redirection-url-prefix: https://www.ajouevent.com/event/
     default-click-action-url: https://www.ajouevent.com
+    executor:
+      callback:
+        core-pool-size: 4
+        max-pool-size: 16
+        queue-capacity: 100
+        await-termination-seconds: 30
+      default-pool:
+        core-pool-size: 4
+        max-pool-size: 16
+        queue-capacity: 100
+        await-termination-seconds: 30
