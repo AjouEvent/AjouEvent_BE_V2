@@ -41,6 +41,9 @@ public class ClubEvent {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "content_preview", length = 200)
+    private String contentPreview;
+
     @Column(name = "writer")
     private String writer;
 

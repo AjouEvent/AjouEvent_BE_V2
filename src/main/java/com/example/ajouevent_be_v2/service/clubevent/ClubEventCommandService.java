@@ -6,6 +6,7 @@ import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
 import com.example.ajouevent_be_v2.domain.clubevent.ClubEventImage;
 import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventCommand;
+import com.example.ajouevent_be_v2.dto.clubevent.ClubEventSummaryResult;
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventRepositoryPort;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,15 +22,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClubEventCommandService {
 
     private static final String DEFAULT_IMAGE_URL = "https://www.ajou.ac.kr/_res/ajou/kr/img/intro/img-symbol.png";
+    private static final int CONTENT_PREVIEW_LENGTH = 200;
 
     private final ClubEventRepositoryPort clubEventRepositoryPort;
 
     public void isDuplicateNotice(String englishTopic, String title, String url) {
         Type type = parseType(englishTopic);
-        List<ClubEvent> recentEvents = clubEventRepositoryPort.findTop10ByTypeOrderByCreatedAtDesc(type);
+        List<ClubEventSummaryResult> recentEvents = clubEventRepositoryPort.findTop10ByType(type);
 
         boolean isDuplicate = recentEvents.stream()
-                .anyMatch(e -> e.getTitle().equals(title) && e.getUrl().equals(url));
+                .anyMatch(e -> e.title().equals(title) && e.url().equals(url));
         if (isDuplicate) {
             throw new ClubEventException(ClubEventErrorCode.DUPLICATE_NOTICE);
         }
@@ -40,9 +42,15 @@ public class ClubEventCommandService {
         Type type = parseType(command.englishTopic());
         List<String> imageUrls = resolveImages(command.images());
 
+        String content = command.content();
+        String contentPreview = content != null && content.length() > CONTENT_PREVIEW_LENGTH
+                ? content.substring(0, CONTENT_PREVIEW_LENGTH)
+                : content;
+
         ClubEvent clubEvent = ClubEvent.builder()
                 .title(command.title())
-                .content(command.content())
+                .content(content)
+                .contentPreview(contentPreview)
                 .writer(command.department())
                 .subject(command.koreanTopic())
                 .url(command.url())

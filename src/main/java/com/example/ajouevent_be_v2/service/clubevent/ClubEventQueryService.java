@@ -8,6 +8,7 @@ import com.example.ajouevent_be_v2.domain.clubevent.EventBanner;
 import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.member.Member;
+import com.example.ajouevent_be_v2.dto.clubevent.ClubEventSummaryResult;
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventCachePort;
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventImageRepositoryPort;
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventRepositoryPort;
@@ -58,31 +59,31 @@ public class ClubEventQueryService {
         }
     }
 
-    public SliceResult<ClubEvent> getEventsByType(Type type, String keyword, Pageable pageable) {
+    public SliceResult<ClubEventSummaryResult> getEventsByType(Type type, String keyword, Pageable pageable) {
         String searchKeyword = keyword != null ? keyword : "";
-        Slice<ClubEvent> slice = clubEventRepositoryPort.findByTypeAndTitleContaining(
+        Slice<ClubEventSummaryResult> slice = clubEventRepositoryPort.findByTypeAndTitleContaining(
             type, searchKeyword, pageable);
         return SliceResult.from(slice, pageable);
     }
 
-    public List<ClubEvent> getPopularEvents() {
+    public List<ClubEventSummaryResult> getPopularEvents() {
         LocalDate now = LocalDate.now();
         LocalDateTime start = now.with(DayOfWeek.MONDAY).atStartOfDay();
         LocalDateTime end = now.with(DayOfWeek.SUNDAY).atTime(LocalTime.MAX);
         return clubEventRepositoryPort.findTop10ByCreatedAtBetween(start, end);
     }
 
-    public SliceResult<ClubEvent> getEventsByTypes(List<Type> types, String keyword, Pageable pageable) {
+    public SliceResult<ClubEventSummaryResult> getEventsByTypes(List<Type> types, String keyword, Pageable pageable) {
         String searchKeyword = keyword != null ? keyword : "";
-        Slice<ClubEvent> slice = searchKeyword.isEmpty()
+        Slice<ClubEventSummaryResult> slice = searchKeyword.isEmpty()
             ? clubEventRepositoryPort.findByTypeIn(types, pageable)
             : clubEventRepositoryPort.findByTypeInAndTitleContaining(types, searchKeyword, pageable);
         return SliceResult.from(slice, pageable);
     }
 
-    public SliceResult<ClubEvent> getEventsByIds(List<Long> eventIds, Type type, String keyword, Pageable pageable) {
+    public SliceResult<ClubEventSummaryResult> getEventsByIds(List<Long> eventIds, Type type, String keyword, Pageable pageable) {
         String searchKeyword = keyword != null ? keyword : "";
-        Slice<ClubEvent> slice;
+        Slice<ClubEventSummaryResult> slice;
         if (type != null && !searchKeyword.isEmpty()) {
             slice = clubEventRepositoryPort.findByEventIdsAndTypeAndTitleContaining(eventIds, type, searchKeyword, pageable);
         } else if (type != null) {
@@ -95,9 +96,9 @@ public class ClubEventQueryService {
         return SliceResult.from(slice, pageable);
     }
 
-    public SliceResult<ClubEvent> getEventsByKeyword(Keyword keyword, Pageable pageable) {
+    public SliceResult<ClubEventSummaryResult> getEventsByKeyword(Keyword keyword, Pageable pageable) {
         Type type = keyword.getTopic().getType();
-        Slice<ClubEvent> slice = clubEventRepositoryPort.findByTypeAndTitleContaining(
+        Slice<ClubEventSummaryResult> slice = clubEventRepositoryPort.findByTypeAndTitleContaining(
             type, keyword.getKoreanKeyword(), pageable);
         return SliceResult.from(slice, pageable);
     }
@@ -106,8 +107,8 @@ public class ClubEventQueryService {
         return eventBannerRepositoryPort.findAllOrderByBannerOrder();
     }
 
-    public SliceResult<ClubEvent> getEventsByTypeAndKeywords(Type type, List<Keyword> keywords, Pageable pageable) {
-        Slice<ClubEvent> slice = clubEventRepositoryPort.findByTypeAndAnyKeyword(type, keywords, pageable);
+    public SliceResult<ClubEventSummaryResult> getEventsByTypeAndKeywords(Type type, List<Keyword> keywords, Pageable pageable) {
+        Slice<ClubEventSummaryResult> slice = clubEventRepositoryPort.findByTypeAndAnyKeyword(type, keywords, pageable);
         return SliceResult.from(slice, pageable);
     }
 
