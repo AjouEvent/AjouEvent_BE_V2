@@ -1,6 +1,5 @@
 package com.example.ajouevent_be_v2.dto.clubevent;
 
-import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,21 +45,22 @@ public record ClubEventWithKeywordResponse(
     @Schema(description = "매칭된 구독 키워드", example = "장학금")
     String keyword
 ) {
-    public static ClubEventWithKeywordResponse from(ClubEvent event, String keyword, boolean star, List<String> imgUrls) {
+    public static ClubEventWithKeywordResponse from(
+            ClubEventSummaryResult event, String keyword, boolean star, List<String> imgUrls) {
         String imgUrl = (imgUrls != null && !imgUrls.isEmpty()) ? imgUrls.get(0) : null;
         return new ClubEventWithKeywordResponse(
-            event.getEventId(),
-            event.getTitle(),
-            event.getContentPreview(),
-            event.getWriter(),
+            event.eventId(),
+            event.title(),
+            event.contentPreview(),
+            event.writer(),
             imgUrl,
-            event.getCreatedAt(),
-            event.getLikesCount(),
-            event.getViewCount(),
+            event.createdAt(),
+            event.likesCount(),
+            event.viewCount(),
             star,
-            event.getSubject(),
-            event.getType() != null ? event.getType().name() : null,
-            event.getUrl(),
+            event.subject(),
+            event.type() != null ? event.type().name() : null,
+            event.url(),
             keyword
         );
     }

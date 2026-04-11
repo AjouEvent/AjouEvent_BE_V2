@@ -6,6 +6,7 @@ import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
 import com.example.ajouevent_be_v2.domain.clubevent.ClubEventImage;
 import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventCommand;
+import com.example.ajouevent_be_v2.dto.clubevent.ClubEventSummaryResult;
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventRepositoryPort;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,10 +28,10 @@ public class ClubEventCommandService {
 
     public void isDuplicateNotice(String englishTopic, String title, String url) {
         Type type = parseType(englishTopic);
-        List<ClubEvent> recentEvents = clubEventRepositoryPort.findTop10ByTypeOrderByCreatedAtDesc(type);
+        List<ClubEventSummaryResult> recentEvents = clubEventRepositoryPort.findTop10ByType(type);
 
         boolean isDuplicate = recentEvents.stream()
-                .anyMatch(e -> e.getTitle().equals(title) && e.getUrl().equals(url));
+                .anyMatch(e -> e.title().equals(title) && e.url().equals(url));
         if (isDuplicate) {
             throw new ClubEventException(ClubEventErrorCode.DUPLICATE_NOTICE);
         }

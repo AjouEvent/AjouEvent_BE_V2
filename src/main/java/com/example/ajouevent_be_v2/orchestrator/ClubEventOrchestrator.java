@@ -8,13 +8,7 @@ import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.domain.keyword.KeywordMember;
 import com.example.ajouevent_be_v2.domain.member.Member;
-import com.example.ajouevent_be_v2.dto.clubevent.CalendarRequest;
-import com.example.ajouevent_be_v2.dto.clubevent.ClubEventCommand;
-import com.example.ajouevent_be_v2.dto.clubevent.ClubEventDetailResponse;
-import com.example.ajouevent_be_v2.dto.clubevent.ClubEventKeywordPair;
-import com.example.ajouevent_be_v2.dto.clubevent.ClubEventResponse;
-import com.example.ajouevent_be_v2.dto.clubevent.ClubEventWithKeywordResponse;
-import com.example.ajouevent_be_v2.dto.clubevent.EventBannerResponse;
+import com.example.ajouevent_be_v2.dto.clubevent.*;
 import com.example.ajouevent_be_v2.service.calendar.CalendarCommandService;
 import com.example.ajouevent_be_v2.service.clubevent.ClubEventCommandService;
 import com.example.ajouevent_be_v2.service.clubevent.ClubEventLikeCommandService;
@@ -102,7 +96,7 @@ public class ClubEventOrchestrator {
         if (eventType.isEmpty()) {
             return SliceResponse.empty(pageable.getPageNumber());
         }
-        SliceResult<ClubEvent> result = clubEventQueryService.getEventsByType(eventType.get(), keyword, pageable);
+        SliceResult<ClubEventSummaryResult> result = clubEventQueryService.getEventsByType(eventType.get(), keyword, pageable);
         if (member != null) {
             topicCommandService.markTopicAsRead(member, eventType.get().getEnglishTopic());
         }
@@ -117,12 +111,12 @@ public class ClubEventOrchestrator {
      * 2. 이미지·찜 여부 조립 후 반환
      */
     public List<ClubEventResponse> getTopPopularEvents(Member member) {
-        List<ClubEvent> events = clubEventQueryService.getPopularEvents();
-        List<Long> eventIds = events.stream().map(ClubEvent::getEventId).toList();
+        List<ClubEventSummaryResult> events = clubEventQueryService.getPopularEvents();
+        List<Long> eventIds = events.stream().map(ClubEventSummaryResult::eventId).toList();
         Map<Long, List<String>> images = clubEventQueryService.getImageUrlsByEventIds(eventIds);
         Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
         return events.stream()
-            .map(e -> ClubEventResponse.from(e, likedIds.contains(e.getEventId()), images.get(e.getEventId())))
+            .map(e -> ClubEventResponse.from(e, likedIds.contains(e.eventId()), images.get(e.eventId())))
             .toList();
     }
 
@@ -144,7 +138,7 @@ public class ClubEventOrchestrator {
         if (subscribedTypes.isEmpty()) {
             return SliceResponse.empty(pageable.getPageNumber());
         }
-        SliceResult<ClubEvent> result = clubEventQueryService.getEventsByTypes(subscribedTypes, keyword, pageable);
+        SliceResult<ClubEventSummaryResult> result = clubEventQueryService.getEventsByTypes(subscribedTypes, keyword, pageable);
         return buildClubEventSlice(result, member);
     }
 
@@ -168,9 +162,9 @@ public class ClubEventOrchestrator {
         if (hasTypeFilter && resolvedType.isEmpty()) {
             return SliceResponse.empty(pageable.getPageNumber());
         }
-        SliceResult<ClubEvent> result = clubEventQueryService.getEventsByIds(likedEventIds, resolvedType.orElse(null), keyword, pageable);
+        SliceResult<ClubEventSummaryResult> result = clubEventQueryService.getEventsByIds(likedEventIds, resolvedType.orElse(null), keyword, pageable);
         Map<Long, List<String>> images = clubEventQueryService.getImageUrlsByEventIds(toEventIds(result));
-        return SliceResponse.from(result, e -> ClubEventResponse.from(e, true, images.get(e.getEventId())));
+        return SliceResponse.from(result, e -> ClubEventResponse.from(e, true, images.get(e.eventId())));
     }
 
     /**
@@ -198,16 +192,16 @@ public class ClubEventOrchestrator {
         boolean hasNext = false;
 
         for (Map.Entry<Type, List<Keyword>> entry : keywordsByType.entrySet()) {
-            SliceResult<ClubEvent> result = clubEventQueryService.getEventsByTypeAndKeywords(
+            SliceResult<ClubEventSummaryResult> result = clubEventQueryService.getEventsByTypeAndKeywords(
                 entry.getKey(), entry.getValue(), pageable);
             List<String> lowerKeywords = toLowerKeywords(entry.getValue());
-            for (ClubEvent event : result.result()) {
+            for (ClubEventSummaryResult event : result.result()) {
                 findFirstMatchingKeyword(event, entry.getValue(), lowerKeywords).ifPresent(allPairs::add);
             }
             if (result.hasNext()) hasNext = true;
         }
 
-        List<Long> eventIds = allPairs.stream().map(p -> p.event().getEventId()).distinct().toList();
+        List<Long> eventIds = allPairs.stream().map(p -> p.event().eventId()).distinct().toList();
         Map<Long, List<String>> images = clubEventQueryService.getImageUrlsByEventIds(eventIds);
         Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
 
@@ -230,11 +224,11 @@ public class ClubEventOrchestrator {
     public SliceResponse<ClubEventWithKeywordResponse> getByKeyword(String searchKeyword, Member member, Pageable pageable) {
         Keyword keyword = keywordQueryService.getSubscribedKeywordByName(member, searchKeyword);
         keywordCommandService.markKeywordMemberAsRead(member, keyword);
-        SliceResult<ClubEvent> result = clubEventQueryService.getEventsByKeyword(keyword, pageable);
+        SliceResult<ClubEventSummaryResult> result = clubEventQueryService.getEventsByKeyword(keyword, pageable);
         Map<Long, List<String>> images = clubEventQueryService.getImageUrlsByEventIds(toEventIds(result));
         Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
         return SliceResponse.from(result, e -> ClubEventWithKeywordResponse.from(
-            e, keyword.getKoreanKeyword(), likedIds.contains(e.getEventId()), images.get(e.getEventId())));
+            e, keyword.getKoreanKeyword(), likedIds.contains(e.eventId()), images.get(e.eventId())));
     }
 
     /**
@@ -284,10 +278,10 @@ public class ClubEventOrchestrator {
      * 이미지 배치 조회 + 찜 여부 조회 + SliceResponse 조립을 한 번에 처리한다.
      * getEventTypeList / getSubscribedEvents 처럼 "일반 목록 조회" 패턴에서 공통으로 사용한다.
      */
-    private SliceResponse<ClubEventResponse> buildClubEventSlice(SliceResult<ClubEvent> result, Member member) {
+    private SliceResponse<ClubEventResponse> buildClubEventSlice(SliceResult<ClubEventSummaryResult> result, Member member) {
         Map<Long, List<String>> images = clubEventQueryService.getImageUrlsByEventIds(toEventIds(result));
         Set<Long> likedIds = clubEventLikeQueryService.getLikedEventIds(member);
-        return SliceResponse.from(result, e -> ClubEventResponse.from(e, likedIds.contains(e.getEventId()), images.get(e.getEventId())));
+        return SliceResponse.from(result, e -> ClubEventResponse.from(e, likedIds.contains(e.eventId()), images.get(e.eventId())));
     }
 
     /**
@@ -297,9 +291,9 @@ public class ClubEventOrchestrator {
      * @param lowerKeywords 반복 toLowerCase 호출을 피하기 위해 미리 소문자로 변환한 키워드 목록
      */
     private Optional<ClubEventKeywordPair> findFirstMatchingKeyword(
-        ClubEvent event, List<Keyword> keywords, List<String> lowerKeywords) {
-        if (event.getTitle() == null) return Optional.empty();
-        String lowerTitle = event.getTitle().toLowerCase();
+            ClubEventSummaryResult event, List<Keyword> keywords, List<String> lowerKeywords) {
+        if (event.title() == null) return Optional.empty();
+        String lowerTitle = event.title().toLowerCase();
         for (int i = 0; i < lowerKeywords.size(); i++) {
             if (lowerTitle.contains(lowerKeywords.get(i))) {
                 return Optional.of(new ClubEventKeywordPair(event, keywords.get(i).getKoreanKeyword()));
@@ -315,19 +309,19 @@ public class ClubEventOrchestrator {
             .toList();
     }
 
-    private List<Long> toEventIds(SliceResult<ClubEvent> result) {
-        return result.result().stream().map(ClubEvent::getEventId).toList();
+    private List<Long> toEventIds(SliceResult<ClubEventSummaryResult> result) {
+        return result.result().stream().map(ClubEventSummaryResult::eventId).toList();
     }
 
     private List<ClubEventWithKeywordResponse> toKeywordResponses(
         List<ClubEventKeywordPair> pairs, Set<Long> likedIds, Map<Long, List<String>> images) {
         return pairs.stream()
-            .sorted(Comparator.comparing(pair -> pair.event().getCreatedAt(), Comparator.reverseOrder()))
+            .sorted(Comparator.comparing(pair -> pair.event().createdAt(), Comparator.reverseOrder()))
             .map(pair -> ClubEventWithKeywordResponse.from(
                 pair.event(),
                 pair.keyword(),
-                likedIds.contains(pair.event().getEventId()),
-                images.get(pair.event().getEventId())))
+                likedIds.contains(pair.event().eventId()),
+                images.get(pair.event().eventId())))
             .toList();
     }
 
