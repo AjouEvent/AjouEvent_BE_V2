@@ -1,3 +1,8 @@
+server:
+  tomcat:
+    mbean-registry:
+      enabled: true
+
 spring:
   application:
     name: ajouevent-be-v2
@@ -13,7 +18,35 @@ spring:
       - classpath:config/aws.yaml
       - classpath:config/google.yaml
 
+management:
+  server:
+    # 앱 포트(8080)와 분리 — 관리 서버는 별도 서블릿 컨텍스트로 기동되므로
+    # 메인 앱의 SecurityFilterChain이 적용되지 않음
+    # 접근 제어는 AWS 보안 그룹에서 9090 포트를 모니터링 EC2 IP로만 제한
+    port: ${MANAGEMENT_PORT:9090}
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    tags:
+      # 모든 메트릭에 공통 태그로 부착 — 멀티 앱 환경에서 Prometheus 쿼리 시 앱 구분자 역할
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        # 히스토그램 버킷 활성화 — Prometheus에서 histogram_quantile()로 정확한 레이턴시 분위수 계산 가능
+        # 비활성화 시 percentiles 값은 앱 내부 추정값(부정확)으로만 노출됨
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+
 ajou:
+  scheduler:
+    pool-size: 4
+    await-termination-seconds: 30
   swagger:
     server-url: ${SWAGGER_SERVER_URL:http://localhost:8080}
   cors:
