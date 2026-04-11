@@ -48,7 +48,7 @@ public record ClubEventResponse(
         return new ClubEventResponse(
             event.getEventId(),
             event.getTitle(),
-            event.getContent(),
+            event.getContentPreview(),
             event.getWriter(),
             imgUrl,
             event.getCreatedAt(),
