@@ -13,7 +13,7 @@ public record ClubEventWithKeywordResponse(
     @Schema(description = "게시글 제목", example = "[소프트웨어학과] 2024학년도 1학기 장학금 공지")
     String title,
 
-    @Schema(description = "게시글 본문 내용", example = "다음과 같이 장학금 신청을 안내드립니다.")
+    @Schema(description = "게시글 본문 미리보기", example = "다음과 같이 장학금 신청을 안내드립니다...")
     String content,
 
     @Schema(description = "작성자", example = "소프트웨어학과")
