@@ -21,6 +21,7 @@ public class FcmConfig {
         executor.setThreadNamePrefix("fcm-callback-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(30);
+        executor.initialize();
         return executor;
     }
 
@@ -31,6 +32,29 @@ public class FcmConfig {
             executor.getThreadPoolExecutor(),
             "fcm_callback_executor",
             List.of(Tag.of("pool", "fcm-callback"))
+        ).bindTo(registry);
+    }
+
+    @Bean(name = "fcmDefaultExecutor")
+    public ThreadPoolTaskExecutor fcmDefaultExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(16);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("fcm-default-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(30);
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean
+    public MeterBinder fcmDefaultExecutorMetrics(
+            @Qualifier("fcmDefaultExecutor") ThreadPoolTaskExecutor executor) {
+        return registry -> new ExecutorServiceMetrics(
+            executor.getThreadPoolExecutor(),
+            "fcm_default_executor",
+            List.of(Tag.of("pool", "fcm-default"))
         ).bindTo(registry);
     }
 }

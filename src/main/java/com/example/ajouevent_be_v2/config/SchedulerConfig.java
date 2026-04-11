@@ -8,7 +8,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @Configuration
@@ -18,7 +17,7 @@ public class SchedulerConfig {
     private final SchedulerProperties schedulerProperties;
 
     @Bean
-    public TaskScheduler taskScheduler() {
+    public ThreadPoolTaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(schedulerProperties.getPoolSize());
         scheduler.setThreadNamePrefix("app-scheduler-");
@@ -28,9 +27,9 @@ public class SchedulerConfig {
     }
 
     @Bean
-    public MeterBinder schedulerMetrics(TaskScheduler taskScheduler) {
+    public MeterBinder schedulerMetrics(ThreadPoolTaskScheduler taskScheduler) {
         return registry -> new ExecutorServiceMetrics(
-            ((ThreadPoolTaskScheduler) taskScheduler).getScheduledExecutor(),
+            taskScheduler.getScheduledExecutor(),
             "app_scheduler",
             List.of(Tag.of("pool", "app-scheduler"))
         ).bindTo(registry);
