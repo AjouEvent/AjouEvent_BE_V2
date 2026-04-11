@@ -212,10 +212,10 @@ CREATE TABLE IF NOT EXISTS push_clusters (
 -- findAllByPushClusterWithMember
 --   → idx_pct_push_cluster_id (push_cluster_id)
 -- findRecoverableTokens — OR 조건 3개를 각 인덱스로 개별 커버
---   PENDING      AND request_time   < ?  → idx_pct_status_request        (job_status, request_time)
---   IN_PROGRESS  AND processed_time < ?  → idx_pct_status_processed      (job_status, processed_time)
+--   PENDING      AND request_time   < ?  → idx_pct_status_request   (job_status, request_time)
+--   IN_PROGRESS  AND processed_time < ?  → idx_pct_status_processed (job_status, processed_time)
 --   RETRY_PENDING AND retry_after <= ? AND retry_count <= ?
---                                        → idx_pct_status_retry          (job_status, retry_after, retry_count)
+--                                        → idx_pct_status_retry     (job_status, retry_after, retry_count)
 CREATE TABLE IF NOT EXISTS push_cluster_tokens (
     id              BIGINT       NOT NULL AUTO_INCREMENT,
     push_cluster_id BIGINT       NOT NULL,
