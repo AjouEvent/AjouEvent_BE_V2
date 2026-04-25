@@ -28,8 +28,8 @@ import org.springframework.stereotype.Component;
  *
  * <p>ClubEvent:dedup:{eventId}:u:{email}  — 회원 dedup (TTL 24시간)
  * <p>ClubEvent:dedup:{eventId}:a:{hash}   — 비회원 dedup, IP/UA SHA-256 앞 16자 (TTL 24시간)
- * <p>ClubEvent:views:{eventId}            — 조회수 누적 카운터
- * <p>ClubEvent:dirty                      — 변경 대상 더티 셋
+ * <p>ClubEvent:views:{eventId}            — 조회수 누적 카운터 (안전장치 TTL 7일)
+ * <p>ClubEvent:dirty                      — 변경 대상 더티 셋 (TTL 없음, SREM으로 관리)
  * <p>ClubEvent:committed:{eventId}        — DB 커밋 완료 대기 delta (TTL 10분, idempotent용)
  */
 @Component
@@ -42,6 +42,7 @@ public class ClubEventCacheAdapter implements ClubEventCachePort {
     private static final String COMMITTED_PREFIX = "ClubEvent:committed:";
 
     private static final long DEDUP_TTL_SECONDS = 86400L;
+    private static final long VIEW_KEY_TTL_SECONDS = 604800L;
     private static final long COMMITTED_TTL_SECONDS = 600L;
 
     private final StringRedisTemplate stringRedisTemplate;
@@ -95,7 +96,7 @@ public class ClubEventCacheAdapter implements ClubEventCachePort {
             connection -> connection.scan(options))) {
             if (cursor != null) {
                 while (cursor.hasNext()) {
-                    String key = new String(cursor.next());
+                    String key = new String(cursor.next(), StandardCharsets.UTF_8);
                     ids.add(Long.parseLong(key.substring(VIEW_KEY_PREFIX.length())));
                 }
             }
@@ -160,7 +161,8 @@ public class ClubEventCacheAdapter implements ClubEventCachePort {
             incrementViewScript,
             keys,
             String.valueOf(DEDUP_TTL_SECONDS),
-            String.valueOf(eventId));
+            String.valueOf(eventId),
+            String.valueOf(VIEW_KEY_TTL_SECONDS));
     }
 
     private static String hashIdentifier(String ip, String userAgent) {
