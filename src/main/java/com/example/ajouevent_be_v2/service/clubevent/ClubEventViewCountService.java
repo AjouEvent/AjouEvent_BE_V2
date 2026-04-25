@@ -1,7 +1,6 @@
 package com.example.ajouevent_be_v2.service.clubevent;
 
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventCachePort;
-import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventRepositoryPort;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,8 +32,7 @@ public class ClubEventViewCountService {
     private static final int CHUNK_SIZE = 100;
 
     private final ClubEventCachePort clubEventCachePort;
-    // ⚠️ cross-domain: 조회수 Redis → DB 동기화를 위해 ClubEvent 도메인 Repository 직접 참조
-    private final ClubEventRepositoryPort clubEventRepositoryPort;
+    private final ClubEventViewCountWriteService clubEventViewCountWriteService;
 
     public void flushViewCountsToDatabase() {
         // 1. 더티 셋에서 반영 대상 조회
@@ -85,14 +83,13 @@ public class ClubEventViewCountService {
             return;
         }
 
-        // [Read] DB 커밋 전 delta 기록 (subtract 실패 시 재시도용)
-        clubEventCachePort.saveCommittedDeltas(freshMap);
-
         try {
             // [Write] JdbcTemplate Batch Update
-            clubEventRepositoryPort.batchIncrementViews(freshMap);
+            clubEventViewCountWriteService.batchIncrementViews(freshMap);
+            // [Write 이후] DB 반영이 끝난 delta만 committed로 기록
+            clubEventCachePort.saveCommittedDeltas(freshMap);
         } catch (Exception e) {
-            log.error("조회수 DB 반영 실패 — committed 키 정리 후 재시도 대기: {}", e.getMessage());
+            log.error("조회수 DB 반영 실패 — committed 키 정리 후 재시도 대기", e);
             clubEventCachePort.deleteCommittedDeltas(freshMap.keySet());
             return;
         }
