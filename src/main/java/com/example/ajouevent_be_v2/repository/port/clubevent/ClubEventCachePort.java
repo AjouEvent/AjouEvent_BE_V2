@@ -1,28 +1,31 @@
 package com.example.ajouevent_be_v2.repository.port.clubevent;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface ClubEventCachePort {
 
-    // View count deduplication for authenticated users (email-based)
-    boolean isFirstUserRequest(String userEmail, Long eventId);
+    // 조회수 증가 — dedup + INCR + SADD dirty (Lua Script, 원자적)
+    void incrementViewForUser(String userEmail, Long eventId);
 
-    void recordUserRequest(String userEmail, Long eventId);
+    void incrementViewForAnonymous(String ip, String userAgent, Long eventId);
 
-    // View count deduplication for anonymous users (IP + User-Agent based)
-    boolean isFirstAnonymousRequest(String ip, String userAgent, Long eventId);
+    // 스케줄러: 더티 셋에서 DB 반영 대상 eventId 조회
+    Set<Long> getDirtyEventIds();
 
-    void recordAnonymousRequest(String ip, String userAgent, Long eventId);
+    // 스케줄러: SCAN으로 더티 셋 미등록 누락 키 탐지
+    Set<Long> scanViewCountIds();
 
-    // View count management (Redis key: ClubEvent:views:{eventId})
-    void incrementViewCount(Long eventId, Long currentViewCount);
+    // 스케줄러: eventId 별 누적 조회수 delta 조회
+    Long getViewCountDelta(Long eventId);
 
-    // For ViewCountScheduler: scan, read, delete, parse
-    Set<String> scanViewCountKeys();
+    // 스케줄러: 청크 단위 DECRBY + 조건부 정리 (Lua Script, 원자적)
+    void subtractViewCountChunk(Map<Long, Long> deltaMap);
 
-    String getViewCount(String key);
+    // 스케줄러: idempotent 보장용 committed delta 관리
+    void saveCommittedDeltas(Map<Long, Long> deltaMap);
 
-    void deleteKey(String key);
+    Long getCommittedDelta(Long eventId);
 
-    Long extractEventIdFromViewKey(String key);
+    void deleteCommittedDeltas(Set<Long> eventIds);
 }

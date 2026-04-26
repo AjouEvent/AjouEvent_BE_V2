@@ -38,24 +38,11 @@ public class ClubEventQueryService {
             .orElseThrow(() -> new ClubEventException(ClubEventErrorCode.EVENT_NOT_FOUND));
     }
 
-    /**
-     *
-     * @param clubEvent
-     * @param member: 가입된 사용자라면, Email 기반으로 조회수 처리
-     * @param clientIp: 가입된 사용자가 아니라면, IP 기반으로 조회수 처리
-     * @param userAgent: 가입된 사용자가 아닐때,
-     */
     public void handleViewCount(ClubEvent clubEvent, Member member, String clientIp, String userAgent) {
         if (member != null) {
-            if (clubEventCachePort.isFirstUserRequest(member.getEmail(), clubEvent.getEventId())) {
-                clubEventCachePort.recordUserRequest(member.getEmail(), clubEvent.getEventId());
-                clubEventCachePort.incrementViewCount(clubEvent.getEventId(), clubEvent.getViewCount());
-            }
+            clubEventCachePort.incrementViewForUser(member.getEmail(), clubEvent.getEventId());
         } else {
-            if (clubEventCachePort.isFirstAnonymousRequest(clientIp, userAgent, clubEvent.getEventId())) {
-                clubEventCachePort.recordAnonymousRequest(clientIp, userAgent, clubEvent.getEventId());
-                clubEventCachePort.incrementViewCount(clubEvent.getEventId(), clubEvent.getViewCount());
-            }
+            clubEventCachePort.incrementViewForAnonymous(clientIp, userAgent, clubEvent.getEventId());
         }
     }
 

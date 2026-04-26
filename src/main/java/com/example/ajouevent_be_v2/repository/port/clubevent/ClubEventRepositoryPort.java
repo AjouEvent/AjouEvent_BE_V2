@@ -4,9 +4,11 @@ import com.example.ajouevent_be_v2.domain.clubevent.ClubEvent;
 import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.domain.keyword.Keyword;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventSummaryResult;
+import com.example.ajouevent_be_v2.repository.adapter.clubevent.ClubEventJdbcRepositoryAdapter;
 import com.example.ajouevent_be_v2.repository.adapter.clubevent.ClubEventJpaRepositoryAdapter;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Repository;
 public class ClubEventRepositoryPort {
 
     private final ClubEventJpaRepositoryAdapter clubEventJpaRepositoryAdapter;
+    private final ClubEventJdbcRepositoryAdapter clubEventJdbcRepositoryAdapter;
 
     public Optional<ClubEvent> findById(Long eventId) {
         return clubEventJpaRepositoryAdapter.findById(eventId);
@@ -74,5 +77,9 @@ public class ClubEventRepositoryPort {
 
     public void updateViews(Long viewCount, Long eventId) {
         clubEventJpaRepositoryAdapter.updateViews(viewCount, eventId);
+    }
+
+    public void batchIncrementViews(Map<Long, Long> deltaMap) {
+        clubEventJdbcRepositoryAdapter.batchIncrementViews(deltaMap);
     }
 }
