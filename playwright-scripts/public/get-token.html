@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>FCM Token Fetcher</title>
+  </head>
+  <body>
+    <div id="status">Initializing Firebase...</div>
+
+    <!--
+      window.__FIREBASE_CONFIG__ 와 window.__VAPID_KEY__ 는
+      Playwright의 page.addInitScript()가 페이지 로드 전에 주입한다.
+    -->
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+      import {
+        getMessaging,
+        getToken,
+      } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
+
+      const config = window.__FIREBASE_CONFIG__;
+      const vapidKey = window.__VAPID_KEY__;
+
+      document.getElementById('status').textContent = 'Registering service worker...';
+
+      try {
+        const swReg = await navigator.serviceWorker.register(
+          '/firebase-messaging-sw.js'
+        );
+        await navigator.serviceWorker.ready;
+
+        document.getElementById('status').textContent =
+          'Service worker ready. Requesting token...';
+
+        const app = initializeApp(config);
+        const messaging = getMessaging(app);
+
+        const token = await getToken(messaging, {
+          vapidKey,
+          serviceWorkerRegistration: swReg,
+        });
+
+        if (token) {
+          window.__FCM_TOKEN__ = token;
+          document.title = 'TOKEN_READY';
+          document.getElementById('status').textContent = 'Token: ' + token;
+        } else {
+          window.__FCM_ERROR__ = 'getToken() returned empty string';
+          document.title = 'TOKEN_ERROR';
+          document.getElementById('status').textContent =
+            'Error: token is empty (notification permission may be denied)';
+        }
+      } catch (err) {
+        window.__FCM_ERROR__ = err.message;
+        document.title = 'TOKEN_ERROR';
+        document.getElementById('status').textContent = 'Error: ' + err.message;
+      }
+    </script>
+  </body>
+</html>

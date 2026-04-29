@@ -66,7 +66,8 @@ public class AuthOrchestrator {
     }
 
     public TestLoginResponse testLoginWithFcm(String email, String fcmToken) {
-        Member member = memberService.findByEmail(email);
+        String name = email.contains("@") ? email.split("@")[0] : email;
+        Member member = memberService.findOrCreateByInfo(email, name, "소프트웨어학과");
         AuthTokenResult authResult = authService.issueTokens(member, false);
         registerFcmToken(member, fcmToken);
         return new TestLoginResponse(
