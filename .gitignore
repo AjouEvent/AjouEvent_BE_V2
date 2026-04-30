@@ -55,3 +55,8 @@ node_modules/
 **/src/main/resources/firebase/
 fcm-test-frontend/
 k6-load-test/
+playwright-scripts/.env
+!playwright-scripts/.env.example
+playwright-scripts/tokens.json
+playwright-scripts/tokens.csv
+playwright-scripts/node_modules/
