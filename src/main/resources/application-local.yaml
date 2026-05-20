@@ -14,6 +14,17 @@ spring:
 ajou:
   swagger:
     server-url: http://localhost:8080
+  fcm:
+    executor:
+      callback:
+        core-pool-size: 8
+        max-pool-size: 32
+        queue-capacity: 500
+        await-termination-seconds: 30
+      default-pool:
+        core-pool-size: 32
+        max-pool-size: 128
+        queue-capacity: 50000
 
 jwt:
   cookie-secure: false
