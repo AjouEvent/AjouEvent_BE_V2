@@ -1,21 +1,32 @@
 package com.example.ajouevent_be_v2.repository.adapter.clubevent;
 
+import com.example.ajouevent_be_v2.common.dto.SliceResult;
+import com.example.ajouevent_be_v2.domain.clubevent.EventBanner;
+import com.example.ajouevent_be_v2.domain.clubevent.Type;
+import com.example.ajouevent_be_v2.dto.clubevent.ClubEventSummaryResult;
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventCachePort;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -40,12 +51,19 @@ public class ClubEventCacheAdapter implements ClubEventCachePort {
     private static final String DEDUP_PREFIX = "ClubEvent:dedup:";
     private static final String DIRTY_SET_KEY = "ClubEvent:dirty";
     private static final String COMMITTED_PREFIX = "ClubEvent:committed:";
+    private static final String TYPE_EVENTS_PREFIX = "ClubEvent:type-events:";
+    private static final String POPULAR_EVENTS_KEY = "ClubEvent:popular-events";
+    private static final String BANNERS_KEY = "ClubEvent:banners";
 
     private static final long DEDUP_TTL_SECONDS = 86400L;
     private static final long VIEW_KEY_TTL_SECONDS = 604800L;
     private static final long COMMITTED_TTL_SECONDS = 600L;
+    private static final Duration TYPE_EVENTS_TTL = Duration.ofHours(6);
+    private static final Duration POPULAR_EVENTS_TTL = Duration.ofHours(1);
+    private static final Duration BANNERS_TTL = Duration.ofHours(24);
 
     private final StringRedisTemplate stringRedisTemplate;
+    private final ObjectMapper objectMapper;
 
     private DefaultRedisScript<Long> incrementViewScript;
     private DefaultRedisScript<Long> subtractViewChunkScript;
@@ -61,6 +79,49 @@ public class ClubEventCacheAdapter implements ClubEventCachePort {
         subtractViewChunkScript.setScriptSource(
             new ResourceScriptSource(new ClassPathResource("scripts/subtract_view_chunk.lua")));
         subtractViewChunkScript.setResultType(Long.class);
+    }
+
+    @Override
+    public Optional<SliceResult<ClubEventSummaryResult>> getTypeEvents(Type type, String keyword, Pageable pageable) {
+        return getJson(
+            buildTypeEventsKey(type, keyword, pageable),
+            new TypeReference<SliceResult<ClubEventSummaryResult>>() {});
+    }
+
+    @Override
+    public void saveTypeEvents(
+            Type type, String keyword, Pageable pageable, SliceResult<ClubEventSummaryResult> events) {
+        saveJson(buildTypeEventsKey(type, keyword, pageable), events, TYPE_EVENTS_TTL);
+    }
+
+    @Override
+    public void evictTypeEvents(Type type) {
+        deleteByPattern(TYPE_EVENTS_PREFIX + type.name() + ":*");
+    }
+
+    @Override
+    public Optional<List<ClubEventSummaryResult>> getPopularEvents() {
+        return getJson(POPULAR_EVENTS_KEY, new TypeReference<List<ClubEventSummaryResult>>() {});
+    }
+
+    @Override
+    public void savePopularEvents(List<ClubEventSummaryResult> events) {
+        saveJson(POPULAR_EVENTS_KEY, events, POPULAR_EVENTS_TTL);
+    }
+
+    @Override
+    public void evictPopularEvents() {
+        stringRedisTemplate.delete(POPULAR_EVENTS_KEY);
+    }
+
+    @Override
+    public Optional<List<EventBanner>> getBanners() {
+        return getJson(BANNERS_KEY, new TypeReference<List<EventBanner>>() {});
+    }
+
+    @Override
+    public void saveBanners(List<EventBanner> banners) {
+        saveJson(BANNERS_KEY, banners, BANNERS_TTL);
     }
 
     @Override
@@ -153,6 +214,71 @@ public class ClubEventCacheAdapter implements ClubEventCachePort {
             .map(id -> COMMITTED_PREFIX + id)
             .toList();
         stringRedisTemplate.delete(keys);
+    }
+
+    private <T> Optional<T> getJson(String key, TypeReference<T> typeReference) {
+        String json = stringRedisTemplate.opsForValue().get(key);
+        if (json == null) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(objectMapper.readValue(json, typeReference));
+        } catch (JsonProcessingException e) {
+            stringRedisTemplate.delete(key);
+            return Optional.empty();
+        }
+    }
+
+    private void saveJson(String key, Object value, Duration ttl) {
+        try {
+            stringRedisTemplate.opsForValue().set(
+                key,
+                objectMapper.writeValueAsString(value),
+                ttl);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("ClubEvent cache serialization failed", e);
+        }
+    }
+
+    private void deleteByPattern(String pattern) {
+        ScanOptions options = ScanOptions.scanOptions()
+            .match(pattern)
+            .count(100)
+            .build();
+        List<String> keys = new ArrayList<>();
+        try (Cursor<byte[]> cursor = stringRedisTemplate.executeWithStickyConnection(
+            connection -> connection.scan(options))) {
+            if (cursor != null) {
+                while (cursor.hasNext()) {
+                    keys.add(new String(cursor.next(), StandardCharsets.UTF_8));
+                }
+            }
+        }
+        if (!keys.isEmpty()) {
+            stringRedisTemplate.delete(keys);
+        }
+    }
+
+    private String buildTypeEventsKey(Type type, String keyword, Pageable pageable) {
+        return TYPE_EVENTS_PREFIX
+            + type.name()
+            + ":page:" + pageable.getPageNumber()
+            + ":size:" + pageable.getPageSize()
+            + ":sort:" + normalizeSort(pageable.getSort())
+            + ":keyword:" + normalizeKeyword(keyword);
+    }
+
+    private String normalizeSort(Sort sort) {
+        if (sort == null || sort.isUnsorted()) {
+            return "unsorted";
+        }
+        return sort.stream()
+            .map(order -> order.getProperty() + "-" + order.getDirection().name())
+            .collect(Collectors.joining(","));
+    }
+
+    private String normalizeKeyword(String keyword) {
+        return keyword == null ? "" : keyword.trim();
     }
 
     private void executeIncrementView(String dedupKey, Long eventId) {

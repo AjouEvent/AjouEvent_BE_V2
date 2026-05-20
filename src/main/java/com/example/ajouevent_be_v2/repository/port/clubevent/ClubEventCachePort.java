@@ -1,9 +1,32 @@
 package com.example.ajouevent_be_v2.repository.port.clubevent;
 
+import com.example.ajouevent_be_v2.common.dto.SliceResult;
+import com.example.ajouevent_be_v2.domain.clubevent.EventBanner;
+import com.example.ajouevent_be_v2.domain.clubevent.Type;
+import com.example.ajouevent_be_v2.dto.clubevent.ClubEventSummaryResult;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.domain.Pageable;
 
 public interface ClubEventCachePort {
+
+    Optional<SliceResult<ClubEventSummaryResult>> getTypeEvents(Type type, String keyword, Pageable pageable);
+
+    void saveTypeEvents(Type type, String keyword, Pageable pageable, SliceResult<ClubEventSummaryResult> events);
+
+    void evictTypeEvents(Type type);
+
+    Optional<List<ClubEventSummaryResult>> getPopularEvents();
+
+    void savePopularEvents(List<ClubEventSummaryResult> events);
+
+    void evictPopularEvents();
+
+    Optional<List<EventBanner>> getBanners();
+
+    void saveBanners(List<EventBanner> banners);
 
     // 조회수 증가 — dedup + INCR + SADD dirty (Lua Script, 원자적)
     void incrementViewForUser(String userEmail, Long eventId);
