@@ -7,6 +7,7 @@ import com.example.ajouevent_be_v2.domain.clubevent.ClubEventImage;
 import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventCommand;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventSummaryResult;
+import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventCachePort;
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventRepositoryPort;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class ClubEventCommandService {
     private static final int CONTENT_PREVIEW_LENGTH = 200;
 
     private final ClubEventRepositoryPort clubEventRepositoryPort;
+    private final ClubEventCachePort clubEventCachePort;
 
     public void isDuplicateNotice(String englishTopic, String title, String url) {
         Type type = parseType(englishTopic);
@@ -71,6 +73,8 @@ public class ClubEventCommandService {
         clubEvent.getClubEventImageList().addAll(images);
 
         ClubEvent saved = clubEventRepositoryPort.save(clubEvent);
+        clubEventCachePort.evictTypeEvents(type);
+        clubEventCachePort.evictPopularEvents();
         log.info("공지사항 저장 완료 - eventId: {}, type: {}", saved.getEventId(), type);
         return saved;
     }
