@@ -51,8 +51,6 @@ jobs:
         with:
           context: .
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/ajouevent-be:latest
             ${{ secrets.DOCKER_USERNAME }}/ajouevent-be:${{ github.sha }}
@@ -62,7 +60,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          port: ${{ secrets.EC2_PORT }}
+          port: 20000
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "docker-compose.yml,monitoring"
           target: ~/ajouevent
@@ -76,7 +74,7 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          port: ${{ secrets.EC2_PORT }}
+          port: 20000
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: APP_CHANGED,APP_IMAGE,APP_LATEST_IMAGE
           script: |
