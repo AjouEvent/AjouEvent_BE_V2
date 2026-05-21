@@ -12,44 +12,84 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect app image changes
+        id: changes
+        run: |
+          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            changed_files="$(git ls-tree -r --name-only HEAD)"
+          else
+            changed_files="$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})"
+          fi
+
+          if echo "$changed_files" | grep -Eq '^(Dockerfile|build\.gradle|settings\.gradle|gradle/|gradlew|src/)'; then
+            echo "app_changed=true" >> "$GITHUB_OUTPUT"
+            echo "image_tag=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "app_changed=false" >> "$GITHUB_OUTPUT"
+            echo "image_tag=latest" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Log in to Docker Hub
+        if: steps.changes.outputs.app_changed == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Create Firebase service account file
+        if: steps.changes.outputs.app_changed == 'true'
         run: |
           mkdir -p src/main/resources/firebase
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > src/main/resources/firebase/firebase-service-account.json
 
       - name: Build and push Docker image
+        if: steps.changes.outputs.app_changed == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/ajouevent-be:latest
             ${{ secrets.DOCKER_USERNAME }}/ajouevent-be:${{ github.sha }}
 
-      - name: Copy docker-compose.yml to EC2
+      - name: Copy deployment files to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
+          port: ${{ secrets.EC2_PORT }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: docker-compose.yml
+          source: "docker-compose.yml,monitoring"
           target: ~/ajouevent
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
+        env:
+          APP_CHANGED: ${{ steps.changes.outputs.app_changed }}
+          APP_IMAGE: ${{ secrets.DOCKER_USERNAME }}/ajouevent-be:${{ steps.changes.outputs.image_tag }}
+          APP_LATEST_IMAGE: ${{ secrets.DOCKER_USERNAME }}/ajouevent-be:latest
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
+          port: ${{ secrets.EC2_PORT }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: APP_CHANGED,APP_IMAGE,APP_LATEST_IMAGE
           script: |
             cd ~/ajouevent
-            DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/ajouevent-be:${{ github.sha }} docker compose pull app
-            DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/ajouevent-be:${{ github.sha }} docker compose up -d --no-deps app
+            if [ "$APP_CHANGED" = "true" ]; then
+              export DOCKER_IMAGE="$APP_IMAGE"
+              docker compose pull app
+            else
+              export DOCKER_IMAGE="$(docker inspect ajouevent-app --format '{{.Config.Image}}' 2>/dev/null || true)"
+              if [ -z "$DOCKER_IMAGE" ]; then
+                export DOCKER_IMAGE="$APP_LATEST_IMAGE"
+              fi
+            fi
+
+            docker compose up -d --pull missing
             docker image prune -f
