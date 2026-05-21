@@ -8,6 +8,7 @@ services:
     environment:
       REDIS_HOST: ajouevent-redis
       REDIS_PORT: 6379
+      LOKI_URL: http://loki:3100
     ports:
       - "8080:8080"
       - "9090:9090"
@@ -35,8 +36,87 @@ services:
     networks:
       - ajouevent-network
 
+  # ──────────────────────────────────────────────
+  # 모니터링 스택
+  # ──────────────────────────────────────────────
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ajouevent-prometheus
+    restart: always
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+    networks:
+      - ajouevent-network
+
+  loki:
+    image: grafana/loki:latest
+    container_name: ajouevent-loki
+    restart: always
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - ajouevent-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ajouevent-grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - ajouevent-network
+
+  # Docker 컨테이너 메트릭 수집 (cAdvisor)
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: ajouevent-cadvisor
+    restart: always
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8181:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - ajouevent-network
+
 volumes:
   redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  loki_data:
+    driver: local
+  grafana_data:
     driver: local
 
 networks:
