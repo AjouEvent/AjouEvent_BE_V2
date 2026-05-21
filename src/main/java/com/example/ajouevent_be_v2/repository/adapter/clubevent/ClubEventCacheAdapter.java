@@ -5,9 +5,9 @@ import com.example.ajouevent_be_v2.domain.clubevent.EventBanner;
 import com.example.ajouevent_be_v2.domain.clubevent.Type;
 import com.example.ajouevent_be_v2.dto.clubevent.ClubEventSummaryResult;
 import com.example.ajouevent_be_v2.repository.port.clubevent.ClubEventCachePort;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -223,7 +223,7 @@ public class ClubEventCacheAdapter implements ClubEventCachePort {
         }
         try {
             return Optional.of(objectMapper.readValue(json, typeReference));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             stringRedisTemplate.delete(key);
             return Optional.empty();
         }
@@ -235,7 +235,7 @@ public class ClubEventCacheAdapter implements ClubEventCachePort {
                 key,
                 objectMapper.writeValueAsString(value),
                 ttl);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("ClubEvent cache serialization failed", e);
         }
     }
