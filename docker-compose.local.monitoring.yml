@@ -1,0 +1,157 @@
+# 로컬 전체 스택 (앱 빌드 + 모니터링)
+#
+# 사용법:
+#   docker compose -f docker-compose.local.monitoring.yml up -d --build
+
+services:
+  app:
+    build: .
+    container_name: ajouevent-app-local
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      LOKI_URL: http://loki:3100
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - ajouevent-local
+
+  mysql:
+    image: mysql:8.0
+    container_name: ajouevent-mysql-local
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      TZ: Asia/Seoul
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data_local:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - ajouevent-local
+
+  redis:
+    image: redis:7-alpine
+    container_name: ajouevent-redis-local
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_local:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ajouevent-local
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ajouevent-prometheus-local
+    restart: unless-stopped
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus-local.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data_local:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    networks:
+      - ajouevent-local
+
+  loki:
+    image: grafana/loki:latest
+    container_name: ajouevent-loki-local
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data_local:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - ajouevent-local
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ajouevent-grafana-local
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+    volumes:
+      - grafana_data_local:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - ajouevent-local
+
+  # macOS에서는 일부 메트릭이 제한될 수 있음
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: ajouevent-cadvisor-local
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8181:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - ${HOME}/.docker/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - ajouevent-local
+
+volumes:
+  mysql_data_local:
+    driver: local
+  redis_data_local:
+    driver: local
+  prometheus_data_local:
+    driver: local
+  loki_data_local:
+    driver: local
+  grafana_data_local:
+    driver: local
+
+networks:
+  ajouevent-local:
+    driver: bridge
