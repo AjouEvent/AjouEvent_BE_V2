@@ -20,7 +20,7 @@ datasources:
     editable: false
     jsonData:
       derivedFields:
-        - matcherRegex: requestId=(\S+)
+        - matcherRegex: 'requestId="([^"]+)"'
           name: RequestID
           url: ${__value.raw}
           urlDisplayLabel: RequestID

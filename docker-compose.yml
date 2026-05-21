@@ -96,7 +96,9 @@ services:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: ajouevent-cadvisor
     restart: always
-    privileged: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "8181:8080"
     volumes:
@@ -104,9 +106,6 @@ services:
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    devices:
-      - /dev/kmsg
     networks:
       - ajouevent-network
 

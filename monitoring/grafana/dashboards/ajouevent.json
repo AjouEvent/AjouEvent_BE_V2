@@ -694,7 +694,7 @@
       "id": 81,
       "options": {"dedupStrategy": "none", "enableLogDetails": true, "prettifyLogMessage": false, "showCommonLabels": false, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": false},
       "targets": [
-        {"datasource": {"type": "loki", "uid": "loki"}, "expr": "{application=\"ajouevent-be-v2\", level=~\"$level\"}", "refId": "A"}
+        {"datasource": {"type": "loki", "uid": "loki"}, "expr": "{application=\"$application\", level=~\"$level\"}", "refId": "A"}
       ],
       "title": "실시간 애플리케이션 로그",
       "type": "logs"

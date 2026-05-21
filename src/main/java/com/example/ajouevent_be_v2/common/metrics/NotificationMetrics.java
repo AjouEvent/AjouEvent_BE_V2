@@ -27,7 +27,6 @@ public class NotificationMetrics {
             .register(registry);
         this.sendTimer = Timer.builder("notification.send.duration")
             .description("FCM 알림 전송 소요 시간")
-            .publishPercentiles(0.5, 0.95, 0.99)
             .publishPercentileHistogram()
             .register(registry);
     }

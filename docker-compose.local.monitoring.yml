@@ -126,6 +126,9 @@ services:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: ajouevent-cadvisor-local
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "8181:8080"
     volumes:
