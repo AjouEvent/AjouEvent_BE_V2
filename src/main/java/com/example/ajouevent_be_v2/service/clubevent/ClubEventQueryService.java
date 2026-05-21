@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -48,16 +50,73 @@ public class ClubEventQueryService {
 
     public SliceResult<ClubEventSummaryResult> getEventsByType(Type type, String keyword, Pageable pageable) {
         String searchKeyword = keyword != null ? keyword : "";
-        Slice<ClubEventSummaryResult> slice = clubEventRepositoryPort.findByTypeAndTitleContaining(
-            type, searchKeyword, pageable);
-        return SliceResult.from(slice, pageable);
+        return clubEventCachePort.getTypeEvents(type, searchKeyword, pageable)
+            .map(this::refreshCounts)
+            .orElseGet(() -> {
+                Slice<ClubEventSummaryResult> slice = clubEventRepositoryPort.findByTypeAndTitleContaining(
+                    type, searchKeyword, pageable);
+                SliceResult<ClubEventSummaryResult> result = SliceResult.from(slice, pageable);
+                clubEventCachePort.saveTypeEvents(type, searchKeyword, pageable, result);
+                return result;
+            });
+    }
+
+    public void refreshPopularEventsCache() {
+        clubEventCachePort.savePopularEvents(findPopularEventsFromRepository());
     }
 
     public List<ClubEventSummaryResult> getPopularEvents() {
+        return clubEventCachePort.getPopularEvents()
+            .map(this::refreshCounts)
+            .orElseGet(() -> {
+                List<ClubEventSummaryResult> events = findPopularEventsFromRepository();
+                clubEventCachePort.savePopularEvents(events);
+                return events;
+            });
+    }
+
+    private List<ClubEventSummaryResult> findPopularEventsFromRepository() {
         LocalDate now = LocalDate.now();
         LocalDateTime start = now.with(DayOfWeek.MONDAY).atStartOfDay();
         LocalDateTime end = now.with(DayOfWeek.SUNDAY).atTime(LocalTime.MAX);
         return clubEventRepositoryPort.findTop10ByCreatedAtBetween(start, end);
+    }
+
+    private SliceResult<ClubEventSummaryResult> refreshCounts(SliceResult<ClubEventSummaryResult> cached) {
+        return new SliceResult<>(
+            refreshCounts(cached.result()),
+            cached.hasPrevious(),
+            cached.hasNext(),
+            cached.currentPage(),
+            cached.sort());
+    }
+
+    private List<ClubEventSummaryResult> refreshCounts(List<ClubEventSummaryResult> cached) {
+        List<Long> eventIds = cached.stream()
+            .map(ClubEventSummaryResult::eventId)
+            .toList();
+        Map<Long, ClubEvent> events = clubEventRepositoryPort.findAllByIds(eventIds).stream()
+            .collect(Collectors.toMap(ClubEvent::getEventId, Function.identity()));
+        return cached.stream()
+            .map(event -> refreshCounts(event, events.get(event.eventId())))
+            .toList();
+    }
+
+    private ClubEventSummaryResult refreshCounts(ClubEventSummaryResult cached, ClubEvent event) {
+        if (event == null) {
+            return cached;
+        }
+        return new ClubEventSummaryResult(
+            cached.eventId(),
+            cached.title(),
+            cached.contentPreview(),
+            cached.writer(),
+            cached.createdAt(),
+            event.getLikesCount(),
+            event.getViewCount(),
+            cached.subject(),
+            cached.type(),
+            cached.url());
     }
 
     public SliceResult<ClubEventSummaryResult> getEventsByTypes(List<Type> types, String keyword, Pageable pageable) {
@@ -91,7 +150,12 @@ public class ClubEventQueryService {
     }
 
     public List<EventBanner> getBanners() {
-        return eventBannerRepositoryPort.findAllOrderByBannerOrder();
+        return clubEventCachePort.getBanners()
+            .orElseGet(() -> {
+                List<EventBanner> banners = eventBannerRepositoryPort.findAllOrderByBannerOrder();
+                clubEventCachePort.saveBanners(banners);
+                return banners;
+            });
     }
 
     public SliceResult<ClubEventSummaryResult> getEventsByTypeAndKeywords(Type type, List<Keyword> keywords, Pageable pageable) {

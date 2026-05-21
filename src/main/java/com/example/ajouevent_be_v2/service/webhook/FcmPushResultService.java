@@ -15,6 +15,7 @@ import com.example.ajouevent_be_v2.repository.port.token.TokenRepositoryPort;
 import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.MessagingErrorCode;
 import com.google.firebase.messaging.SendResponse;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class FcmPushResultService {
     private final TokenRepositoryPort tokenRepositoryPort;
     private final DiscordMessageService discordMessageService;
     private final PushProperties pushProperties;
+    private final MeterRegistry meterRegistry;
 
     @Transactional
     public void markAsInProgressAndSave(PushCluster pushCluster) {
@@ -68,6 +70,8 @@ public class FcmPushResultService {
         }
 
         pushClusterRepositoryPort.incrementCountsAndUpdateStatus(pushClusterId, successCount, failCount);
+        meterRegistry.counter("fcm.messages.dispatched", "result", "success").increment(successCount);
+        meterRegistry.counter("fcm.messages.dispatched", "result", "fail").increment(failCount);
         log.info("푸시 완료 - PushClusterID: {} 성공: {} 실패: {}", pushClusterId, successCount, failCount);
     }
 
@@ -99,6 +103,8 @@ public class FcmPushResultService {
         }
 
         pushClusterRepositoryPort.incrementRetryCounts(pushClusterId, successCount, failCount);
+        meterRegistry.counter("fcm.messages.dispatched", "result", "success").increment(successCount);
+        meterRegistry.counter("fcm.messages.dispatched", "result", "fail").increment(failCount);
         log.info("재시도 완료 - PushClusterID: {} 성공: {} 실패: {}", pushClusterId, successCount, failCount);
     }
 

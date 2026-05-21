@@ -27,6 +27,10 @@ public class ClubEventRepositoryPort {
         return clubEventJpaRepositoryAdapter.findById(eventId);
     }
 
+    public List<ClubEvent> findAllByIds(List<Long> eventIds) {
+        return clubEventJpaRepositoryAdapter.findAllById(eventIds);
+    }
+
     public ClubEvent save(ClubEvent clubEvent) {
         return clubEventJpaRepositoryAdapter.save(clubEvent);
     }
