@@ -38,8 +38,10 @@ management:
     distribution:
       percentiles-histogram:
         # 히스토그램 버킷 활성화 — Prometheus에서 histogram_quantile()로 정확한 레이턴시 분위수 계산 가능
+        # 비활성화 시 percentiles 값은 앱 내부 추정값(부정확)으로만 노출됨
         http.server.requests: true
-        notification.send.duration: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
 
 ajou:
   scheduler:

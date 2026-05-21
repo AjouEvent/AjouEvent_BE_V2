@@ -1,6 +1,5 @@
 package com.example.ajouevent_be_v2.config;
 
-import com.example.ajouevent_be_v2.common.trace.MdcTaskDecorator;
 import com.example.ajouevent_be_v2.config.properties.FcmExecutorProperties;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.binder.MeterBinder;
@@ -17,7 +16,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class FcmConfig {
 
     private final FcmExecutorProperties fcmExecutorProperties;
-    private final MdcTaskDecorator mdcTaskDecorator;
 
     @Bean(name = "fcmCallbackExecutor")
     public ThreadPoolTaskExecutor fcmCallbackExecutor() {
@@ -29,7 +27,6 @@ public class FcmConfig {
         executor.setThreadNamePrefix("fcm-callback-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(pool.getAwaitTerminationSeconds());
-        executor.setTaskDecorator(mdcTaskDecorator);
         executor.initialize();
         return executor;
     }
@@ -54,7 +51,6 @@ public class FcmConfig {
         executor.setThreadNamePrefix("fcm-default-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(pool.getAwaitTerminationSeconds());
-        executor.setTaskDecorator(mdcTaskDecorator);
         executor.initialize();
         return executor;
     }
