@@ -29,7 +29,7 @@ public class EventBanner {
     @Column(name = "banner_order", nullable = false)
     private Long bannerOrder;
 
-    @Column(name = "img_url", nullable = false)
+    @Column(name = "img_url", nullable = false, columnDefinition = "TEXT")
     private String imgUrl;
 
     @Column(name = "site_url", nullable = false)
