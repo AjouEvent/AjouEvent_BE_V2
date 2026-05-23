@@ -18,7 +18,6 @@ import com.example.ajouevent_be_v2.service.member.MemberService;
 import com.example.ajouevent_be_v2.service.token.FcmTokenCommandService;
 import com.example.ajouevent_be_v2.service.token.TokenService;
 import com.example.ajouevent_be_v2.service.topic.TopicQueryService;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -78,10 +77,9 @@ public class AuthOrchestrator {
     private void sendNewMemberDiscordNotification(Member member) {
         try {
             String message = String.format(
-                "🎉 신규 회원 가입\n가입 일시: %s\n이름: %s\n이메일: %s\n학과: %s",
-                LocalDateTime.now(),
+                "%d번째 유저 %s(%s) 님이 회원가입했습니다!",
+                member.getId(),
                 member.getName(),
-                member.getEmail(),
                 member.getMajor() != null ? member.getMajor() : "미입력"
             );
             discordMessageService.sendMessage(message);
