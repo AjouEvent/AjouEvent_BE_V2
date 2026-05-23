@@ -28,7 +28,7 @@ public class ClubEventImage {
     @Column(name = "image_id")
     private Long imageId;
 
-    @Column(name = "url")
+    @Column(name = "url", length = 2083)
     private String url;
 
     @ManyToOne(fetch = FetchType.LAZY)

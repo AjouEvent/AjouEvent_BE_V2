@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS club_events (
 -- club_event_images
 CREATE TABLE IF NOT EXISTS club_event_images (
     image_id      BIGINT       NOT NULL AUTO_INCREMENT,
-    url           VARCHAR(255),
+    url           VARCHAR(2083),
     club_event_id BIGINT,
     PRIMARY KEY (image_id),
     CONSTRAINT fk_club_event_images_club_event FOREIGN KEY (club_event_id) REFERENCES club_events (event_id)
@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS club_event_images (
 CREATE TABLE IF NOT EXISTS event_banners (
     event_banner_id BIGINT       NOT NULL AUTO_INCREMENT,
     banner_order    BIGINT       NOT NULL,
-    img_url         VARCHAR(255) NOT NULL,
+    img_url         TEXT         NOT NULL,
     site_url        VARCHAR(255) NOT NULL,
     start_date      DATE         NOT NULL,
     end_date        DATE         NOT NULL,

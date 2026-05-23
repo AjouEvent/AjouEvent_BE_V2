@@ -16,6 +16,8 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class PushClusterTokenBulkRepositoryAdapter {
 
+    private static final int CHUNK_SIZE = 500;
+
     private final JdbcTemplate jdbcTemplate;
 
     @PersistenceContext
@@ -24,27 +26,30 @@ public class PushClusterTokenBulkRepositoryAdapter {
     public void saveAll(List<PushClusterToken> clusterTokens) {
         String sql = "INSERT INTO push_cluster_tokens (push_cluster_id, member_id, token_value, job_status, request_time, processed_time, retry_count, retry_after) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                PushClusterToken token = clusterTokens.get(i);
-                ps.setLong(1, token.getPushCluster().getId());
-                ps.setLong(2, token.getMember().getId());
-                ps.setString(3, token.getTokenValue());
-                ps.setString(4, token.getJobStatus().name());
-                ps.setTimestamp(5, java.sql.Timestamp.valueOf(token.getRequestTime()));
-                ps.setTimestamp(6, token.getProcessedTime() != null
-                    ? java.sql.Timestamp.valueOf(token.getProcessedTime()) : null);
-                ps.setInt(7, token.getRetryCount());
-                ps.setTimestamp(8, token.getRetryAfter() != null
-                    ? java.sql.Timestamp.valueOf(token.getRetryAfter()) : null);
-            }
+        for (int start = 0; start < clusterTokens.size(); start += CHUNK_SIZE) {
+            List<PushClusterToken> chunk = clusterTokens.subList(start, Math.min(start + CHUNK_SIZE, clusterTokens.size()));
+            jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    PushClusterToken token = chunk.get(i);
+                    ps.setLong(1, token.getPushCluster().getId());
+                    ps.setLong(2, token.getMember().getId());
+                    ps.setString(3, token.getTokenValue());
+                    ps.setString(4, token.getJobStatus().name());
+                    ps.setTimestamp(5, java.sql.Timestamp.valueOf(token.getRequestTime()));
+                    ps.setTimestamp(6, token.getProcessedTime() != null
+                        ? java.sql.Timestamp.valueOf(token.getProcessedTime()) : null);
+                    ps.setInt(7, token.getRetryCount());
+                    ps.setTimestamp(8, token.getRetryAfter() != null
+                        ? java.sql.Timestamp.valueOf(token.getRetryAfter()) : null);
+                }
 
-            @Override
-            public int getBatchSize() {
-                return clusterTokens.size();
-            }
-        });
+                @Override
+                public int getBatchSize() {
+                    return chunk.size();
+                }
+            });
+        }
     }
 
     public void updateAll(List<PushClusterToken> clusterTokens) {
