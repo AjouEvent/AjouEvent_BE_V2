@@ -6,10 +6,11 @@ import com.example.ajouevent_be_v2.domain.member.Member;
 import com.example.ajouevent_be_v2.domain.member.Token;
 import com.example.ajouevent_be_v2.domain.topic.Topic;
 import com.example.ajouevent_be_v2.dto.auth.AuthTokenResult;
-import com.example.ajouevent_be_v2.dto.auth.GoogleUserInfoResult;
+import com.example.ajouevent_be_v2.dto.auth.GoogleOauthResult;
 import com.example.ajouevent_be_v2.dto.auth.LoginResponse;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
 import com.example.ajouevent_be_v2.dto.auth.TestLoginResponse;
+import com.example.ajouevent_be_v2.service.calendar.CalendarCommandService;
 import com.example.ajouevent_be_v2.dto.member.MemberLoginResult;
 import com.example.ajouevent_be_v2.service.auth.AuthService;
 import com.example.ajouevent_be_v2.service.auth.OauthService;
@@ -37,15 +38,22 @@ public class AuthOrchestrator {
     private final KeywordQueryService keywordQueryService;
     private final TokenService tokenService;
     private final DiscordMessageService discordMessageService;
+    private final CalendarCommandService calendarCommandService;
 
     public AuthTokenResult socialLogin(OauthRequest request) {
-        GoogleUserInfoResult userInfo = oauthService.getUserInfo(request);
-        MemberLoginResult memberResult = memberService.findOrCreateMember(userInfo);
+        GoogleOauthResult oauthResult = oauthService.getOauthResult(request);
+        MemberLoginResult memberResult = memberService.findOrCreateMember(oauthResult.userInfo());
         if (memberResult.isNewMember()) {
             sendNewMemberDiscordNotification(memberResult.member());
         }
         if (request.fcmToken() != null) {
             registerFcmToken(memberResult.member(), request.fcmToken());
+        }
+        if (oauthResult.refreshToken() != null) {
+            calendarCommandService.saveRefreshToken(
+                memberResult.member().getEmail(),
+                oauthResult.refreshToken()
+            );
         }
         return authService.issueTokens(memberResult.member(), memberResult.isNewMember());
     }

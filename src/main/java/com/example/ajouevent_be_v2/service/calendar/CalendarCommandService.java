@@ -85,7 +85,7 @@ public class CalendarCommandService {
         postCalendarEvent(email, accessToken, request);
     }
 
-    private void saveRefreshToken(String email, String refreshToken) {
+    public void saveRefreshToken(String email, String refreshToken) {
         try {
             Path dir = tokenDirectory();
             if (!Files.exists(dir)) {
@@ -93,6 +93,7 @@ public class CalendarCommandService {
             }
             Path tokenFile = dir.resolve(sanitize(email));
             Files.writeString(tokenFile, refreshToken);
+            log.info("Google Calendar refresh token 저장 완료 - email: {}", email);
         } catch (IOException e) {
             log.error("캘린더 refresh token 저장 실패 - email: {}", email, e);
             throw new AuthException(AuthErrorCode.CALENDAR_NOT_CONNECTED);
