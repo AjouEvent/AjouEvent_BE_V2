@@ -32,7 +32,7 @@ import org.springframework.web.client.RestClientException;
 @RequiredArgsConstructor
 public class CalendarCommandService {
 
-    private static final String TOKENS_DIR = "tokens";
+    private static final String DEFAULT_TOKENS_DIR = "tokens";
 
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final GoogleProperties googleProperties;
@@ -87,7 +87,7 @@ public class CalendarCommandService {
 
     private void saveRefreshToken(String email, String refreshToken) {
         try {
-            Path dir = Paths.get(TOKENS_DIR);
+            Path dir = tokenDirectory();
             if (!Files.exists(dir)) {
                 Files.createDirectories(dir);
             }
@@ -100,7 +100,7 @@ public class CalendarCommandService {
     }
 
     private String loadRefreshToken(String email) {
-        Path tokenFile = Paths.get(TOKENS_DIR, sanitize(email));
+        Path tokenFile = tokenDirectory().resolve(sanitize(email));
         if (!Files.exists(tokenFile)) {
             throw new AuthException(AuthErrorCode.CALENDAR_NOT_CONNECTED);
         }
@@ -114,6 +114,14 @@ public class CalendarCommandService {
 
     private String sanitize(String email) {
         return email.replaceAll("[^a-zA-Z0-9_-]", "_");
+    }
+
+    private Path tokenDirectory() {
+        String configuredDirectory = googleProperties.getTokenDirectory();
+        if (configuredDirectory == null || configuredDirectory.isBlank()) {
+            return Paths.get(DEFAULT_TOKENS_DIR);
+        }
+        return Paths.get(configuredDirectory);
     }
 
     private String refreshAccessToken(String refreshToken) {

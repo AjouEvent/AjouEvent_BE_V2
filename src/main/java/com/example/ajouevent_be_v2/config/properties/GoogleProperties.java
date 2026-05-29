@@ -15,4 +15,5 @@ public class GoogleProperties {
     private String tokenEndpoint;
     private String calendarApiUrl;
     private String peopleApiUrl;
+    private String tokenDirectory;
 }
