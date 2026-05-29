@@ -4,3 +4,4 @@ ajou:
     token-endpoint: https://oauth2.googleapis.com/token
     calendar-api-url: https://www.googleapis.com/calendar/v3/calendars/{calendarId}/events
     people-api-url: https://people.googleapis.com/v1/people/me?personFields=organizations
+    token-directory: ${CALENDAR_TOKEN_DIRECTORY:/app/tokens}

@@ -12,6 +12,8 @@ services:
     ports:
       - "8080:8080"
       - "9090:9090"
+    volumes:
+      - calendar_tokens:/app/tokens
     depends_on:
       redis:
         condition: service_healthy
@@ -117,6 +119,8 @@ volumes:
   loki_data:
     driver: local
   grafana_data:
+    driver: local
+  calendar_tokens:
     driver: local
 
 networks:
