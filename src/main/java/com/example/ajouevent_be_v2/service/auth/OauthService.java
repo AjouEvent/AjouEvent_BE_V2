@@ -3,6 +3,7 @@ package com.example.ajouevent_be_v2.service.auth;
 import com.example.ajouevent_be_v2.common.exception.auth.AuthErrorCode;
 import com.example.ajouevent_be_v2.common.exception.auth.AuthException;
 import com.example.ajouevent_be_v2.config.properties.GoogleProperties;
+import com.example.ajouevent_be_v2.dto.auth.GoogleOauthResult;
 import com.example.ajouevent_be_v2.dto.auth.GooglePeopleResult;
 import com.example.ajouevent_be_v2.dto.auth.GoogleUserInfoResult;
 import com.example.ajouevent_be_v2.dto.auth.OauthRequest;
@@ -38,7 +39,7 @@ public class OauthService {
     private final DefaultOAuth2UserService userService = new DefaultOAuth2UserService();
     private final RestClient restClient = RestClient.create();
 
-    public GoogleUserInfoResult getUserInfo(OauthRequest request) {
+    public GoogleOauthResult getOauthResult(OauthRequest request) {
         ClientRegistration clientRegistration =
             clientRegistrationRepository.findByRegistrationId(googleProperties.getRegistrationId());
 
@@ -67,6 +68,9 @@ public class OauthService {
         try {
             var tokenResponse = tokenResponseClient.getTokenResponse(grantRequest);
             String accessToken = tokenResponse.getAccessToken().getTokenValue();
+            String refreshToken = tokenResponse.getRefreshToken() != null
+                ? tokenResponse.getRefreshToken().getTokenValue()
+                : null;
 
             OAuth2User oAuth2User = userService.loadUser(
                 new OAuth2UserRequest(clientRegistration, tokenResponse.getAccessToken())
@@ -74,10 +78,13 @@ public class OauthService {
 
             String department = fetchDepartmentFromPeopleApi(accessToken);
 
-            return new GoogleUserInfoResult(
-                oAuth2User.getAttribute("email"),
-                oAuth2User.getAttribute("name"),
-                department
+            return new GoogleOauthResult(
+                new GoogleUserInfoResult(
+                    oAuth2User.getAttribute("email"),
+                    oAuth2User.getAttribute("name"),
+                    department
+                ),
+                refreshToken
             );
         } catch (OAuth2AuthorizationException e) {
             log.warn("OAuth2 토큰 교환 실패: {}", e.getMessage());
