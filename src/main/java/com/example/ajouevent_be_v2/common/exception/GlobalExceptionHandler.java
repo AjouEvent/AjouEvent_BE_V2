@@ -1,9 +1,11 @@
 package com.example.ajouevent_be_v2.common.exception;
 
 import com.example.ajouevent_be_v2.common.exception.common.CommonErrorCode;
+import com.example.ajouevent_be_v2.common.exception.auth.AuthErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -32,6 +34,13 @@ public class GlobalExceptionHandler {
         log.error("[IllegalArgumentException] {}", e.getMessage(), e);
         return ResponseEntity.status(CommonErrorCode.VALIDATION_ERROR.getStatus())
                 .body(new ErrorResponse(CommonErrorCode.VALIDATION_ERROR.getCode(), e.getMessage()));
+    }
+
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<ErrorResponse> handleMissingRequestCookie(MissingRequestCookieException e) {
+        log.warn("[MissingRequestCookieException] required cookie is missing - {}", e.getCookieName());
+        return ResponseEntity.status(AuthErrorCode.UNAUTHORIZED.getStatus())
+                .body(ErrorResponse.of(AuthErrorCode.UNAUTHORIZED));
     }
 
     @ExceptionHandler(Exception.class)
