@@ -46,7 +46,11 @@ public class SecurityConfig implements WebMvcConfigurer {
             "/api/users/oauth", "/api/users/reissue-token", "/api/users/logout",
             "/api/topic/all",
             "/api/webhook/crawling",
-            "/api/event/banner"
+            "/api/event/banner",
+            "/api/event/popular",
+            "/api/event/subscribed",
+            "/api/event/detail/**",
+            "/api/event/{type}"
     };
 
     private static final String[] LOCAL_AUTH_WHITELIST = {
