@@ -1,4 +1,8 @@
 ajou:
   discord:
-    name: ajouevent
-    webhook-url: ${DISCORD_WEBHOOK_URL}
+    error:
+      name: ajouevent-discord-error
+      webhook-url: ${DISCORD_ERROR_WEBHOOK_URL}
+    member:
+      name: ajouevent-discord-member
+      webhook-url: ${DISCORD_MEMBER_WEBHOOK_URL}

@@ -6,8 +6,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "${ajou.discord.error.name}", url = "${ajou.discord.error.webhook-url}")
-public interface DiscordFeignClient {
+@FeignClient(name = "${ajou.discord.member.name}", url = "${ajou.discord.member.webhook-url}")
+public interface DiscordMemberFeignClient {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     void sendMessage(@RequestBody DiscordMessage discordMessage);
