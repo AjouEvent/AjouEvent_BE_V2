@@ -54,10 +54,6 @@ public interface PushNotificationJpaRepositoryAdapter extends JpaRepository<Push
     void updateReadStatusByIds(@Param("ids") List<Long> ids, @Param("now") LocalDateTime now);
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE PushNotification p SET p.isRead = true, p.clickedAt = :now WHERE p.id IN :ids AND p.isRead = false")
-    void updateReadStatusByIdsWhereUnread(@Param("ids") List<Long> ids, @Param("now") LocalDateTime now);
-
-    @Modifying(clearAutomatically = true)
     @Query("UPDATE PushNotification p SET p.isRead = true, p.clickedAt = :now WHERE p.member = :member AND p.isRead = false")
     void updateAllUnreadByMember(@Param("member") Member member, @Param("now") LocalDateTime now);
 }

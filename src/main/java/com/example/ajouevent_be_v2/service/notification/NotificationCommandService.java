@@ -36,17 +36,6 @@ public class NotificationCommandService {
     }
 
     @Transactional
-    public void markPageNotificationsAsRead(List<PushNotification> pageNotifications) {
-        if (pageNotifications.isEmpty()) {
-            return;
-        }
-        List<Long> ids = pageNotifications.stream()
-            .map(PushNotification::getId)
-            .toList();
-        pushNotificationRepositoryPort.updateReadStatusByIdsWhereUnread(ids, LocalDateTime.now());
-    }
-
-    @Transactional
     public void markAllAsReadByMember(Member member) {
         pushNotificationRepositoryPort.updateAllUnreadByMember(member, LocalDateTime.now());
     }
