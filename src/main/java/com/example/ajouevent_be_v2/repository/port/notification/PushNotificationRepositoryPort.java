@@ -63,10 +63,6 @@ public class PushNotificationRepositoryPort {
         pushNotificationJpaRepositoryAdapter.updateReadStatusByIds(ids, now);
     }
 
-    public void updateReadStatusByIdsWhereUnread(List<Long> ids, LocalDateTime now) {
-        pushNotificationJpaRepositoryAdapter.updateReadStatusByIdsWhereUnread(ids, now);
-    }
-
     public PushNotification save(PushNotification pushNotification) {
         return pushNotificationJpaRepositoryAdapter.save(pushNotification);
     }

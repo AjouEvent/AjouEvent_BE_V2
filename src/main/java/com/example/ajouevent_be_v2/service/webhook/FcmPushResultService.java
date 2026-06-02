@@ -203,7 +203,7 @@ public class FcmPushResultService {
             case SENDER_ID_MISMATCH:
                 // Firebase 프로젝트 Sender ID 불일치 — 서버 설정 오류. 운영자 확인 필요
                 token.markAsPermanentFail();
-                discordMessageService.sendMessage(
+                discordMessageService.sendErrorMessage(
                     String.format("[FCM SENDER_ID_MISMATCH] pushClusterId=%d, token=%s",
                         token.getPushCluster().getId(), token.getTokenValue()));
                 return 1;

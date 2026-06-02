@@ -90,7 +90,7 @@ public class AuthOrchestrator {
                 member.getName(),
                 member.getMajor() != null ? member.getMajor() : "미입력"
             );
-            discordMessageService.sendMessage(message);
+            discordMessageService.sendMemberMessage(message);
         } catch (Exception e) {
             log.warn("Discord 신규 회원 알림 전송 실패 - email: {}", member.getEmail(), e);
         }

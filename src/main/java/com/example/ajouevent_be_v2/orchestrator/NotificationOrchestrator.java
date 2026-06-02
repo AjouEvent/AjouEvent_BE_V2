@@ -24,13 +24,11 @@ public class NotificationOrchestrator {
 
     public SliceResponse<TopicNotificationResponse> getTopicNotifications(Member member, Pageable pageable) {
         SliceResult<PushNotification> sliceResult = notificationQueryService.getTopicNotifications(member, pageable);
-        notificationCommandService.markPageNotificationsAsRead(sliceResult.result());
         return SliceResponse.from(sliceResult, TopicNotificationResponse::from);
     }
 
     public SliceResponse<KeywordNotificationResponse> getKeywordNotifications(Member member, Pageable pageable) {
         SliceResult<PushNotification> sliceResult = notificationQueryService.getKeywordNotifications(member, pageable);
-        notificationCommandService.markPageNotificationsAsRead(sliceResult.result());
         return SliceResponse.from(sliceResult, KeywordNotificationResponse::from);
     }
 
