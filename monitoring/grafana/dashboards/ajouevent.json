@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "AjouEvent 통합 모니터링 — JVM · HTTP · DB · ThreadPool · FCM · Docker",
+  "description": "AjouEvent 통합 모니터링 — JVM · HTTP · DB · ThreadPool · FCM · Docker · 크롤링",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -611,7 +611,7 @@
       "id": 71,
       "options": {"legend": {"calcs": ["lastNotNull", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
       "targets": [
-        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "rate(container_cpu_usage_seconds_total{job=\"cadvisor\",id=~\"/docker/.+\"}[1m])", "legendFormat": "{{id}}", "refId": "A"}
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "rate(container_cpu_usage_seconds_total{job=\"cadvisor\",name!=\"\"}[1m])", "legendFormat": "{{name}}", "refId": "A"}
       ],
       "title": "컨테이너 CPU 사용률",
       "type": "timeseries"
@@ -632,8 +632,8 @@
       "id": 72,
       "options": {"legend": {"calcs": ["lastNotNull", "max"], "displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
       "targets": [
-        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "container_memory_usage_bytes{job=\"cadvisor\",id=~\"/docker/.+\"}", "legendFormat": "{{id}} Usage", "refId": "A"},
-        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "container_memory_working_set_bytes{job=\"cadvisor\",id=~\"/docker/.+\"}", "legendFormat": "{{id}} Working Set", "refId": "B"}
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "container_memory_usage_bytes{job=\"cadvisor\",name!=\"\"}", "legendFormat": "{{name}} Usage", "refId": "A"},
+        {"datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "container_memory_working_set_bytes{job=\"cadvisor\",name!=\"\"}", "legendFormat": "{{name}} Working Set", "refId": "B"}
       ],
       "title": "컨테이너 메모리 사용량",
       "type": "timeseries"
@@ -697,6 +697,64 @@
         {"datasource": {"type": "loki", "uid": "loki"}, "expr": "{application=\"$application\", level=~\"$level\"}", "refId": "A"}
       ],
       "title": "실시간 애플리케이션 로그",
+      "type": "logs"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 118},
+      "id": 90,
+      "title": "크롤링 서비스 (Loki)",
+      "type": "row"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "loki"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 12, "x": 0, "y": 119},
+      "id": 91,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [
+        {"datasource": {"type": "loki", "uid": "loki"}, "expr": "sum(count_over_time({service=\"ajouevent-crawling\"} |= \"crawl_tick\" [1h]))", "legendFormat": "실행 횟수 (1h)", "refId": "A"}
+      ],
+      "title": "크롤링 실행 횟수 (1h)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "loki"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]},
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 4, "w": 12, "x": 12, "y": 119},
+      "id": 92,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [
+        {"datasource": {"type": "loki", "uid": "loki"}, "expr": "sum(count_over_time({service=\"ajouevent-crawling\"} |~ \"(?i)(error|panic|fatal)\" [1h]))", "legendFormat": "에러 수 (1h)", "refId": "A"}
+      ],
+      "title": "크롤링 에러 수 (1h)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 14, "w": 24, "x": 0, "y": 123},
+      "id": 93,
+      "options": {"dedupStrategy": "none", "enableLogDetails": true, "prettifyLogMessage": false, "showCommonLabels": false, "showLabels": true, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": false},
+      "targets": [
+        {"datasource": {"type": "loki", "uid": "loki"}, "expr": "{service=\"ajouevent-crawling\"}", "refId": "A"}
+      ],
+      "title": "크롤링 실시간 로그",
       "type": "logs"
     }
   ],
