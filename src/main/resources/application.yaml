@@ -45,6 +45,10 @@ ajou:
   scheduler:
     pool-size: 4
     await-termination-seconds: 30
+    # transaction outbox 복구 릴레이(PushPollingPublisherScheduler) on/off
+    # false 로 두면 @Scheduled 빈 자체가 등록되지 않음 — 재배포 없이 환경변수로 토글 가능
+    enabled:
+      push-polling: ${SCHEDULER_PUSH_POLLING_ENABLED:true}
   swagger:
     server-url: ${SWAGGER_SERVER_URL:http://localhost:8080}
   cors:
