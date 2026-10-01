@@ -2,6 +2,7 @@ package com.example.ajouevent_be_v2.repository.port.push;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import com.example.ajouevent_be_v2.domain.clubevent.JobStatus;
 import com.example.ajouevent_be_v2.domain.push.PushCluster;
@@ -28,6 +29,10 @@ public class PushClusterTokenRepositoryPort {
 
     public void bulkUpdateAll(List<PushClusterToken> clusterTokens) {
         pushClusterTokenBulkRepositoryAdapter.updateAll(clusterTokens);
+    }
+
+    public Map<Long, JobStatus> lockStatuses(List<Long> ids) {
+        return pushClusterTokenBulkRepositoryAdapter.lockStatuses(ids);
     }
 
     public List<PushClusterToken> findRecoverableTokens(LocalDateTime staleThreshold, LocalDateTime now, int maxRetryCount) {

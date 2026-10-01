@@ -3,6 +3,7 @@ package com.example.ajouevent_be_v2.service.webhook;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.example.ajouevent_be_v2.common.discord.DiscordMessageService;
 import com.example.ajouevent_be_v2.config.properties.PushProperties;
@@ -108,10 +109,30 @@ public class FcmPushResultService {
         log.info("재시도 완료 - PushClusterID: {} 성공: {} 실패: {}", pushClusterId, successCount, failCount);
     }
 
+    /**
+     * 발송 허가를 얻은 직후 호출한다. 배치 토큰을 행 락으로 잠근 뒤, 현재 상태가 expected 인 토큰만 IN_PROGRESS 로 선점한다.
+     * dispatch 스레드와 폴링 릴레이가 같은 토큰을 동시에 집더라도 한쪽만 선점에 성공하므로 중복 발송되지 않는다.
+     * @return 선점에 성공한 토큰 (이 토큰들로만 메시지를 만들어 발송해야 한다)
+     */
     @Transactional
-    public void markBatchAsSendingAndSave(List<PushClusterToken> batch) {
-        batch.forEach(PushClusterToken::markAsSending);
-        pushClusterTokenRepositoryPort.bulkUpdateAll(batch);
+    public List<PushClusterToken> claimForSending(List<PushClusterToken> batch, JobStatus expected) {
+        if (batch.isEmpty()) {
+            return batch;
+        }
+        Map<Long, JobStatus> current = pushClusterTokenRepositoryPort.lockStatuses(
+            batch.stream().map(PushClusterToken::getId).toList());
+        List<PushClusterToken> claimed = batch.stream()
+            .filter(token -> current.get(token.getId()) == expected)
+            .toList();
+        if (claimed.isEmpty()) {
+            return claimed;
+        }
+        claimed.forEach(PushClusterToken::markAsSending);
+        pushClusterTokenRepositoryPort.bulkUpdateAll(claimed);
+        if (claimed.size() < batch.size()) {
+            log.info("발송 선점 - 대상 {}건 중 {}건 선점 (나머지는 다른 경로가 이미 처리)", batch.size(), claimed.size());
+        }
+        return claimed;
     }
 
     // onFailure는 FCM 에러 코드가 아닌 Java 레벨 예외 (네트워크 단절, SDK 타임아웃 등)다.
@@ -133,11 +154,19 @@ public class FcmPushResultService {
             return recoverableTokens;
         }
 
+        // 조회 이후 dispatch 스레드가 먼저 선점(IN_PROGRESS)한 토큰은 제외한다.
+        // 조회 시점의 상태가 그대로인 행만 행 락으로 확보해, 이 트랜잭션이 끝날 때까지 dispatch 선점이 끼어들지 못하게 한다.
+        Map<Long, JobStatus> current = pushClusterTokenRepositoryPort.lockStatuses(
+            recoverableTokens.stream().map(PushClusterToken::getId).toList());
+        List<PushClusterToken> unchanged = recoverableTokens.stream()
+            .filter(token -> current.get(token.getId()) == token.getJobStatus())
+            .toList();
+
         List<PushClusterToken> toRetry = new ArrayList<>();
         List<PushClusterToken> staleConverted = new ArrayList<>();
         List<PushClusterToken> toPermanentFail = new ArrayList<>();
 
-        for (PushClusterToken token : recoverableTokens) {
+        for (PushClusterToken token : unchanged) {
             if (token.getRetryCount() >= pushProperties.getMaxRetryCount()) {
                 token.markAsPermanentFail();
                 toPermanentFail.add(token);

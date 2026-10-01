@@ -11,8 +11,11 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "ajou.fcm.executor")
 public class FcmExecutorProperties {
 
+    private int maxInFlightBatches = 3;
+    private long acquireTimeoutSeconds = 300;
     private Pool callback = new Pool();
     private Pool defaultPool = new Pool();
+    private Pool dispatch = new Pool();
 
     @Getter
     @Setter

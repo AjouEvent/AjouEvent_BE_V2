@@ -2,8 +2,13 @@ package com.example.ajouevent_be_v2.repository.adapter.push;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.example.ajouevent_be_v2.domain.clubevent.JobStatus;
 import com.example.ajouevent_be_v2.domain.push.PushClusterToken;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -75,5 +80,26 @@ public class PushClusterTokenBulkRepositoryAdapter {
         });
 
         clusterTokens.forEach(entityManager::detach);
+    }
+
+    /**
+     * 주어진 토큰 행을 PK 오름차순으로 잠그고(SELECT ... FOR UPDATE) 현재 상태를 반환한다.
+     * 호출자의 트랜잭션이 끝날 때까지 다른 트랜잭션은 같은 행을 잠그거나 갱신할 수 없다.
+     * 잠금 순서를 PK 오름차순 하나로 통일해, 발송 선점과 폴링 릴레이 복구가 서로 교착하지 않게 한다.
+     */
+    public Map<Long, JobStatus> lockStatuses(List<Long> ids) {
+        List<Long> sortedIds = new ArrayList<>(ids);
+        Collections.sort(sortedIds);
+        Map<Long, JobStatus> statuses = new HashMap<>();
+        for (int start = 0; start < sortedIds.size(); start += CHUNK_SIZE) {
+            List<Long> chunk = sortedIds.subList(start, Math.min(start + CHUNK_SIZE, sortedIds.size()));
+            String placeholders = String.join(",", Collections.nCopies(chunk.size(), "?"));
+            String sql = "SELECT id, job_status FROM push_cluster_tokens WHERE id IN (" + placeholders
+                + ") ORDER BY id FOR UPDATE";
+            jdbcTemplate.query(sql, rs -> {
+                statuses.put(rs.getLong("id"), JobStatus.valueOf(rs.getString("job_status")));
+            }, chunk.toArray());
+        }
+        return statuses;
     }
 }

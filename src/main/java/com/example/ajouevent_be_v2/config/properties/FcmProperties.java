@@ -15,4 +15,6 @@ public class FcmProperties {
     private String defaultImageUrl;
     private String redirectionUrlPrefix;
     private String defaultClickActionUrl;
+    private int connectTimeoutMillis = 10_000;
+    private int readTimeoutMillis = 30_000;
 }
