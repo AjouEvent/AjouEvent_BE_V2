@@ -22,9 +22,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.Cursor;
@@ -42,7 +45,13 @@ import org.springframework.stereotype.Component;
  * <p>ClubEvent:views:{eventId}            — 조회수 누적 카운터 (안전장치 TTL 7일)
  * <p>ClubEvent:dirty                      — 변경 대상 더티 셋 (TTL 없음, SREM으로 관리)
  * <p>ClubEvent:committed:{eventId}        — DB 커밋 완료 대기 delta (TTL 10분, idempotent용)
+ *
+ * <p>장애 격리: 요청 경로에서 호출되는 캐시 조회·저장·무효화와 조회수 증가는 Redis 장애 시 예외를 던지지 않는다.
+ * 캐시 조회는 미스로 처리해 DB로 우회하고, 저장·무효화·조회수 증가는 건너뛴다.
+ * 스케줄러 전용 메서드(dirty set, committed delta, subtract)는 실패를 그대로 전파한다.
+ * 실패를 빈 값으로 삼키면 committed 표식 누락으로 DB에 조회수가 이중 반영될 수 있기 때문이다.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ClubEventCacheAdapter implements ClubEventCachePort {
@@ -83,58 +92,60 @@ public class ClubEventCacheAdapter implements ClubEventCachePort {
 
     @Override
     public Optional<SliceResult<ClubEventSummaryResult>> getTypeEvents(Type type, String keyword, Pageable pageable) {
-        return getJson(
+        return readSafely("getTypeEvents", () -> getJson(
             buildTypeEventsKey(type, keyword, pageable),
-            new TypeReference<SliceResult<ClubEventSummaryResult>>() {});
+            new TypeReference<SliceResult<ClubEventSummaryResult>>() {}));
     }
 
     @Override
     public void saveTypeEvents(
             Type type, String keyword, Pageable pageable, SliceResult<ClubEventSummaryResult> events) {
-        saveJson(buildTypeEventsKey(type, keyword, pageable), events, TYPE_EVENTS_TTL);
+        writeSafely("saveTypeEvents",
+            () -> saveJson(buildTypeEventsKey(type, keyword, pageable), events, TYPE_EVENTS_TTL));
     }
 
     @Override
     public void evictTypeEvents(Type type) {
-        deleteByPattern(TYPE_EVENTS_PREFIX + type.name() + ":*");
+        writeSafely("evictTypeEvents", () -> deleteByPattern(TYPE_EVENTS_PREFIX + type.name() + ":*"));
     }
 
     @Override
     public Optional<List<ClubEventSummaryResult>> getPopularEvents() {
-        return getJson(POPULAR_EVENTS_KEY, new TypeReference<List<ClubEventSummaryResult>>() {});
+        return readSafely("getPopularEvents",
+            () -> getJson(POPULAR_EVENTS_KEY, new TypeReference<List<ClubEventSummaryResult>>() {}));
     }
 
     @Override
     public void savePopularEvents(List<ClubEventSummaryResult> events) {
-        saveJson(POPULAR_EVENTS_KEY, events, POPULAR_EVENTS_TTL);
+        writeSafely("savePopularEvents", () -> saveJson(POPULAR_EVENTS_KEY, events, POPULAR_EVENTS_TTL));
     }
 
     @Override
     public void evictPopularEvents() {
-        stringRedisTemplate.delete(POPULAR_EVENTS_KEY);
+        writeSafely("evictPopularEvents", () -> stringRedisTemplate.delete(POPULAR_EVENTS_KEY));
     }
 
     @Override
     public Optional<List<EventBanner>> getBanners() {
-        return getJson(BANNERS_KEY, new TypeReference<List<EventBanner>>() {});
+        return readSafely("getBanners", () -> getJson(BANNERS_KEY, new TypeReference<List<EventBanner>>() {}));
     }
 
     @Override
     public void saveBanners(List<EventBanner> banners) {
-        saveJson(BANNERS_KEY, banners, BANNERS_TTL);
+        writeSafely("saveBanners", () -> saveJson(BANNERS_KEY, banners, BANNERS_TTL));
     }
 
     @Override
     public void incrementViewForUser(String userEmail, Long eventId) {
         String dedupKey = DEDUP_PREFIX + eventId + ":u:" + userEmail;
-        executeIncrementView(dedupKey, eventId);
+        writeSafely("incrementView", () -> executeIncrementView(dedupKey, eventId));
     }
 
     @Override
     public void incrementViewForAnonymous(String ip, String userAgent, Long eventId) {
         String hash = hashIdentifier(ip, userAgent);
         String dedupKey = DEDUP_PREFIX + eventId + ":a:" + hash;
-        executeIncrementView(dedupKey, eventId);
+        writeSafely("incrementView", () -> executeIncrementView(dedupKey, eventId));
     }
 
     @Override
@@ -214,6 +225,23 @@ public class ClubEventCacheAdapter implements ClubEventCachePort {
             .map(id -> COMMITTED_PREFIX + id)
             .toList();
         stringRedisTemplate.delete(keys);
+    }
+
+    private <T> Optional<T> readSafely(String operation, Supplier<Optional<T>> reader) {
+        try {
+            return reader.get();
+        } catch (DataAccessException e) {
+            log.warn("Redis 조회 실패 — 캐시 미스로 처리: operation={}, cause={}", operation, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private void writeSafely(String operation, Runnable writer) {
+        try {
+            writer.run();
+        } catch (DataAccessException e) {
+            log.warn("Redis 쓰기 실패 — 건너뜀: operation={}, cause={}", operation, e.getMessage());
+        }
     }
 
     private <T> Optional<T> getJson(String key, TypeReference<T> typeReference) {
