@@ -50,12 +50,16 @@ public class PushPollingPublisherScheduler {
 
         log.info("복구 및 재발송 시작 - {}건 ({}개 클러스터)", tokens.size(), tokensByCluster.size());
 
-        tokensByCluster.forEach((cluster, clusterTokens) -> {
+        for (Map.Entry<PushCluster, List<PushClusterToken>> entry : tokensByCluster.entrySet()) {
             try {
-                fcmOrchestrator.dispatchRetryTokens(cluster, clusterTokens);
+                // 허가 대기 초과(허가 누수·장기 장애) 또는 인터럽트(종료 중)면 남은 클러스터는 다음 주기에 맡긴다
+                if (!fcmOrchestrator.dispatchRetryTokens(entry.getKey(), entry.getValue())) {
+                    log.warn("PushPollingPublisher 중단 - 남은 클러스터는 다음 주기에 복구합니다.");
+                    return;
+                }
             } catch (Exception e) {
-                log.error("복구 발송 중 오류 - clusterId={}", cluster.getId(), e);
+                log.error("복구 발송 중 오류 - clusterId={}", entry.getKey().getId(), e);
             }
-        });
+        }
     }
 }

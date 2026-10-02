@@ -34,6 +34,9 @@ public class FcmInitializer implements InitializingBean {
         try {
             FirebaseOptions options = FirebaseOptions.builder()
                             .setCredentials(GoogleCredentials.fromStream(new ClassPathResource(fcmProperties.getCertification()).getInputStream()))
+                            // 기본값 0(무한 대기)이면 응답이 끝나지 않는 요청이 전송 스레드와 발송 허가를 영구히 점유한다
+                            .setConnectTimeout(fcmProperties.getConnectTimeoutMillis())
+                            .setReadTimeout(fcmProperties.getReadTimeoutMillis())
                             .setThreadManager(new ThreadManager() {
                                 @Override
                                 protected ExecutorService getExecutor(FirebaseApp app) {

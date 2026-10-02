@@ -4,14 +4,35 @@ ajou:
     default-image-url: https://www.ajou.ac.kr/_res/ajou/kr/img/intro/img-symbol.png
     redirection-url-prefix: https://www.ajouevent.com/event/
     default-click-action-url: https://www.ajouevent.com
+    # FCM HTTP 타임아웃(ms). SDK 기본값 0 은 무한 대기라, 응답이 끝나지 않는 요청이 전송 스레드와 발송 허가를 영구히 점유한다
+    connect-timeout-millis: 10000
+    read-timeout-millis: 30000
     executor:
+      # 동시에 처리 중인 발송 배치 수 상한 (세마포어). 배치 1개 = sendEachAsync 1회 (최대 500건)
+      # 메시지 1,200건(배치 3개)은 전송 스레드 200개의 6배라 스레드가 놀지 않고, 앞 배치 꼬리 대기 중 다음 배치가 진행된다
+      max-in-flight-batches: 3
+      # 허가 대기 상한(초). 처리 중 배치는 HTTP 타임아웃 안에 끝나므로 정상 장애라면 이 안에 허가가 반납된다. 넘기면 허가 누수 또는 장기 장애로 보고 알림 후 중단
+      acquire-timeout-seconds: 300
+      # 발송 결과 DB 반영 — DB 바운드 작업. 허가가 콜백 종료 후 반납되므로 동시 콜백은 max-in-flight-batches 이하
+      # HikariCP(10) 중 웹 요청 몫을 남기기 위해 4개로 제한
       callback:
-        core-pool-size: 8
-        max-pool-size: 32
-        queue-capacity: 500
+        core-pool-size: 4
+        max-pool-size: 4
+        queue-capacity: 100
         await-termination-seconds: 30
+      # Firebase SDK 전송 스레드 — 메시지 1건이 RTT 동안 스레드 1개를 블로킹 점유한다
+      # 리틀의 법칙: 10만 건/1분(약 1,700건/s) × RTT 100ms ≈ 170 → 200. RTT 50ms 에서도 4,000건/s 로 FCM 쿼터(10,000건/s) 미만
+      # core = max: 큐가 차야 max 까지 늘어나는 ThreadPoolExecutor 특성상 둘이 다르면 max 는 동작하지 않는다
+      # queue: 세마포어 허가분 1,200건 + 토큰 검증 배치 400건 < 스레드 200 + 큐 2,000 → 거절이 구조적으로 발생하지 않는 크기
       default-pool:
-        core-pool-size: 32
-        max-pool-size: 128
-        queue-capacity: 50000
+        core-pool-size: 200
+        max-pool-size: 200
+        queue-capacity: 2000
+        await-termination-seconds: 30
+      # 발송 루프 실행 — 웹훅 요청 스레드 대신 세마포어 대기를 맡는다
+      # 2개: 큰 클러스터 발송 중에도 다른 클러스터가 진행. 큐 초과 시 클러스터는 PENDING 으로 남아 폴링 릴레이가 복구
+      dispatch:
+        core-pool-size: 2
+        max-pool-size: 2
+        queue-capacity: 100
         await-termination-seconds: 30
