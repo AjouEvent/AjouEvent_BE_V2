@@ -15,14 +15,14 @@ spring:
       - classpath:config/jwt.yaml
       - classpath:config/fcm.yaml
       - classpath:config/discord.yaml
-      - classpath:config/aws.yaml
+      - classpath:config/webhook.yaml
       - classpath:config/google.yaml
 
 management:
   server:
     # 앱 포트(8080)와 분리 — 관리 서버는 별도 서블릿 컨텍스트로 기동되므로
     # 메인 앱의 SecurityFilterChain이 적용되지 않음
-    # 접근 제어는 AWS 보안 그룹에서 9090 포트를 모니터링 EC2 IP로만 제한
+    # 접근 제어: 9090 은 호스트에 공개하지 않고 Docker 내부망(Prometheus · Caddy 헬스 체크)에서만 접근
     port: ${MANAGEMENT_PORT:9090}
   endpoints:
     web:

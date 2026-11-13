@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,8 @@ public class FcmInitializer implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         try {
             FirebaseOptions options = FirebaseOptions.builder()
-                            .setCredentials(GoogleCredentials.fromStream(new ClassPathResource(fcmProperties.getCertification()).getInputStream()))
+                            // 접두사 없는 경로는 classpath, "file:" 접두사는 서버에 마운트한 파일 (운영은 OCI Vault 에서 내려받아 마운트)
+                            .setCredentials(GoogleCredentials.fromStream(new DefaultResourceLoader().getResource(fcmProperties.getCertification()).getInputStream()))
                             // 기본값 0(무한 대기)이면 응답이 끝나지 않는 요청이 전송 스레드와 발송 허가를 영구히 점유한다
                             .setConnectTimeout(fcmProperties.getConnectTimeoutMillis())
                             .setReadTimeout(fcmProperties.getReadTimeoutMillis())

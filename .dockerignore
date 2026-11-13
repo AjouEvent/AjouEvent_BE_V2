@@ -6,3 +6,13 @@ build
 fcm-test-frontend
 docs
 scripts
+.github
+.claude
+.omc
+deploy
+monitoring
+k6-load-test
+playwright-scripts
+src/main/resources/firebase
+**/*.env
+.env*

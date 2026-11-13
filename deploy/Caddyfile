@@ -1,0 +1,60 @@
+{
+	servers {
+		protocols h1 h2 h3
+		timeouts {
+			read_header 10s
+			read_body 30s
+			write 60s
+			idle 2m
+		}
+	}
+	log {
+		output file /data/logs/access.log {
+			roll_size 20MiB
+			roll_keep 5
+		}
+		format json
+	}
+}
+
+(common) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}
+
+api.ajouevent.com, admin.api.ajouevent.com, {$EXTRA_API_HOST:oci-api.ajouevent.com} {
+	import common
+
+	request_body {
+		max_size 10MB
+	}
+
+	# actuator 는 관리 포트(9090)로만 노출한다. 공개 포트로 들어온 요청은 막는다
+	@actuator path /actuator /actuator/*
+	respond @actuator 404
+
+	reverse_proxy ajouevent-app:8080 {
+		health_uri /actuator/health
+		health_port 9090
+		health_interval 10s
+		health_timeout 3s
+		# 앱 재시작 중 들어온 요청을 바로 실패시키지 않고 15초까지 기다린다
+		lb_try_duration 15s
+		transport http {
+			dial_timeout 3s
+			response_header_timeout 60s
+			keepalive 90s
+			keepalive_idle_conns 32
+		}
+	}
+}
+
+grafana.ajouevent.com {
+	import common
+	reverse_proxy ajouevent-grafana:3000
+}
