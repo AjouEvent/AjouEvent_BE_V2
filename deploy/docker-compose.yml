@@ -1,0 +1,177 @@
+# OCI A1 ajouevent-core 단일 인스턴스 (4 OCPU / 24GB, arm64, 사설 10.0.0.170, 예약 IP 146.56.101.16)
+# Caddy · Spring 앱 · Redis · Prometheus · Loki · Grafana · 수집기
+# 크롤러는 AjouEvent_Crawling_V2 저장소가 같은 VM 의 ~/crawling 에 따로 배포한다.
+# 외부 공개는 Caddy(80, 443)만. 크롤러가 쓰는 포트(8080, 6379)는 사설 IP 에, Loki 는 127.0.0.1 에만 바인딩한다.
+services:
+  caddy:
+    image: caddy:2.10.2-alpine
+    container_name: ajouevent-caddy
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+      - 443:443/udp
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    mem_limit: 128m
+    networks:
+      - ajouevent-network
+
+  app:
+    image: ${DOCKER_IMAGE}
+    container_name: ajouevent-app
+    restart: always
+    env_file:
+      - .env
+    environment:
+      REDIS_HOST: ajouevent-redis
+      REDIS_PORT: 6379
+      LOKI_URL: http://ajouevent-loki:3100
+      AJOU_FCM_CERTIFICATION: file:/app/secrets/firebase-service-account.json
+      # 운영 실측(힙 111MB · Metaspace 160MB · 코드 캐시 59MB · 스레드 102개)의 약 4배 여유. G1 · C2 사용
+      JAVA_TOOL_OPTIONS: >-
+        -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -Xms512m -Xmx1g
+        -XX:MaxMetaspaceSize=320m -XX:ReservedCodeCacheSize=128m
+        -XX:MaxDirectMemorySize=128m -XX:+ExitOnOutOfMemoryError
+    ports:
+      - 10.0.0.170:8080:8080
+    volumes:
+      - calendar_tokens:/app/tokens
+      - ./secrets/firebase-service-account.json:/app/secrets/firebase-service-account.json:ro
+    mem_limit: 2g
+    stop_grace_period: 30s
+    depends_on:
+      redis:
+        condition: service_healthy
+      loki:
+        condition: service_started
+    networks:
+      - ajouevent-network
+
+  redis:
+    image: redis:7.4.9-alpine
+    container_name: ajouevent-redis
+    restart: always
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy noeviction
+    ports:
+      - 10.0.0.170:6379:6379
+    volumes:
+      - redis_data:/data
+    mem_limit: 384m
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ajouevent-network
+
+  prometheus:
+    image: prom/prometheus:v3.11.3
+    container_name: ajouevent-prometheus
+    restart: always
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --storage.tsdb.retention.size=5GB
+      - --web.enable-lifecycle
+    ports:
+      - 127.0.0.1:9091:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    mem_limit: 512m
+    networks:
+      - ajouevent-network
+
+  loki:
+    image: grafana/loki:3.7.2
+    container_name: ajouevent-loki
+    restart: always
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      # 크롤러의 Docker Loki 로깅 드라이버가 호스트에서 접근한다
+      - 127.0.0.1:3100:3100
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    mem_limit: 512m
+    networks:
+      - ajouevent-network
+
+  grafana:
+    image: grafana/grafana:13.0.1
+    container_name: ajouevent-grafana
+    restart: always
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:?GRAFANA_ADMIN_USER is required}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+      GF_SERVER_ROOT_URL: https://grafana.ajouevent.com
+      GF_ANALYTICS_REPORTING_ENABLED: false
+      GF_ANALYTICS_CHECK_FOR_UPDATES: false
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: false
+      GF_PLUGINS_PREINSTALL_DISABLED: true
+      GF_DATABASE_WAL: true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    mem_limit: 512m
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - ajouevent-network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    container_name: ajouevent-cadvisor
+    restart: always
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    command:
+      - --docker_only=true
+      - --housekeeping_interval=15s
+      - --store_container_labels=false
+      - --disable_metrics=advtcp,cpu_topology,cpuset,hugetlb,memory_numa,percpu,process,referenced_memory,resctrl,sched,tcp,udp
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    mem_limit: 128m
+    networks:
+      - ajouevent-network
+
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    container_name: ajouevent-node-exporter
+    restart: always
+    network_mode: host
+    pid: host
+    command:
+      - --web.listen-address=10.0.0.170:9100
+      - --path.rootfs=/host
+    volumes:
+      - /:/host:ro,rslave
+    mem_limit: 64m
+
+volumes:
+  caddy_data:
+  caddy_config:
+  redis_data:
+  calendar_tokens:
+  prometheus_data:
+  loki_data:
+  grafana_data:
+
+networks:
+  ajouevent-network:
+    driver: bridge
