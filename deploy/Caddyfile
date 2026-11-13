@@ -58,3 +58,8 @@ grafana.ajouevent.com {
 	import common
 	reverse_proxy ajouevent-grafana:3000
 }
+
+# 루트 도메인은 프론트(www, Cloudflare Pages)로 영구 리다이렉트한다 (Vercel 의 리다이렉트를 대체)
+ajouevent.com {
+	redir https://www.ajouevent.com{uri} permanent
+}
