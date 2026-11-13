@@ -75,7 +75,7 @@ jobs:
           host: ${{ secrets.OCI_HOST }}
           username: ubuntu
           key: ${{ secrets.OCI_DEPLOY_KEY }}
-          source: deploy/docker-compose.yml,deploy/Caddyfile,deploy/prometheus,deploy/loki,deploy/scripts
+          source: deploy/docker-compose.yml,deploy/caddy,deploy/prometheus,deploy/loki,deploy/scripts
           target: ~/ajouevent
           strip_components: 1
 
@@ -109,6 +109,7 @@ jobs:
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin >/dev/null
             docker pull "$DOCKER_IMAGE"
             docker logout ghcr.io >/dev/null
+            rm -f Caddyfile
             docker compose up -d --remove-orphans
             docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile || true
             curl -s -X POST http://127.0.0.1:9091/-/reload || true

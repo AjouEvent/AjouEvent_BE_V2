@@ -12,7 +12,8 @@ services:
       - 443:443
       - 443:443/udp
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # 파일 하나가 아니라 디렉터리를 마운트한다. 배포가 파일을 새로 쓰면(inode 교체) 파일 마운트는 옛 내용을 계속 보기 때문이다
+      - ./caddy:/etc/caddy:ro
       - caddy_data:/data
       - caddy_config:/config
     mem_limit: 128m
@@ -82,7 +83,7 @@ services:
     ports:
       - 127.0.0.1:9091:9090
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus:/etc/prometheus:ro
       - prometheus_data:/prometheus
     mem_limit: 512m
     networks:
@@ -92,12 +93,12 @@ services:
     image: grafana/loki:3.7.2
     container_name: ajouevent-loki
     restart: always
-    command: -config.file=/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/loki-config.yml
     ports:
       # 크롤러의 Docker Loki 로깅 드라이버가 호스트에서 접근한다
       - 127.0.0.1:3100:3100
     volumes:
-      - ./loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - ./loki:/etc/loki:ro
       - loki_data:/loki
     mem_limit: 512m
     networks:
