@@ -30,14 +30,14 @@ tags: []
 ### POL-EXT-03 Discord 채널
 
 - 정책: Discord 웹훅 채널 두 개를 씁니다. 전송 실패 시 DiscordException(502)을 던집니다.
-- 값: 
-- 근거: 
+- 값:
+- 근거:
 
 ### POL-EXT-04 Redis 키와 TTL
 
 - 정책: Redis는 캐시, 조회수 집계, 크롤링 토큰 저장에 씁니다. 운영 Redis는 AOF로 영속화하고 메모리가 차도 키를 지우지 않습니다.
-- 값: 
-- 근거: 
+- 값:
+- 근거:
 
 ### POL-EXT-05 MySQL과 기타
 
