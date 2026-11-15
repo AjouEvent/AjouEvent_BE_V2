@@ -1,0 +1,56 @@
+# AjouEvent 내부 LLM 위키 — 에이전트용 전체 색인
+# 시작: 00-MOC/에이전트-운영규약.md → 00-MOC/MOC-전체지도.md
+00-MOC/MOC-전체지도.md: 전체 지도
+00-MOC/에이전트-운영규약.md: 에이전트 운영 규약
+10-기준/디자인-시스템.md: 디자인 시스템
+10-기준/문서-체계.md: 문서 체계
+10-기준/서비스-개요.md: 서비스 개요
+10-기준/용어집.md: 용어집
+20-정책/POL-00-색인.md: 정책 색인
+20-정책/POL-01-회원-인증.md: 회원 · 인증: POL 15건, 표 0행, 이슈 0건
+20-정책/POL-02-구독-토픽.md: 구독 (토픽): POL 11건, 표 59행, 이슈 0건
+20-정책/POL-03-키워드.md: 키워드: POL 8건, 표 0행, 이슈 0건
+20-정책/POL-04-공지-수집.md: 공지 수집: POL 11건, 표 0행, 이슈 0건
+20-정책/POL-05-알림-발송.md: 알림 발송: POL 16건, 표 11행, 이슈 0건
+20-정책/POL-06-알림함.md: 알림함: POL 5건, 표 0행, 이슈 0건
+20-정책/POL-07-공지-검색.md: 공지 목록 · 상세 · 검색: POL 7건, 표 0행, 이슈 0건
+20-정책/POL-08-인기글-트렌드-배너.md: 인기글 · 주간 트렌드 · 배너: POL 4건, 표 0행, 이슈 0건
+20-정책/POL-09-조회수.md: 조회수: POL 7건, 표 0행, 이슈 0건
+20-정책/POL-10-찜-캘린더.md: 찜(북마크) · 캘린더 연동: POL 8건, 표 0행, 이슈 0건
+20-정책/POL-11-스케줄러.md: 스케줄러 전체 목록: POL 0건, 표 5행, 이슈 0건
+20-정책/POL-12-에러코드.md: 에러 코드 목록: POL 0건, 표 29행, 이슈 0건
+20-정책/POL-13-외부-연동.md: 외부 연동: POL 5건, 표 10행, 이슈 0건
+20-정책/POL-14-API.md: 주요 API 목록: POL 0건, 표 41행, 이슈 0건
+20-정책/POL-15-알려진-이슈.md: 알려진 이슈: POL 0건, 표 0행, 이슈 26건
+40-화면/SC-00-색인.md: 화면 색인
+40-화면/SDD-WEB-AUTH-0010-로그인.md: SDD-WEB-AUTH-0010: /login 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-AUTH-0020-로그인-처리-중.md: SDD-WEB-AUTH-0020: /loginSuccess 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-AUTH-0030-약관-동의.md: SDD-WEB-AUTH-0030: /privacy-agreement 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-EVT-0010-공지사항-검색.md: SDD-WEB-EVT-0010: /event 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-EVT-0020-공지사항-상세.md: SDD-WEB-EVT-0020: /event/:id 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-EVT-0030-찜-목록.md: SDD-WEB-EVT-0030: /liked 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-HOME-0010-홈.md: SDD-WEB-HOME-0010: / 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-MY-0010-프로필.md: SDD-WEB-MY-0010: /mypage 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-MY-0020-회원정보-수정.md: SDD-WEB-MY-0020: /profile-modification 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-MY-0030-회원-탈퇴-안내.md: SDD-WEB-MY-0030: /delete-account 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-MY-0040-회원-탈퇴-탈퇴-절차.md: SDD-WEB-MY-0040: /delete-account 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-MY-0050-FAQ.md: SDD-WEB-MY-0050: /faq 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-MY-0060-버전-및-히스토리.md: SDD-WEB-MY-0060: /version 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-NTF-0010-알림.md: SDD-WEB-NTF-0010: /notification 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-SUB-0010-구독-구독-알림-탭.md: SDD-WEB-SUB-0010: /subscribe 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-SUB-0020-구독-키워드-알림-탭.md: SDD-WEB-SUB-0020: /subscribe 화면의 배치, 설명, 팝업, API
+40-화면/SDD-WEB-SUB-0030-키워드-구독.md: SDD-WEB-SUB-0030: /subscribe/keywordSubscribe 화면의 배치, 설명, 팝업, API
+40-화면/공통-요소.md: 화면 공통 요소
+50-에러코드/에러코드-전량.md: 에러 코드 전량
+55-API/API-목록.md: 주요 API 목록
+60-인프라/AWS-OCI-이전.md: AWS·아올다에서 OCI로 이전
+60-인프라/모니터링.md: 모니터링
+60-인프라/배포-CICD.md: 배포와 CI/CD
+60-인프라/백업-복구.md: 백업과 복구
+60-인프라/비용.md: 비용
+60-인프라/인프라-현황.md: 인프라 현황
+70-구현/구현현황-코드매핑.md: 구현 현황과 코드 매핑
+70-구현/보류-과제.md: 보류 과제
+90-질문/Q-확인필요.md: 확인할 질문
+README.md: AjouEvent 내부 LLM 위키
+_sources/README.md: 원문 목록

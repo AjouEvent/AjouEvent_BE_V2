@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>AjouEvent OCI 이전 계획서</title>
+
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 단일 열 런북 + 상단 탭. 개선 항목은 문제/해결/성과 3칸, 표·코드는 각자 가로 스크롤 */
+:root{
+  --bg:#f6f7f8; --surface:#ffffff; --fg:#1b2127; --muted:#5b6670; --line:#dfe3e7;
+  --accent:#0f6e6a; --accent-soft:#e3f1f0;
+  --ok:#1f7a3d; --ok-soft:#e5f3e9; --warn:#9a5b00; --warn-soft:#fbf0dc; --bad:#b3261e; --bad-soft:#fbe7e5;
+  --code-bg:#eef1f3; color-scheme:light;
+  --font-body:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
+.wrap{max-width:940px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header{display:flex;flex-direction:column;gap:8px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+h1{font-size:clamp(25px,4vw,32px);line-height:1.25;margin:0;text-wrap:balance}
+h2{font-size:21px;margin:8px 0 2px;text-wrap:balance;padding-top:10px;border-top:2px solid var(--fg)}
+h3{font-size:16.5px;margin:18px 0 4px}
+p{margin:0 0 10px;max-width:70ch}
+.lead{font-size:16.5px;max-width:72ch}
+.meta{color:var(--muted);font-size:13px}
+section.panel{display:flex;flex-direction:column;gap:8px}
+ul,ol{margin:0 0 10px;padding-left:22px;max-width:72ch}
+li{margin:2px 0}
+[hidden]{display:none!important}
+html,body{margin:0}
+code.secret{user-select:all;word-break:break-all}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--code-bg);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+pre{font-family:var(--font-mono);font-size:12.5px;line-height:1.55;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:4px 0 12px}
+pre code{background:none;padding:0;font-size:inherit;overflow-wrap:normal}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);margin:4px 0 12px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:600px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.04em;color:var(--muted);font-weight:600;background:var(--code-bg)}
+tr:last-child td{border-bottom:none}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.ok{background:var(--ok-soft);color:var(--ok)} .warn{background:var(--warn-soft);color:var(--warn)} .bad{background:var(--bad-soft);color:var(--bad)} .info{background:var(--accent-soft);color:var(--accent)}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stat b{font-size:21px;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:13px}
+.callout{border-left:4px solid var(--warn);background:var(--warn-soft);padding:12px 16px;border-radius:0 8px 8px 0}
+.callout.red{border-color:var(--bad);background:var(--bad-soft)}
+.callout.teal{border-color:var(--accent);background:var(--accent-soft)}
+.callout p:last-child,.callout ul:last-child{margin-bottom:0}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:8px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.tabs button{font:inherit;font-size:14px;font-weight:600;color:var(--muted);background:transparent;border:1px solid transparent;border-radius:8px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+.tabs button:hover{color:var(--fg);background:var(--surface)}
+.tabs button[aria-selected="true"]{color:var(--accent);background:var(--accent-soft);border-color:var(--accent)}
+.tabs .n{font-family:var(--font-mono);font-size:12px;margin-right:6px;opacity:.8}
+/* 문제 · 해결 · 성과 */
+.psr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:6px 0 14px;overflow:hidden}
+.psr > div{padding:12px 14px;min-width:0;border-right:1px solid var(--line)}
+.psr > div:last-child{border-right:none}
+.psr .k{display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;margin-bottom:4px}
+.psr .p .k{color:var(--bad)} .psr .s .k{color:var(--accent)} .psr .r .k{color:var(--ok)}
+.psr .r{background:var(--ok-soft)}
+.psr p{margin:0;font-size:14px}
+.psr-title{font-weight:700;margin:14px 0 0;font-size:15px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media (max-width:700px){.psr{grid-template-columns:1fr}.psr > div{border-right:none;border-bottom:1px solid var(--line)}.psr > div:last-child{border-bottom:none}}
+.mem{display:flex;height:26px;border-radius:6px;overflow:hidden;border:1px solid var(--line);font-size:11px;font-family:var(--font-mono)}
+.mem div{display:flex;align-items:center;justify-content:center;color:#fff;white-space:nowrap;overflow:hidden;min-width:0}
+.m1{background:#56636e}.m2{background:#0f6e6a}.m3{background:#2d8a84}.m4{background:#7a5c99}.m5{background:#a0742a}.m6{background:#b9c2c9;color:#1b2127!important}
+.memrow{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.memrow .meta{font-family:var(--font-mono)}
+pre.mermaid{background:var(--surface);text-align:center}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">AjouEvent 인프라 · 2026-11-13 14:37 OCI 전환 완료</div>
+  <h1>아올다 · AWS에서 OCI 춘천 리전으로 전체 이전</h1>
+  <p class="lead">앱, 크롤러, 모니터링, DB, 비밀 관리, 배포 파이프라인을 OCI로 옮기고 아올다와 AWS 의존성을 없애는 작업 기록입니다. 각 개선 항목은 <b>문제 · 해결 · 성과</b>로 정리했습니다. 수치는 서버와 콘솔에서 직접 잰 값입니다.</p>
+</header>
+
+<section class="summary" aria-label="요약 수치">
+  <div class="stat"><b>$47.37 → $0</b><span>월 클라우드 비용 (AWS 10월 청구액 기준)</span></div>
+  <div class="stat"><b>180MB → 2MB</b><span>코드 변경 배포 시 서버가 받는 이미지 레이어</span></div>
+  <div class="stat"><b>9개 → 3개</b><span>인터넷에 열린 포트 (22, 80, 443)</span></div>
+  <div class="stat"><b>0 → 7개</b><span>OCI Vault에 보관한 운영 비밀</span></div>
+</section>
+
+<nav class="tabs" role="tablist" aria-label="문서 구역">
+  <button role="tab" id="tab-infra" aria-controls="infra" aria-selected="true"><span class="n">1</span>OCI 인프라</button>
+  <button role="tab" id="tab-migration" aria-controls="migration" aria-selected="false"><span class="n">2</span>AWS · 아올다 이전</button>
+  <button role="tab" id="tab-cicd" aria-controls="cicd" aria-selected="false"><span class="n">3</span>CI/CD · Caddy · 빌드</button>
+  <button role="tab" id="tab-architecture" aria-controls="architecture" aria-selected="false"><span class="n">4</span>아키텍처 변경안</button>
+  <button role="tab" id="tab-projects" aria-controls="projects" aria-selected="false"><span class="n">5</span>프로젝트 · 시크릿 위치</button>
+  <button role="tab" id="tab-dns" aria-controls="dns" aria-selected="false"><span class="n">6</span>DNS · 비용</button>
+  <button role="tab" id="tab-secrets" aria-controls="secrets" aria-selected="false"><span class="n">7</span>비밀 값</button>
+</nav>
+
+<!-- ============ 탭 1 ============ -->
+<section class="panel" id="infra" role="tabpanel" aria-labelledby="tab-infra">
+  <h2>OCI 인프라 구성</h2>
+  <p>테넌시 <code>rlagnlfo1004</code> · 홈 리전 춘천(<code>ap-chuncheon-1</code>) · <b>PAYG 업그레이드 완료</b>(무료 한도 안에서는 요금 0원, 유휴 인스턴스 회수 대상에서 제외). <b>결정: A1 단일 인스턴스로 운영</b>하고, 메시지 큐와 k3s는 전환 뒤에 검토합니다. 지금 A1은 Docker Compose로 동작합니다.</p>
+
+  <h3>현재 리소스</h3>
+  <div class="tbl"><table>
+    <tr><th>리소스</th><th>구성</th><th>상태</th></tr>
+    <tr><td><b>A1 · core</b><br><code>ajouevent-core</code></td><td>VM.Standard.A1.Flex · <b>4 OCPU / 24GB</b> · arm64 · Ubuntu 24.04 Minimal · 부트 50GB · 공인 <b>146.56.101.16</b>(예약 IP) · 사설 10.0.0.170 · NSG <code>nsg-web</code></td><td><span class="chip ok">운영 중 (14:37~)</span></td></tr>
+    <tr><td><b>HeatWave MySQL</b><br><code>ajouevent-mysql</code></td><td>MySQL.Free(26.10) · 50GB · 사설 10.0.1.93 · 구성 <code>ajouevent-mysql-free</code>(sql_mode RDS 호환) · 관리자 <code>admin</code> · 삭제 보호 · 계정 3개(앱 · 크롤러 · 백업)</td><td><span class="chip ok">운영 DB</span></td></tr>
+    <tr><td><b>OCI Vault</b> <code>ajouevent-vault</code></td><td>DEFAULT 유형(무료) · 소프트웨어 키 <code>ajouevent-secrets-key</code> · 비밀 7개 (탭 5 · 6 참고)</td><td><span class="chip ok">구축 완료</span></td></tr>
+    <tr><td><b>Object Storage</b> <code>ajouevent-backups</code></td><td>비공개 · <code>db/</code> 접두사 14일 뒤 자동 삭제 · 쓰기 전용 PAR(1년)</td><td><span class="chip ok">구축 완료</span></td></tr>
+    <tr><td><b>IAM</b></td><td>동적 그룹 <code>ajouevent-vms</code>(VM 3대) · 정책 <code>ajouevent-vms-read-secrets</code> · <code>objectstorage-lifecycle</code> · API 키(지문 <code>38:52:54…</code>)</td><td><span class="chip ok">구축 완료</span></td></tr>
+    <tr><td><b>DNS</b> (Cloudflare)</td><td><code>api</code> · <code>admin.api</code> · <code>oci-api</code> · <code>grafana</code> · 루트 → 146.56.101.16, <code>www</code> → Cloudflare Pages. 인증서는 A1 Caddy(Let's Encrypt) · Pages가 관리</td><td><span class="chip ok">운영 중</span></td></tr>
+    <tr><td>E2 Micro 2대<br><code>always-free-e2-micro</code>, <code>-2</code></td><td>1GB · Ubuntu 24.04 Minimal · 158.179.169.74 / 168.107.15.42 · 단일 인스턴스 결정에 따라 서비스를 올리지 않음</td><td><span class="chip info">대기 (나중에 푸시 워커 · 상태 점검)</span></td></tr>
+  </table></div>
+
+  <h3>단일 인스턴스 구성 (A1)</h3>
+  <pre class="mermaid">
+flowchart LR
+  U[사용자 · 앱] -->|HTTPS 443| C
+  FE["Vercel 프론트 (www)"] -->|API| C
+  subgraph VCN["OCI VCN 10.0.0.0/16 · 춘천"]
+    subgraph A["A1 · ajouevent-core · 146.56.101.16 / 10.0.0.170"]
+      C[Caddy] --> APP[Spring 앱]
+      APP --> R[(Redis)]
+      CR[크롤러] -->|웹훅 10.0.0.170:8080| APP
+      CR --> R
+      APP -->|로그| LK[Loki]
+      CR -->|로그| LK
+      PR[Prometheus] -->|수집| APP
+      GF[Grafana] --- PR
+      GF --- LK
+      C -->|grafana.ajouevent.com| GF
+    end
+    DB[(HeatWave MySQL<br/>10.0.1.93)]
+  end
+  APP --> DB
+  CR --> DB
+  CR -->|공지 수집| AJ[ajou.ac.kr]
+  </pre>
+  <div class="memrow">
+    <div class="meta">A1 · 리허설 실측: 앱 661MB · Grafana 144MB · Loki 33MB · Prometheus 27MB · cAdvisor 15MB · Redis 4MB (24GB 중 약 0.9GB)</div>
+    <div class="mem" role="img" aria-label="A1 메모리 사용량: 24GB 중 컨테이너 약 0.9GB">
+      <div class="m2" style="flex:661">앱</div><div class="m4" style="flex:144">G</div><div class="m3" style="flex:80"></div><div class="m1" style="flex:400">OS</div><div class="m6" style="flex:22500">여유 약 23GB</div>
+    </div>
+  </div>
+
+  <h3>리허설 검증 결과 (전환 전)</h3>
+  <div class="tbl"><table>
+    <tr><th>항목</th><th>결과</th></tr>
+    <tr><td>앱 기동</td><td class="num">17초, 헬스 체크 UP</td></tr>
+    <tr><td>HTTPS</td><td>Let's Encrypt 인증서(만료 2027-02-11), HTTP/2 응답, HTTP/3 광고, HSTS</td></tr>
+    <tr><td>API</td><td><code>GET /api/event/banner</code> 200 · 0.4초 (HeatWave 데이터)</td></tr>
+    <tr><td>actuator 외부 차단</td><td><code>/actuator/health</code> 외부 요청 404</td></tr>
+    <tr><td>Grafana</td><td><code>https://grafana.ajouevent.com</code> 200</td></tr>
+    <tr><td>실제 푸시 차단</td><td>리허설 앱은 Firebase 키 없이 기동, 크롤러는 켜지 않음 (아올다와 중복 알림 방지)</td></tr>
+  </table></div>
+
+  <h3>개선 내역</h3>
+
+  <div class="psr-title">A1 확보와 단일 인스턴스 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>Always Free 상태에서는 A1 한도가 0이라 1GB VM만 쓸 수 있었고, 사용률이 낮은 인스턴스가 회수될 위험이 있었습니다. 1GB VM 2대에 나눠 올리면 JVM 상한을 조이고 서비스 사이 통신을 사설 IP로 맞춰야 했습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>PAYG로 업그레이드한 뒤 A1 4 OCPU / 24GB를 무료 한도 그대로 만들었습니다(첫 시도에 성공). 모든 컨테이너를 A1 한 대에 올리고, 예약 IP를 A1으로 옮겼습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>앱 기동 <b>17초</b>, 컨테이너 전체 메모리 약 0.9GB로 24GB 중 대부분이 여유입니다. 서버 대수가 줄어 운영할 대상도 하나가 되었습니다. 스토리지는 150GB로 무료 200GB 안입니다.</p></div>
+  </div>
+
+  <div class="psr-title">OS 이미지 교체 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>Oracle Linux 9 기본 서비스(<code>dnf</code> 자동 갱신 597MB, PCP 수집기, cloud-agent)만으로 1GB가 바닥나서, 아무것도 올리지 않은 VM 2대가 모두 SSH 응답을 멈췄습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>부트 볼륨만 Ubuntu 24.04 Minimal로 교체하고(VNIC · IP 유지), snap 기반 <code>oracle-cloud-agent</code>와 <code>snapd</code>를 제거했습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>유휴 메모리 사용량 <b>837MB → 310~344MB</b>, 스왑 사용 628MB → 0. 두 VM 모두 SSH가 즉시 응답합니다.</p></div>
+  </div>
+
+  <div class="psr-title">스왑 · 커널 설정 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>1GB VM에서 메모리가 순간적으로 넘치면 OOM으로 컨테이너가 죽거나 VM 전체가 멈춥니다. 기본 스왑은 945MB였습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>스왑 파일 4GB, <code>vm.swappiness=10</code>, <code>vm.min_free_kbytes=32768</code>, <code>vfs_cache_pressure=50</code>, 저널 100MB 제한, Docker 로그 10MB×3 로테이션. 컨테이너마다 <code>mem_limit</code>를 둡니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>메모리가 순간 초과해도 VM은 살아 있고, 한 컨테이너가 폭주하면 그 컨테이너만 재시작됩니다. JVM 힙이 스왑으로 밀려나는 일을 줄였습니다.</p></div>
+  </div>
+
+  <div class="psr-title">네트워크 접근 통제 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>아올다에서는 Redis 6379, Loki 3100, Grafana 3000, actuator 9090 등 <b>9개 포트</b>가 <code>0.0.0.0</code>에 열려 있었습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>Security List는 SSH와 VCN 내부 통신만 허용하고, 80 · 443 · UDP 443은 NSG <code>nsg-web</code>로 VM 1에만 붙였습니다. 내부 포트는 사설 IP(10.0.0.x)나 127.0.0.1에만 바인딩하고, OS iptables도 같은 규칙으로 맞췄습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>인터넷에 열린 포트 <b>9개 → 3개</b>. Grafana는 <code>grafana.ajouevent.com</code>으로 HTTPS를 거쳐서만 접근합니다.</p></div>
+  </div>
+
+  <div class="psr-title">고정 IP 확보 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>VM IP가 임시 IP였고, 예약 IP 한도 1개를 아무 백엔드도 없는 10Mbps 로드밸런서 <code>oci-free-lb</code>가 차지하고 있었습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>쓰이지 않는 로드밸런서를 지우고 예약 IP <code>146.56.101.16</code>을 VM 1에 붙였습니다. 10Mbps 고정 대역폭은 API 앞단에 두기에 부족해서 다시 만들지 않았습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>예약 IP를 VM 1에서 A1으로 옮겨 붙였습니다. 서버를 바꿔도 <b>DNS는 그대로</b>이고, 앞으로 서버를 교체할 때도 같습니다.</p></div>
+  </div>
+
+  <div class="psr-title">MTU 정리 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>아올다 네트워크에 맞춰 Docker 브리지 MTU를 1450으로 고정해 두었습니다. OCI에서는 근거가 없는 값입니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>OCI VNIC은 9000(VCN 내부 점보 프레임)이고 인터넷 구간은 1500입니다. 새 compose와 <code>docker-compose.local.yml</code>에서 MTU 설정을 빼고 Docker 기본값 1500을 씁니다. 경로 MTU 탐지용 ICMP 3/4 규칙도 열었습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>패킷이 쪼개지지 않는 표준 크기로 통신합니다. 아올다용 <code>docker-compose.yml</code>의 1450 설정은 전환이 끝날 때 파일째 지웁니다.</p></div>
+  </div>
+
+  <div class="psr-title">운영 비밀을 OCI Vault로 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>DB 비밀번호, JWT 키, Google 시크릿, Discord 웹훅이 아올다 서버의 <code>.env</code> 파일에만 평문으로 있었습니다. 서버가 사라지면 함께 사라지는 구조였습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>값을 Vault 비밀로 옮겼습니다. VM은 인스턴스 주체로 Vault를 읽으므로 디스크에 OCI 인증 키를 두지 않습니다. DB 계정은 앱 · 크롤러 · 백업 용도로 나누고 비밀번호를 새로 만들었습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>VM을 다시 만들어도 <code>render-env.sh</code> 한 번으로 설정이 복구됩니다. 크롤러 계정은 SELECT · INSERT · UPDATE · DELETE만, 백업 계정은 읽기만 가능합니다.</p></div>
+  </div>
+
+  <div class="psr-title">DB 백업 <span class="chip ok">구성 완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>지금까지는 RDS의 7일 자동 백업에만 의존했습니다. HeatWave 무료 DB는 백업 보존 기간을 1일에서 바꿀 수 없습니다(API가 거부).</p></div>
+    <div class="s"><span class="k">해결</span><p>VM 2의 cron이 매일 04:30에 <code>mysqldump</code> → zstd 압축 → 쓰기 전용 PAR로 Object Storage에 올립니다. 수명 주기 정책이 14일 지난 덤프를 지웁니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>논리 백업 14일 치를 DB 밖에 보관합니다. VM에는 버킷 읽기 · 삭제 권한이 없어서, VM이 털려도 백업은 지워지지 않습니다.</p></div>
+  </div>
+
+  <div class="psr-title">HeatWave 설정 호환 · 복원 리허설 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>RDS는 <code>sql_mode=NO_ENGINE_SUBSTITUTION</code>(느슨한 모드)이고 HeatWave 기본값은 엄격한 모드입니다. 기존 무료 DB는 관리자 이름을 알 수 없어 접속할 수 없었고, HeatWave 비밀번호 정책은 특수문자를 요구했습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>RDS와 같은 <code>sql_mode</code> 구성을 만들고, 기존 DB는 최종 백업을 남기고 삭제한 뒤 관리자 <code>admin</code>으로 같은 사설 IP에 다시 만들었습니다. DB 계정 비밀번호는 정책에 맞게 다시 만들어 Vault에 새 버전으로 넣었습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>RDS 덤프(압축 21MB, 38초) → HeatWave 복원 <b>85초</b>. 테이블 17개, 공지 71,609 · 알림 889,446 · 이미지 88,163행이 <b>RDS와 정확히 일치</b>합니다. 전환 당일 DB 작업은 약 2분이면 끝납니다.</p></div>
+  </div>
+
+  <div class="psr-title">아주대 사이트 접근 검증 <span class="chip ok">통과</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>로컬 Mac에서는 <code>www.ajou.ac.kr</code> 접속이 시간 초과로 실패해서, OCI에서도 막히면 크롤러를 옮길 수 없는 상황이었습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>OS 재설치 직후 VM 2에서 공지 목록, 이미지, 학과 사이트, 도서관 사이트를 직접 요청했습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>4개 모두 <b>200 응답, 0.1~1.0초</b>. 크롤러를 OCI로 옮길 수 있습니다.</p></div>
+  </div>
+</section>
+
+<!-- ============ 탭 2 ============ -->
+<section class="panel" id="migration" role="tabpanel" aria-labelledby="tab-migration" hidden>
+  <h2>AWS · 아올다 리소스를 OCI로 이전</h2>
+
+  <h3>이전 전 리소스 (실측)</h3>
+  <div class="tbl"><table>
+    <tr><th>위치</th><th>리소스</th><th>실측</th><th>이전 후</th></tr>
+    <tr><td>아올다</td><td><code>ajouevent-app</code> m1.4xlarge</td><td>8 vCPU · 32GB 중 2.6GB 사용 · 컨테이너 7개 · HTTPS는 아올다 프록시 <code>210.107.196.188</code></td><td>OCI VM 1 · VM 2</td></tr>
+    <tr><td>AWS</td><td>RDS <code>ajouevent-v2-db</code></td><td>MySQL 8.4.8 · db.t3.micro · 20GB 중 1.07GB · 퍼블릭 접근 켜짐</td><td>HeatWave(사설)</td></tr>
+    <tr><td>AWS</td><td>Route 53 <code>ajouevent.com</code></td><td>레코드 4개 · 도메인 등록은 가비아(만료 2027-05-28)</td><td>A 레코드 2개만 변경</td></tr>
+    <tr><td>AWS</td><td>EC2 <code>ajouevent-v2</code>, <code>ajouevent-monitoring</code></td><td>앱 컨테이너는 5개월 전 종료 · nginx만 남음 / 모니터링 서버는 중지</td><td>삭제</td></tr>
+    <tr><td>AWS</td><td>S3</td><td>버킷 0개 · SDK 의존성만 남아 있었음(제거함)</td><td>없음</td></tr>
+  </table></div>
+
+  <div class="psr-title">비용 <span class="chip info">전환 후 반영</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>AWS 10월 청구액 <b>$47.37</b>. RDS $21.96, EC2 $13.14(쓰지 않는 서버 2대), VPC 퍼블릭 IPv4 $7.44, Route 53 $0.52.</p></div>
+    <div class="s"><span class="k">해결</span><p>DB는 HeatWave 무료, 서버는 E2 Micro · A1 무료 한도, 백업은 Object Storage 무료 20GB, 비밀은 Vault 무료 150개로 옮깁니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>월 비용 <b>$0</b>(Route 53을 유지하면 $0.5). 쓰지 않던 EC2 2대와 퍼블릭 IPv4 요금도 함께 사라집니다.</p></div>
+  </div>
+
+  <div class="psr-title">DB 노출 <span class="chip info">전환 후 반영</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>RDS가 퍼블릭 접근을 허용한 상태였고, 앱 · 크롤러가 같은 DB 계정 하나를 썼습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>HeatWave는 사설 서브넷에만 있고, 3306은 VM 서브넷(10.0.0.0/24)에서만 열립니다. 계정을 용도별로 3개로 나눴습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>DB가 인터넷에서 보이지 않습니다. 크롤러 계정이 털려도 스키마를 바꾸거나 지울 수 없습니다.</p></div>
+  </div>
+
+  <h3>데이터 이전</h3>
+  <div class="tbl"><table>
+    <tr><th>데이터</th><th>크기</th><th>방법</th></tr>
+    <tr><td>MySQL <code>ajouevent</code></td><td class="num">약 650MB</td><td>mysqldump → zstd → VM 1 → HeatWave 복원 (리허설 1회 + 전환 당일)</td></tr>
+    <tr><td>MySQL <code>ajouevent_v1</code></td><td class="num">약 420MB</td><td>덤프만 Object Storage에 보관 (앱 · 크롤러 모두 사용하지 않음)</td></tr>
+    <tr><td>Redis</td><td class="num">4MB</td><td>앱 정지 → 조회수 flush 확인 → <code>/data</code> 볼륨 복사</td></tr>
+    <tr><td>Google 캘린더 토큰</td><td class="num">수 KB</td><td><code>calendar_tokens</code> 볼륨 복사 후 소유자를 UID 10001로 변경 (새 이미지는 root가 아님)</td></tr>
+    <tr><td>Grafana</td><td class="num">수십 MB</td><td><code>grafana.db</code> 복사 (사용자, 알림 규칙 유지)</td></tr>
+    <tr><td>Prometheus · Loki 이력</td><td class="num">1.3GB</td><td>옮기지 않음. 아올다를 7일 보존해 필요하면 그때 조회</td></tr>
+  </table></div>
+<pre><code># ① 아올다에서 RDS 덤프
+docker run --rm -e MYSQL_PWD="$MYSQL_PASSWORD" mysql:8.4 mysqldump \
+  -h "$MYSQL_HOST" -u "$MYSQL_USER" --single-transaction --quick \
+  --set-gtid-purged=OFF --hex-blob --default-character-set=utf8mb4 \
+  --no-tablespaces ajouevent | zstd -T0 -10 &gt; ajouevent-$(date +%Y%m%d-%H%M).sql.zst
+
+# ② VM 1에서 HeatWave에 복원 (관리자 정보는 Vault: ajouevent-heatwave-admin)
+zstd -dc ajouevent-*.sql.zst | mysql --defaults-extra-file=admin.cnf ajouevent
+
+# ③ 검증: 두 DB에서 결과가 같아야 함
+SELECT COUNT(*), MAX(event_id) FROM club_events;
+SELECT COUNT(*), MAX(id) FROM push_notifications;</code></pre>
+
+  <h3>DNS 전환 기록 (Route 53 → Cloudflare, Route 53은 11-13 삭제)</h3>
+  <div class="tbl"><table>
+    <tr><th>레코드</th><th>지금</th><th>전환 후</th></tr>
+    <tr><td><code>api</code> A</td><td>210.107.196.188 (아올다)</td><td>146.56.101.16 (전환 때 변경)</td></tr>
+    <tr><td><code>admin.api</code> A</td><td>210.107.196.188 (아올다)</td><td>146.56.101.16 (전환 때 변경)</td></tr>
+    <tr><td><code>oci-api</code> A (리허설용)</td><td>없음</td><td>146.56.101.16 <span class="chip ok">추가 완료</span></td></tr>
+    <tr><td><code>grafana</code> A</td><td>없음</td><td>146.56.101.16 <span class="chip ok">추가 완료</span></td></tr>
+    <tr><td><code>ajouevent.com</code>, <code>www</code></td><td>Vercel</td><td>그대로</td></tr>
+  </table></div>
+  <p>Route 53을 Cloudflare(무료)로 옮기는 작업은 서버 이전과 독립적이라 별도로 진행합니다. 가비아에서 네임서버만 바꾸면 됩니다.</p>
+
+  <h3>전환 기록 (2026-11-13, 실제)</h3>
+  <div class="tbl"><table>
+    <tr><th>시각 (KST)</th><th>작업</th><th>결과</th></tr>
+    <tr><td class="num">14:30:00</td><td>아올다 크롤러 정지</td><td>마지막 발송은 14:25 성공, 진행 중 발송 없음</td></tr>
+    <tr><td class="num">14:30:59</td><td>아올다 앱 정지 (<b>서비스 중단 시작</b>)</td><td>-</td></tr>
+    <tr><td class="num">14:31~14:32</td><td>RDS 최종 덤프 · Redis · 캘린더 토큰 · Grafana DB 추출</td><td>덤프 21MB · 39초, Redis 키 8개, 토큰 21개</td></tr>
+    <tr><td class="num">14:33~14:35</td><td>HeatWave 최종 복원</td><td>85초, 공지 71,610 · 알림 889,608 · 회원 465 · 클러스터 15,791 <b>RDS와 일치</b></td></tr>
+    <tr><td class="num">14:35:34</td><td>A1 앱 기동 (실제 Firebase 키)</td><td>13초 만에 기동, Firebase 초기화 성공</td></tr>
+    <tr><td class="num">14:35:50</td><td>A1 크롤러 기동</td><td>HeatWave 연결 성공</td></tr>
+    <tr><td class="num">14:36:40</td><td>Route 53 <code>api</code> · <code>admin.api</code> → 146.56.101.16 (TTL 60)</td><td>권한 DNS 반영 확인</td></tr>
+    <tr><td class="num">14:37:27</td><td>Caddy 운영 도메인 인증서 발급 (<b>서비스 재개</b>)</td><td><code>api</code> · <code>admin.api</code> 200, HTTP/2, Let's Encrypt</td></tr>
+    <tr><td class="num">14:38~14:40</td><td>크롤러 웹훅 401 수정 (아래 참고)</td><td>14:40 새 공지 발송 성공 12 · 실패 0</td></tr>
+  </table></div>
+  <p><b>실제 서비스 중단 시간: 약 6분 30초</b> (14:30:59 ~ 14:37:27). 계획한 30분보다 짧았습니다.</p>
+
+  <div class="psr-title">전환 중 생긴 문제: 크롤러 웹훅 401 <span class="chip ok">해결</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>크롤러 설정을 옮기면서 <code>WEBHOOK_ENDPOINT</code>의 경로(<code>/api/webhook/crawling</code>)를 빠뜨려, 크롤러가 <code>/</code>로 요청해 401을 받았습니다. 크롤러는 웹훅이 실패해도 "마지막으로 본 공지" 값을 먼저 갱신하므로, 그대로 두면 공지 판단이 어긋납니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>Vault의 크롤러 설정을 고쳐 새 버전(v4)으로 넣고 서버에서 다시 받았습니다. HeatWave의 크롤러 상태(<code>notice</code> 테이블의 <code>AjouNormal</code> 행)를 전환 직전 RDS 값으로 되돌렸습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>401로 막혔던 공지는 아올다가 14:01에 이미 보낸 공지였고, 진짜 새 공지는 14:40에 정상 발송되었습니다. <b>중복 발송과 누락이 모두 없습니다.</b></p></div>
+  </div>
+
+  <div class="psr-title">옛 배포로 아올다가 다시 켜지는 위험 <span class="chip ok">차단</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>전환 뒤에 <code>main</code>으로 push하면 기존 <code>deploy.yml</code>이 아올다에 배포하면서 아올다 앱이 다시 켜집니다. 그러면 RDS에 붙은 앱과 OCI 앱이 동시에 돌아 푸시가 두 번 나갈 수 있습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>두 저장소의 <code>Deploy to EC2</code> 워크플로를 비활성화했습니다. OCI 배포용 시크릿 <code>OCI_HOST</code>와 배포 전용 SSH 키 <code>OCI_DEPLOY_KEY</code>를 등록하고, 이 키로 A1 로그인을 확인했습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>앞으로의 배포는 <code>deploy-oci.yml</code>로만 나갑니다. 배포 키는 개인 키와 분리되어 있어 언제든 회수할 수 있습니다.</p></div>
+  </div>
+
+  <div class="psr-title">DB 백업 일정 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>Ubuntu Minimal에는 cron이 없고, 서버 시간대가 UTC라 시각을 잘못 잡을 수 있었습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>systemd 타이머 <code>ajouevent-db-backup.timer</code>를 <code>04:30 Asia/Seoul</code>로 설치했습니다. 서버가 꺼져 있던 시간에 놓친 실행은 켜질 때 수행합니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>첫 백업을 수동으로 실행해 Object Storage에 21.7MB 덤프가 올라간 것을 확인했습니다(36초).</p></div>
+  </div>
+
+  <div class="psr-title">AWS 리소스 삭제 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>전환 뒤에도 RDS, EC2 2대(1대는 중지), EBS, 퍼블릭 IPv4가 남아 월 $47 안팎이 나가고 있었습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>RDS 최종 덤프 2개(<code>ajouevent</code>, <code>ajouevent_v1</code>)를 OCI Object Storage <code>archive/</code>에 영구 보관한 뒤, RDS(스냅숏 · 자동 백업 보존 없이), EC2, EBS, 탄력적 IP, 키 페어, 보안 그룹을 지웠습니다. 쓰지 않던 GitHub 시크릿(FE의 AWS 키 포함)도 지웠습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>Route 53 호스팅 영역까지 지워 <b>AWS 유료 리소스 0개</b>입니다. 삭제 직후에도 KT · SK브로드밴드 · LG U+ · Google · Cloudflare DNS 모두 Cloudflare 네임서버로 정상 조회됐습니다.</p></div>
+  </div>
+
+  <div class="psr-title">프론트를 Cloudflare Pages로 <span class="chip ok">완료 (FE #148)</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>프론트가 조직 저장소를 심재엽 님 개인 저장소로 복사한 뒤 그분의 Vercel Hobby 계정에서 배포되어, 우리가 관리할 수 없었습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>GitHub Actions가 조직 저장소에서 바로 빌드해 Cloudflare Pages(무료)에 올립니다. PR마다 미리보기 주소가 생깁니다. 운영 번들에서 읽은 설정값을 Actions 변수로 옮기고, 개인 저장소 복사 워크플로와 Vercel Analytics를 지웠습니다. 루트 도메인 리다이렉트는 OCI Caddy가 맡습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>Vercel 의존성이 없어집니다. 운영 주소 <code>ajouevent.pages.dev</code>에서 SPA 경로 · 서비스 워커 · manifest가 모두 200이고, 번들의 API 주소와 Firebase 설정이 운영과 같습니다.</p></div>
+  </div>
+
+  <div class="psr-title">배포 후 옛 설정이 남는 문제 <span class="chip ok">해결 (#117)</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>루트 도메인 리다이렉트(#116)를 배포했는데 적용되지 않았습니다. 배포가 <code>Caddyfile</code>을 새 파일로 덮어쓰면, 파일 하나만 바인드 마운트한 컨테이너는 옛 파일을 계속 봅니다. Prometheus · Loki 설정도 같은 구조였습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>Caddy 컨테이너를 다시 만들어 즉시 적용한 뒤, <code>deploy/caddy/</code>, <code>prometheus/</code>, <code>loki/</code>를 디렉터리째 마운트하도록 바꿨습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>이제 설정만 바뀐 배포도 <code>caddy reload</code>와 Prometheus 리로드로 무중단 반영됩니다. 루트 도메인은 <code>https://www.ajouevent.com</code>으로 301 리다이렉트됩니다.</p></div>
+  </div>
+
+  <div class="psr-title">전환 후 장애: <code>www</code> Cloudflare 522 <span class="chip ok">복구</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>DNS가 Cloudflare로 넘어오자 <code>www</code> CNAME이 Cloudflare 프록시(주황 구름)를 거치게 되었고, 이 경로가 Pages로 연결되지 않아 <b>522 오류로 프론트가 열리지 않았습니다</b>. Route 53 시절에는 DNS 전용이라 문제가 없었습니다. Route 53 삭제 뒤 최대 약 40분 동안 영향이 있었을 수 있습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>Pages 사용자 지정 도메인이 Active · SSL 활성임을 확인하고, <code>www</code> 레코드를 DNS 전용(회색 구름)으로 바꿨습니다. Pages는 원래 Cloudflare 엣지에서 제공되므로 CDN 효과는 그대로입니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>즉시 200으로 복구했습니다. 함께 확인하던 중, Vercel 시절의 정적 파일 장기 캐시(#130)가 빠진 것을 발견해 <code>public/_headers</code>로 되살렸습니다(FE #149: <code>/static/*</code> 1년 immutable, <code>index.html</code> · 서비스 워커는 매번 재검증).</p></div>
+  </div>
+
+  <div class="callout teal"><p><b>롤백</b>: DNS를 <code>210.107.196.188</code>로 되돌리고 아올다 앱 · 크롤러를 다시 켜면 됩니다. 다만 14:37 이후 OCI에 쌓인 데이터(알림, 가입)는 RDS에 없으므로, 롤백할 때는 HeatWave 덤프를 RDS로 옮겨야 합니다.</p></div>
+
+  <h3>정리 결과 (2026-11-13 완료)</h3>
+  <ul>
+    <li><b>AWS</b>: RDS(최종 덤프는 OCI <code>archive/</code>에 보관) · EC2 2대 · EBS · 탄력적 IP · 키 페어 · 보안 그룹 · 스냅숏 · <b>Route 53 호스팅 영역</b> · IAM 사용자 4명 · <code>rds-monitoring-role</code> · RDS 서브넷 그룹 · <b>17개 리전 기본 VPC</b> · Resource Explorer 인덱스까지 삭제. 남은 것은 로그인용 IAM 사용자 1명과 AWS가 삭제를 허용하지 않는 기본 항목뿐입니다(요금 없음).</li>
+    <li><b>아올다</b>: <code>ajouevent-app</code> 인스턴스 · 512GiB 볼륨 · 유동 IP 삭제</li>
+    <li><b>Vercel</b>: 프론트를 Cloudflare Pages로 옮겨 의존성 제거 (프로젝트는 심재엽 님 계정에 남음)</li>
+    <li><b>Docker Hub</b>: <code>wa6221/ajouevent-be</code>(옛 Firebase 키 포함), <code>wa6221/ajouevent-crawling</code> 삭제</li>
+    <li><b>GitHub</b>: 아올다용 <code>deploy.yml</code> · <code>docker-compose.yml</code>, <code>EC2_*</code> · <code>DOCKER_*</code> · <code>FIREBASE_SERVICE_ACCOUNT</code> · FE의 AWS 키 시크릿 삭제</li>
+    <li>CORS의 죽은 주소 <code>dev.ajouevent.com</code>, <code>dev.fe.ajouevent.com</code> 정리는 별도 작업으로 남김</li>
+  </ul>
+
+  <h3>DB 데이터 현황 (정리는 별도 작업)</h3>
+  <div class="tbl"><table>
+    <tr><th>대상</th><th>실측</th><th>판단</th></tr>
+    <tr><td>공지 <code>club_events</code></td><td>2014~2026년 69,552건 · 123MB · 연 5~7MB</td><td>유지. 13년 치가 123MB라 용량 문제가 아닙니다.</td></tr>
+    <tr><td>알림 <code>push_notifications</code></td><td>90만 행 · 370MB · 월 3~6만 행 증가</td><td>HeatWave 50GB 기준으로 용량은 충분합니다. 조회 성능을 위한 보관 정책은 나중에 결정합니다.</td></tr>
+    <tr><td>공지 이미지 <code>club_event_images</code></td><td>88,157행 중 고유 URL 42,394개 · http 4,476행 · 깨진 주소 232행 · 평균 765KB</td><td>원본 사이트 URL만 저장합니다. 미러링 방안은 탭 4에 있습니다.</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ 탭 3 ============ -->
+<section class="panel" id="cicd" role="tabpanel" aria-labelledby="tab-cicd" hidden>
+  <h2>CI/CD · Caddy · 이미지 빌드</h2>
+
+  <div class="psr-title">공개 이미지에 들어 있던 Firebase 키 <span class="chip ok">이미지 삭제 · 키 교체 완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>CI가 Firebase 서비스 계정 키를 jar 안에 넣어 빌드했고, Docker Hub <code>wa6221/ajouevent-be</code>는 <b>공개 저장소</b>(pull 2,130회)입니다. 누구나 키(<code>38edb2…</code>)를 꺼내 전체 사용자에게 푸시를 보낼 수 있었습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>키를 Vault 비밀 <code>ajouevent-firebase-sa</code>로 옮기고, 앱은 <code>file:</code> 경로로 마운트된 키를 읽도록 <code>FcmInitializer</code>를 고쳤습니다. CI의 키 생성 단계를 지우고 <code>.dockerignore</code>에 키 경로를 추가했습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>새 이미지에 키가 없음을 확인했고, 키가 든 Docker Hub 저장소 <code>wa6221/ajouevent-be</code>를 삭제했습니다. 푸시 전용 서비스 계정 <code>firebase@ajou-event</code>(역할: Firebase Cloud Messaging API 관리자 하나)의 새 키 <code>b0cef1</code>로 교체했습니다(11-13 17:13, Vault v2, 앱 재시작 13초). 새 키로 실제 발송 성공(클러스터 19607, 성공 3 · 실패 0)을 확인한 뒤 옛 키 <code>38edb2</code> · <code>655a7e</code>를 <b>삭제</b>했습니다. 공개 이미지로 새어 나간 키는 이제 무효입니다.</p></div>
+  </div>
+
+  <div class="psr-title">GitHub 레지스트리(GHCR) 전환과 CI 배포 <span class="chip ok">완료 (PR #115 · #6)</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>이미지가 개인 Docker Hub(<code>wa6221</code>)에 있어서 조직 저장소와 분리되어 있었고, CI가 Docker Hub 계정 비밀번호를 GitHub 시크릿으로 들고 있어야 했습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>두 저장소의 이미지를 <code>ghcr.io/ajouevent/ajouevent-be</code>, <code>ghcr.io/ajouevent/ajouevent-crawling</code>으로 옮기고, CI가 작업마다 자동 발급되는 <code>GITHUB_TOKEN</code>으로 push · pull하게 했습니다. 빌드 캐시는 GitHub Actions 캐시를 씁니다. <code>main</code> push → 빌드 → A1 배포 → 헬스 체크까지 자동으로 이어집니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>BE 배포 4분(빌드 3분 · 배포 1분), 크롤러 배포 성공. GitHub 시크릿이 BE 10개 → 5개, 크롤러 5개 → 2개로 줄었습니다(Docker Hub · 아올다 · Firebase 키 시크릿 삭제). GHCR 패키지 두 개를 <b>공개</b>로 바꿔(조직 설정 Package creation → Public 허용) 용량 제한 없이 무료로 씁니다. 익명 pull 200 확인.</p></div>
+  </div>
+
+  <div class="psr-title">BE 이미지 레이어 분리 · 캐시 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>이미지가 jar 하나(180MB)를 통째로 담아서, 코드 한 줄을 바꿔도 서버가 180MB를 다시 받았습니다. 빌드마다 Gradle 의존성을 새로 받았고, 컨테이너는 root로 실행되었습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>의존성 레이어를 먼저 만들고 BuildKit 캐시 마운트(<code>/root/.gradle</code>)를 씁니다. Spring Boot 레이어 추출(<code>jarmode=tools extract --layers</code>)로 의존성 · 로더 · 앱 코드를 레이어로 나눴습니다. UID 10001 사용자로 실행합니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>코드만 바뀐 배포에서 받는 양 <b>180MB → 2MB</b>. 변경 없는 재빌드 <b>2초</b>. 이미지 전체 233MB → 202MB.</p></div>
+  </div>
+
+  <div class="psr-title">불필요한 의존성 제거 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p><code>firebase-admin 9.4.0</code>이 테스트용 라이브러리 <code>mockserver-junit-rule</code>(36MB)을 운영 런타임에 끌고 왔습니다. 사용하지 않는 <code>aws-java-sdk-s3</code>(3MB)도 남아 있었습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p><code>firebase-admin</code>을 9.9.0으로 올리고 AWS SDK를 제거했습니다. 테스트 19개 중 18개 통과(DB가 필요한 <code>contextLoads</code> 1개는 변경 전에도 실패)로 회귀가 없음을 확인했습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>런타임 의존성 약 <b>39MB 감소</b>. JVM이 읽는 클래스 수가 줄어 Metaspace도 줄어듭니다.</p></div>
+  </div>
+
+  <div class="psr-title">크롤러 이미지 <span class="chip ok">완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>Go 1.22.0(지원 종료), Alpine 3.19, 빌드 캐시 없음, root 실행, amd64 고정 빌드였습니다. 개발용 단계는 <code>curl | sh</code>로 air를 설치했습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>Go 1.27, Alpine 3.23, Go 모듈 · 빌드 캐시 마운트, <code>TARGETARCH</code> 교차 컴파일, <code>-trimpath -ldflags="-s -w"</code>, UID 10001 실행, <code>go install</code>로 air 설치.</p></div>
+    <div class="r"><span class="k">성과</span><p>이미지 29.5MB → <b>27.6MB</b>, 빌드 37초. A1(arm64)용 이미지도 에뮬레이션 없이 만들어집니다.</p></div>
+  </div>
+
+  <div class="psr-title">배포 워크플로 <span class="chip ok">작성 완료 · 전환 때 활성화</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>배포 대상이 <code>EC2_*</code> 이름의 아올다 서버(포트 20000)였고, 액션 버전이 1~3세대 전이었습니다. 크롤러 저장소도 같은 구조였습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>두 저장소에 <code>deploy-oci.yml</code>을 추가했습니다(전환 전에는 수동 실행만). A1 한 대에 배포하고, 헬스 체크가 통과해야 성공으로 처리합니다. 액션을 최신 메이저로 올리고 arm64 · amd64 멀티 아키텍처로 빌드합니다. 크롤러 로깅 플러그인은 서버 아키텍처에 맞는 태그를 설치합니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>GitHub 시크릿은 CI용(<code>DOCKER_*</code>, <code>OCI_HOST</code>, <code>OCI_DEPLOY_KEY</code>)만 남습니다. Firebase 키와 서버 접속용 비밀번호는 GitHub에 두지 않습니다.</p></div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>액션</th><th>이전</th><th>변경</th></tr>
+    <tr><td>actions/checkout</td><td>v4</td><td>v7</td></tr>
+    <tr><td>docker/setup-buildx-action · login-action</td><td>v3</td><td>v4 (+ setup-qemu-action v4)</td></tr>
+    <tr><td>docker/build-push-action</td><td>v6</td><td>v7</td></tr>
+    <tr><td>appleboy/scp-action · ssh-action</td><td>v0.1.7 · v1</td><td>v1.0.0 · v1.2.5</td></tr>
+    <tr><td>actions/setup-go (크롤러 CI)</td><td>v5 · Go 1.22</td><td>v7 · Go 1.27</td></tr>
+  </table></div>
+
+  <div class="psr-title">Caddy (HTTPS 직접 처리) <span class="chip ok">설정 완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>HTTPS를 아올다 프록시가 처리해서 인증서, 압축, 타임아웃, 보안 헤더를 우리가 제어할 수 없었습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>Caddy가 Let's Encrypt 인증서를 자동 관리합니다. HTTP/3, zstd · gzip 압축, 헤더 10초 · 쓰기 60초 타임아웃, 본문 10MB 제한, actuator 외부 차단, 재시작 중 요청 15초 대기를 넣었습니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>JSON 응답이 압축되어 전송량이 줄고, 배포 중 들어온 요청이 바로 실패하지 않고 기다립니다. 상주 메모리는 약 30MB입니다.</p></div>
+  </div>
+<pre><code>api.ajouevent.com, admin.api.ajouevent.com, {$EXTRA_API_HOST:oci-api.ajouevent.com} {
+	import common                      # zstd/gzip, HSTS, nosniff, Server 헤더 제거
+	request_body { max_size 10MB }
+	@actuator path /actuator /actuator/*
+	respond @actuator 404
+	reverse_proxy ajouevent-app:8080 {
+		health_uri /actuator/health
+		health_port 9090
+		health_interval 10s
+		lb_try_duration 15s
+		transport http {
+			dial_timeout 3s
+			response_header_timeout 60s
+			keepalive 90s
+			keepalive_idle_conns 32
+		}
+	}
+}</code></pre>
+
+  <div class="psr-title">JVM · 컨테이너 수치 <span class="chip ok">설정 완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>아올다(32GB)에서는 JVM 옵션이 없어도 됐지만, 1GB VM에서는 힙 · Metaspace 상한이 없으면 메모리를 다 씁니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>운영 앱 실측값(힙 111MB, Metaspace 160MB, 코드 캐시 59MB, 스레드 102개)의 약 4배로 상한을 정했습니다: G1GC(<code>MaxGCPauseMillis=100</code>), <code>-Xms512m -Xmx1g</code>, <code>MaxMetaspaceSize=320m</code>, <code>ReservedCodeCacheSize=128m</code>, 컨테이너 상한 2GB. 모든 컨테이너에 <code>mem_limit</code>를 둡니다.</p></div>
+    <div class="r"><span class="k">성과</span><p>A1 리허설에서 앱은 661MB를 쓰며 17초에 기동했습니다. 상한이 있어서 한 컨테이너가 폭주해도 다른 서비스에 영향이 가지 않습니다.</p></div>
+  </div>
+
+  <div class="psr-title">모니터링 경량화 <span class="chip ok">설정 완료</span></div>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>cAdvisor가 8코어 서버에서도 CPU 4.8%를 썼고, 이미지 태그가 모두 <code>latest</code>라 재시작할 때마다 버전이 바뀔 수 있었습니다. Loki가 죽으면 크롤러 로그 쓰기가 막힐 수 있었습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>cAdvisor 수집 주기 30초 · 불필요 지표 끔, node_exporter 추가, Prometheus 보관 15일 · 5GB, Loki 보관 15일 · 수집 4MB/s 제한, 로깅 드라이버 <code>non-blocking</code>, 버전을 아올다와 같은 값으로 고정(Grafana 13.0.1, Loki 3.7.2, Prometheus 3.11.3).</p></div>
+    <div class="r"><span class="k">성과</span><p>기존 대시보드(cAdvisor 패널 5개 포함)를 그대로 씁니다. 리허설 실측으로 Grafana · Loki · Prometheus · cAdvisor 합계가 약 220MB입니다. 크롤러는 Loki 상태와 관계없이 동작합니다.</p></div>
+  </div>
+</section>
+
+<!-- ============ 탭 4 ============ -->
+<section class="panel" id="architecture" role="tabpanel" aria-labelledby="tab-architecture" hidden>
+  <h2>아키텍처 변경안 (A1 1대 + Micro 2대)</h2>
+  <p>원칙은 세 가지입니다. 요청은 A1이 받고, 몰려서 들어오는 푸시 발송은 Micro가 처리하고, 감시는 감시 대상 밖에서 합니다.</p>
+  <pre class="mermaid">
+flowchart LR
+  U[사용자] -->|HTTPS| ING
+  subgraph A1["A1 · core · 4 OCPU / 24GB · arm64 · k3s 단일 노드"]
+    ING[인그레스] --> API1[API 파드 1]
+    ING --> API2[API 파드 2]
+    RM[(Redis 마스터<br/>Streams · Pub/Sub)]
+    CRW[크롤러]
+    MON[Prometheus · Loki · Grafana]
+  end
+  subgraph M1["Micro 1 · push · 1GB · amd64"]
+    PW[푸시 발송 워커]
+    RR[(Redis 레플리카)]
+    S1[Sentinel]
+  end
+  subgraph M2["Micro 2 · watch · 1GB · amd64"]
+    GT[외부 상태 점검 Gatus]
+    BK[DB 백업 cron]
+    S2[Sentinel]
+  end
+  API1 -->|XADD push-jobs| RM
+  API2 -->|XADD| RM
+  CRW -->|웹훅| ING
+  RM -->|XREADGROUP| PW
+  PW -->|FCM HTTP v1| FCM[Firebase Cloud Messaging]
+  RM -.복제.-> RR
+  GT -->|1분마다 호출| ING
+  GT -->|장애 알림| DC[Discord]
+  API1 --> DB[(HeatWave MySQL)]
+  PW --> DB
+  </pre>
+
+  <h3>역할 분배</h3>
+  <div class="tbl"><table>
+    <tr><th>인스턴스</th><th>올리는 것</th><th>이유</th></tr>
+    <tr><td><b>A1 · core</b><br>4 OCPU / 24GB</td><td>k3s 단일 노드, 인그레스, API 레플리카 2개, Redis 마스터, 크롤러, 모니터링. 예약 IP <code>146.56.101.16</code>을 VM 1에서 옮겨 붙입니다.</td><td>메모리가 넉넉해 JVM 상한을 풀고, 롤링 배포로 무중단 배포가 가능합니다.</td></tr>
+    <tr><td><b>Micro 1 · push</b><br>1GB</td><td>푸시 발송 워커(같은 앱 이미지, 웹 서버 없이 발송 전용 프로필), Redis 레플리카, Sentinel</td><td>FCM 발송은 CPU보다 네트워크 대기가 대부분이라 Micro에 맞습니다. 발송이 몰려도 API가 느려지지 않습니다.</td></tr>
+    <tr><td><b>Micro 2 · watch</b><br>1GB</td><td>Gatus(약 20MB) 외부 상태 점검, DB 백업 cron, Sentinel</td><td>A1이 통째로 죽어도 알림이 옵니다. 감시 대상과 다른 서버에 있어야 의미가 있습니다.</td></tr>
+  </table></div>
+  <p><b>Micro를 k3s 노드로 넣지 않는 이유</b>: 에이전트만으로 약 200MB를 쓰고, arm64(A1)와 amd64(Micro)가 섞여 스케줄링이 복잡해집니다. 컨트롤 플레인이 A1 한 대에 있으니 고가용성도 생기지 않습니다. 그래서 Micro는 Docker Compose로 따로 운영합니다.</p>
+
+  <h3>알림 발송 메시지 큐</h3>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>지금은 API 서버 안의 스레드 풀(전송 스레드 200개)이 FCM을 직접 호출합니다. 공지 웹훅이 몰리면 발송과 API 요청이 같은 JVM의 CPU · 메모리 · DB 커넥션(10개)을 나눠 씁니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>API는 outbox에 기록한 뒤 Redis Streams <code>push-jobs</code>에 발송 작업을 넣고 바로 응답합니다. Micro 1의 워커가 소비자 그룹으로 읽어 발송하고 <code>XACK</code>합니다. 실패한 작업은 <code>XAUTOCLAIM</code>으로 재시도하고, 5회 넘게 실패하면 <code>push-jobs:dlq</code>로 보냅니다.</p></div>
+    <div class="r"><span class="k">기대 성과</span><p>발송량이 늘어도 API 응답 시간이 일정하게 유지됩니다. 워커만 늘려 발송 속도를 올릴 수 있습니다. 기존 outbox와 토큰 선점 로직이 중복 발송을 그대로 막습니다.</p></div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>후보</th><th>메모리</th><th>판단</th></tr>
+    <tr><td><b>Redis Streams (추천)</b></td><td>추가 없음</td><td>이미 운영 중인 Redis를 씁니다. 소비자 그룹, ACK, 재시도, DLQ를 모두 구현할 수 있고 Sentinel 고가용성도 그대로 적용됩니다.</td></tr>
+    <tr><td>RabbitMQ</td><td>약 150MB</td><td>DLQ와 라우팅이 기본 기능이지만, 운영할 서버가 하나 더 생깁니다. 지금 발송량(FCM 월 5,209건)에는 과합니다.</td></tr>
+    <tr><td>Kafka</td><td>1GB 이상</td><td>이 규모에는 맞지 않습니다.</td></tr>
+  </table></div>
+
+  <h3>Caffeine + Redis 2단계 캐시 (Pub/Sub 무효화)</h3>
+  <div class="psr">
+    <div class="p"><span class="k">문제</span><p>API 레플리카가 2개가 되면 공지 목록 같은 읽기 요청이 매번 Redis까지 왕복합니다. 반대로 인스턴스마다 로컬 캐시만 두면, 한쪽에서 수정한 내용이 다른 쪽 캐시에 남습니다.</p></div>
+    <div class="s"><span class="k">해결</span><p>L1은 인스턴스별 Caffeine(최대 1만 항목, TTL 30초), L2는 Redis(TTL 10분)입니다. 데이터가 바뀌면 Redis를 갱신한 뒤 <code>cache:invalidate</code> 채널에 키를 발행하고, 모든 인스턴스가 받아서 자기 L1을 지웁니다. Pub/Sub은 전달을 보장하지 않으므로, L1의 짧은 TTL을 안전장치로 둡니다.</p></div>
+    <div class="r"><span class="k">기대 성과</span><p>자주 읽는 데이터는 JVM 메모리에서 바로 응답합니다. 인스턴스 사이에서 오래된 데이터가 보이는 시간은 최대 30초로 제한됩니다.</p></div>
+  </div>
+
+  <h3>Redis 고가용성 (Sentinel)</h3>
+  <p>Sentinel 3개(A1, push, watch)가 쿼럼 2로 마스터를 감시합니다. A1이 죽으면 Micro 1의 레플리카가 마스터로 승격되어 푸시 워커가 계속 동작합니다. 앱의 Redis 연결 설정을 Sentinel 방식(<code>spring.data.redis.sentinel</code>)으로 바꿔야 합니다.</p>
+
+  <h3>진행 순서</h3>
+  <ol>
+    <li>E2 Micro 2대로 이전 완료 (탭 1 · 2)</li>
+    <li>A1 생성 · 예약 IP 이전 <span class="chip ok">완료</span> → k3s 전환 (아래 ③ 상세 설계)</li>
+    <li>푸시 발송 워커 분리 + Redis Streams (아래 ② 상세 설계)</li>
+    <li>Micro 2에 Gatus 외부 상태 점검</li>
+    <li>2단계 캐시와 Redis Sentinel (코드 작업)</li>
+  </ol>
+
+  <h2>보류 과제 상세 설계</h2>
+  <p>이번 이전에서는 하지 않기로 한 과제 여섯 가지입니다. 실행할 때 그대로 따라 할 수 있게 목적, 구성, 설정값, 단계, 검증, 롤백 방법을 적었습니다. 추천 순서는 <b>① 알림 보관 배치 → ⑤ 이미지 캐시 프록시 → ⑥ 공지 본문 시각화 → ② 메시지 큐 → ③ k3s → ④ 이미지 미러링</b>입니다. 앞의 것일수록 위험이 낮고, 사용자가 체감하는 효과가 바로 보입니다.</p>
+
+  <div class="tbl"><table>
+    <tr><th>과제</th><th>왜 하는가</th><th>작업량</th><th>선행 조건</th></tr>
+    <tr><td>① 알림 보관 배치</td><td>알림 테이블이 월 3~6만 행씩 늘어 알림 목록 조회가 느려지는 것을 막음</td><td class="num">1~2일</td><td>보관 기간 결정</td></tr>
+    <tr><td>② 메시지 큐</td><td>공지가 몰릴 때 FCM 발송이 API와 자원을 나눠 쓰지 않게 분리</td><td class="num">3~5일</td><td>없음 (k3s와 독립)</td></tr>
+    <tr><td>③ k3s</td><td>무중단 롤링 배포, 자동 복구, Git 기반 배포 상태 관리</td><td class="num">2~3일</td><td>A1 여유 메모리 (지금 23GB)</td></tr>
+    <tr><td>④ 공지 이미지 미러링</td><td>원본 사이트에서 지워지거나 http라 안 보이는 이미지를 우리가 보관</td><td class="num">3~4일</td><td>⑤ 이미지 캐시 프록시</td></tr>
+    <tr><td>⑤ 이미지 캐시 프록시</td><td>사진이 느린 문제 해결: Cloudflare 엣지 캐시 + imgproxy 크기 줄이기 (원본 최대 10MB, 일부 네트워크에서 학교 서버 시간 초과)</td><td class="num">반나절</td><td>없음</td></tr>
+    <tr><td>⑥ 공지 본문 시각화</td><td>원문의 표 · 링크 · 서식을 살리고 마감일 등 핵심 정보 카드를 보여 줌</td><td class="num">3~4일</td><td>⑤ 권장</td></tr>
+  </table></div>
+
+  <h3>① 알림 보관 배치 (push_notifications 아카이브)</h3>
+  <div class="psr">
+    <div class="p"><span class="k">현황</span><p>2026-11-13 기준 889,608행, 약 370MB. 2025-03부터 월 3~6만 행이 쌓입니다. 인덱스는 <code>(member_id, notification_type, notified_at)</code>, <code>(member_id, is_read)</code>, <code>(push_cluster_id)</code>가 있습니다. HeatWave 50GB 기준으로 용량은 충분하지만, 회원별 목록 조회 범위가 계속 넓어집니다.</p></div>
+    <div class="s"><span class="k">설계</span><p>매월 1일 04:00(KST)에 <b>12개월이 지난 알림</b>을 월 단위로 Object Storage <code>archive/push_notifications/yyyy-mm.jsonl.zst</code>에 내보내고, 내보낸 범위만 DB에서 지웁니다. ShedLock(<code>@SchedulerLock(name="pushNotificationArchive")</code>)으로 한 번만 실행되게 합니다.</p></div>
+    <div class="r"><span class="k">효과</span><p>DB에는 최근 12개월(약 50~60만 행)만 남고, 지난 알림도 파일로 남아 필요하면 다시 넣을 수 있습니다. 공지(<code>club_events</code>, 13년 치 123MB)는 대상이 아닙니다.</p></div>
+  </div>
+<pre><code># 설정 (application.yaml)
+ajou:
+  archive:
+    push-notification:
+      enabled: ${ARCHIVE_PUSH_NOTIFICATION_ENABLED:false}   # 처음에는 false로 배포 후 수동 1회 실행
+      retention-months: 12
+      chunk-size: 5000                                     # 한 번에 지우는 행 수 (잠금 시간 최소화)
+      bucket-prefix: archive/push_notifications/
+
+# 처리 순서 (월 1회, 대상 월마다)
+1. SELECT id 범위 확인:  WHERE notified_at &lt; :cutoffMonthEnd AND notified_at &gt;= :cutoffMonthStart
+2. id 오름차순으로 5,000행씩 읽어 JSON Lines로 압축 스트림에 기록 → Object Storage 업로드 (멀티파트)
+3. 업로드한 객체의 행 수 = DB 행 수 확인 후에만 삭제 단계로 진행
+4. DELETE FROM push_notifications WHERE id BETWEEN :from AND :to LIMIT 5000  (반복, 사이에 100ms 휴식)
+5. 결과(월, 행 수, 객체 키, 소요 시간)를 Discord 운영 채널로 알림</code></pre>
+  <ul>
+    <li><b>업로드 방식</b>: 서버에 이미 있는 쓰기 전용 PAR(<code>.env.backup</code>의 <code>BACKUP_PAR_URL</code>)을 그대로 씁니다. 버킷 수명 주기 정책은 <code>db/</code>만 지우므로 <code>archive/</code>는 영구 보관됩니다.</li>
+    <li><b>검증</b>: 첫 실행은 <code>enabled=false</code> 상태에서 관리자 API로 1개월만 수동 실행합니다. 객체를 내려받아 행 수와 샘플 10건이 DB와 같은지 비교한 뒤 자동 실행을 켭니다.</li>
+    <li><b>롤백</b>: 지운 달의 <code>.jsonl.zst</code>를 내려받아 <code>LOAD DATA</code> 또는 INSERT 스크립트로 다시 넣습니다. 삭제는 업로드 검증 뒤에만 하므로 데이터 유실 경로가 없습니다.</li>
+    <li><b>같이 정리할 것</b>: 발송이 끝난 <code>push_cluster_tokens</code>(30만 행, 133MB)도 같은 배치로 12개월이 지난 클러스터 기준으로 정리합니다. 상태 <code>PENDING · IN_PROGRESS · RETRY_PENDING</code>인 행은 outbox 복구 대상이므로 제외합니다.</li>
+  </ul>
+
+  <h3>② 알림 발송 메시지 큐 (Redis Streams)</h3>
+  <div class="psr">
+    <div class="p"><span class="k">현황</span><p>웹훅 → <code>PushCluster</code> · <code>push_cluster_tokens</code>(outbox, 상태 <code>PENDING</code>) 저장 → 같은 JVM의 발송 루프(dispatch 풀 2개)가 FCM 전송 스레드 200개로 보냄. 복구는 <code>PushPollingPublisherScheduler</code>(평일 9~21시 5분마다, 지금은 환경 변수로 꺼짐)가 <code>PENDING</code>(오래됨) · <code>IN_PROGRESS</code>(오래됨) · <code>RETRY_PENDING</code>을 다시 보냅니다.</p></div>
+    <div class="s"><span class="k">설계</span><p>outbox 저장까지는 그대로 두고, <b>"발송 시작" 신호만 Redis Streams로</b> 바꿉니다. API는 트랜잭션 커밋 뒤 <code>XADD push:jobs</code>로 클러스터 ID를 넣고 바로 응답합니다. 발송 워커(같은 이미지, <code>SPRING_PROFILES_ACTIVE=prod,push-worker</code>, 웹 포트 없음)가 소비자 그룹으로 읽어 발송하고 <code>XACK</code>합니다.</p></div>
+    <div class="r"><span class="k">효과</span><p>발송이 몰려도 API 응답 시간과 DB 커넥션이 흔들리지 않습니다. 워커만 늘리면(Micro 1 추가 등) 발송 속도가 올라갑니다. 기존 토큰 선점 · 중복 차단 로직이 그대로 동작합니다.</p></div>
+  </div>
+<pre><code># 메시지 (스트림 push:jobs, MAXLEN ~ 100000)
+{ "clusterId": "19599", "type": "TOPIC|KEYWORD|RETRY", "enqueuedAt": "2026-11-13T14:40:33+09:00" }
+
+# 소비자 그룹 / 워커
+XGROUP CREATE push:jobs push-workers $ MKSTREAM
+XREADGROUP GROUP push-workers worker-${HOSTNAME} COUNT 1 BLOCK 5000 STREAMS push:jobs &gt;
+→ 성공 시 XACK push:jobs push-workers &lt;id&gt;
+
+# 재시도 · DLQ
+- 1분마다 XAUTOCLAIM push:jobs push-workers worker-x 60000 0-0  (60초 넘게 ACK 안 된 메시지 회수)
+- XPENDING 의 delivery count &gt; 5 이면 push:jobs:dlq 로 옮기고 Discord 알림, 원본은 XACK
+
+# 설정
+ajou.push.queue.enabled: ${PUSH_QUEUE_ENABLED:false}   # false면 지금처럼 API JVM 안에서 바로 발송
+ajou.push.queue.stream: push:jobs
+ajou.push.queue.consumer-group: push-workers</code></pre>
+  <ul>
+    <li><b>중복 방지</b>: 메시지가 두 번 소비돼도 토큰 단위 상태 전이(<code>PENDING → IN_PROGRESS</code> 선점)가 있어 같은 토큰을 두 번 보내지 않습니다. 워커는 메시지를 "이 클러스터의 PENDING 토큰을 처리하라"는 신호로만 씁니다.</li>
+    <li><b>안전망</b>: Redis가 메시지를 잃어도 outbox(DB)에 <code>PENDING</code>이 남으므로, 지금의 폴링 릴레이를 하루 1회 저빈도로 켜 두면 복구됩니다.</li>
+    <li><b>지표</b>: <code>XLEN push:jobs</code>, 소비자 그룹 지연(<code>XINFO GROUPS</code>의 lag), DLQ 길이를 Micrometer 게이지로 내보내 Grafana 패널을 추가합니다.</li>
+    <li><b>단계</b>: (1) 큐 코드 + 기본값 off 배포 → (2) A1에서 워커 컨테이너 1개를 같이 띄우고 <code>PUSH_QUEUE_ENABLED=true</code> → (3) 일주일 관찰 → (4) 워커를 Micro 1로 옮김. <b>롤백</b>은 환경 변수를 false로 바꾸는 것뿐입니다.</li>
+    <li><b>RabbitMQ · Kafka를 쓰지 않는 이유</b>: 월 FCM 요청 약 5,200건 규모에서 별도 브로커(150MB~1GB+)를 운영할 이유가 없고, Redis는 이미 운영 중입니다.</li>
+  </ul>
+
+  <h3>③ k3s (A1 단일 노드)</h3>
+  <div class="psr">
+    <div class="p"><span class="k">현황</span><p>A1에서 Docker Compose로 운영합니다. 배포할 때 앱 컨테이너를 교체하는 동안(약 15~20초) Caddy가 요청을 최대 15초 기다리게 해 두었지만, 기동이 늦어지면 실패하는 요청이 생길 수 있습니다. 앱이 멈춰도 프로세스가 살아 있으면 Docker는 감지하지 못합니다.</p></div>
+    <div class="s"><span class="k">설계</span><p>A1에 k3s(서버 1대, Traefik 끔)를 설치하고, Caddy를 그대로 인그레스로 씁니다(인증서 · 설정 재사용). 앱은 Deployment 레플리카 2개 + readiness/liveness 프로브로 롤링 배포합니다. Micro 2대는 클러스터에 넣지 않습니다.</p></div>
+    <div class="r"><span class="k">효과</span><p>배포 중 실패 요청 0, 앱이 응답하지 않으면 자동 재시작, 서버 상태를 Git 매니페스트로 관리(Argo CD). k3s 자체 메모리는 약 500~600MB로, A1 여유 23GB에서 부담이 없습니다.</p></div>
+  </div>
+<pre><code># 설치
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik --disable servicelb --write-kubeconfig-mode 600" sh -
+
+# 앱 Deployment 핵심 값
+replicas: 2
+strategy: { type: RollingUpdate, rollingUpdate: { maxUnavailable: 0, maxSurge: 1 } }
+resources: { requests: { cpu: 500m, memory: 768Mi }, limits: { memory: 2Gi } }
+readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 9090 }, initialDelaySeconds: 10, periodSeconds: 5 }
+livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 9090 }, initialDelaySeconds: 60, periodSeconds: 10, failureThreshold: 3 }
+terminationGracePeriodSeconds: 40     # FCM 발송 await-termination 30초 + 여유
+
+# 상태 저장 컴포넌트
+- Redis: StatefulSet 1개 + PVC(local-path, 1Gi), AOF 유지
+- Prometheus / Loki / Grafana: StatefulSet + PVC (보관 15일 그대로)
+- HeatWave: 클러스터 밖 그대로 (사설 IP 10.0.1.93)
+
+# 비밀
+External Secrets Operator + OCI Vault 공급자 → ajouevent-app-env 등을 Kubernetes Secret 으로 동기화
+(인스턴스 주체 인증, 동적 그룹 ajouevent-vms 그대로 사용)
+
+# 배포
+GitHub Actions: 이미지 빌드 → GHCR → 매니페스트 저장소(AjouEvent_Manifest 재사용)의 이미지 태그 갱신 커밋
+Argo CD: 매니페스트 저장소를 감시해 자동 동기화</code></pre>
+  <ul>
+    <li><b>주의</b>: 앱 레플리카가 2개가 되면 스케줄러(<code>ViewCountScheduler</code> 등)가 두 번 돌 수 있습니다. ShedLock이 걸린 것은 안전하지만, 걸리지 않은 스케줄러(<code>ViewCountScheduler</code>, <code>PopularEventCacheScheduler</code>, <code>TokenValidationScheduler</code>, <code>CrawlingTokenScheduler</code>)에 <code>@SchedulerLock</code>을 먼저 붙여야 합니다.</li>
+    <li><b>크롤러</b>: Deployment 레플리카 1개(<code>strategy: Recreate</code>)로 둡니다. 두 개가 뜨면 같은 공지를 두 번 보냅니다.</li>
+    <li><b>단계</b>: (1) 스케줄러 락 보강 배포 → (2) k3s 설치, Compose와 다른 포트로 전체 스택 띄워 검증 → (3) Caddy 업스트림을 k3s 서비스로 바꿔 전환 → (4) Compose 중지. <b>롤백</b>은 Caddy 업스트림을 Compose 앱으로 되돌리는 것입니다.</li>
+  </ul>
+
+  <h3>④ 공지 이미지 Object Storage 미러링</h3>
+  <div class="psr">
+    <div class="p"><span class="k">현황</span><p><code>club_event_images</code> 88,157행(고유 URL 42,394개), 원본은 대부분 <code>www.ajou.ac.kr</code>. http 주소 4,476행은 HTTPS 페이지에서 차단될 수 있고, 깨진 주소 232행, 원본이 지워지면 이미지도 사라집니다. 평균 765KB라 원본 그대로 다 저장하면 약 31GB입니다.</p></div>
+    <div class="s"><span class="k">설계</span><p>크롤러가 새 공지를 저장할 때 이미지를 내려받아 긴 변 1280px · JPEG 품질 80(또는 WebP)으로 줄이고, 내용 해시를 키로 Object Storage <code>ajouevent-notice-images</code>에 올립니다. 제공은 <code>img.ajouevent.com</code>(Cloudflare 프록시 켬) → A1 Caddy → Object Storage PAR 순서입니다.</p></div>
+    <div class="r"><span class="k">효과</span><p>원본이 사라져도 이미지가 남고, http 차단 문제가 없어지며, 모바일에서 받는 용량이 장당 약 100~200KB로 줄어듭니다(추정, 표본 측정 필요). 연 증가량은 약 1GB로 무료 20GB 안에서 10년 이상 씁니다.</p></div>
+  </div>
+<pre><code># 저장 키 (내용 해시 → 같은 이미지는 한 번만 저장)
+notices/{yyyy}/{mm}/{sha256}.jpg
+
+# DB 변경
+ALTER TABLE club_event_images ADD COLUMN stored_key VARCHAR(200) NULL;   -- 없으면 원본 url 사용
+
+# 크롤러 (Go)
+- 다운로드: 타임아웃 10초, 최대 15MB, Content-Type 이 image/* 인 것만
+- 변환: golang.org/x/image/draw 로 축소, image/jpeg 품질 80 (CGO 없이 빌드 유지)
+- 업로드: OCI S3 호환 엔드포인트 https://axuijjtnbjns.compat.objectstorage.ap-chuncheon-1.oraclecloud.com
+          (Customer Secret Key 를 Vault 에 보관, 버킷 쓰기 전용 정책)
+- 실패해도 공지 저장 · 웹훅은 그대로 진행 (stored_key 만 NULL)
+
+# 제공 (Caddy)
+img.ajouevent.com {
+	reverse_proxy https://objectstorage.ap-chuncheon-1.oraclecloud.com {
+		rewrite /p/&lt;PAR 토큰&gt;/n/axuijjtnbjns/b/ajouevent-notice-images/o{uri}
+		header_up Host objectstorage.ap-chuncheon-1.oraclecloud.com
+	}
+	header Cache-Control "public, max-age=31536000, immutable"
+}
+# Cloudflare 가 캐시하므로 Object Storage 무료 API 요청 한도(월 5만)를 거의 쓰지 않음
+
+# 백필
+2025-01 이후 공지 이미지(약 11,500개, 변환 후 약 2GB 추정)만 1초 1건 속도로 채움 (원본 서버 부하 방지)</code></pre>
+  <ul>
+    <li><b>프론트 변경</b>: 이미지 URL을 <code>stored_key</code>가 있으면 <code>https://img.ajouevent.com/{stored_key}</code>, 없으면 원본 URL로 씁니다. API 응답에 두 값을 다 내려 주면 프론트는 한 줄 수정입니다.</li>
+    <li><b>검증</b>: 백필 전에 50장으로 변환 크기 · 화질을 표본 측정하고, 평균이 300KB를 넘으면 WebP나 품질 70으로 바꿉니다.</li>
+    <li><b>롤백</b>: API가 원본 URL만 내려 주게 바꾸면 끝입니다. 저장된 이미지는 그대로 둡니다.</li>
+  </ul>
+
+  <h3>⑤ 공지 이미지 Cloudflare 캐시 프록시 + 크기 줄이기 (imgproxy)</h3>
+  <div class="tbl"><table>
+    <tr><th>측정 (2026-11-13, 최근 공지 이미지 6장)</th><th>결과</th></tr>
+    <tr><td>사용자 네트워크(Mac) → 학교 서버</td><td><b>5장 모두 20초 시간 초과</b> · http 주소 1장은 301 리다이렉트</td></tr>
+    <tr><td>OCI A1(춘천) → 학교 서버</td><td>0.17~1.65초, 모두 200</td></tr>
+    <tr><td>원본 크기</td><td>0.33MB · 0.58MB · 0.95MB · <b>9.99MB PNG 2장</b></td></tr>
+  </table></div>
+  <p>사진이 느린 원인은 이전과 무관합니다. 브라우저가 학교 서버에서 원본을 직접 받는데, 일부 네트워크에서는 학교 서버 연결이 거의 되지 않고, 원본이 최대 10MB입니다. 아래 구성에서 <b>imgproxy</b>(A1 컨테이너, 오픈소스, 메모리 약 100~200MB)가 긴 변 1280px · WebP로 줄이고, Cloudflare가 줄인 결과를 한국 엣지에 캐시합니다. Cloudflare Images 유료 변환 한도를 쓰지 않으므로 비용은 $0입니다.</p>
+<pre><code># 경로
+img.ajouevent.com/{원본 호스트}/{원본 경로}
+  → Cloudflare(프록시 켬, Cache Rule: Edge TTL 30일 · Browser TTL 1년)
+  → A1 Caddy → imgproxy:8080 → https://{원본 호스트}/{원본 경로}
+
+# compose 추가
+imgproxy:
+  image: darthsim/imgproxy:&lt;설치 시점 버전 고정&gt;
+  environment:
+    IMGPROXY_ALLOWED_SOURCES: https://www.ajou.ac.kr/,https://ajou.ac.kr/,https://www.ajoumc.or.kr/,https://cdn.ajoumc.or.kr/
+    IMGPROXY_MAX_SRC_RESOLUTION: 50          # 5,000만 화소 초과 원본 거부
+    IMGPROXY_MAX_SRC_FILE_SIZE: 20971520     # 20MB 초과 원본 거부
+    IMGPROXY_ENFORCE_WEBP: true              # 브라우저가 지원하면 WebP
+    IMGPROXY_QUALITY: 80
+    IMGPROXY_TTL: 31536000
+  mem_limit: 512m
+
+# Caddy: /{호스트}/{경로} → imgproxy 처리 URL 로 바꿔 전달 (서명 없는 모드, 허용 호스트만)
+img.ajouevent.com {
+	@src path_regexp src ^/((?:[a-z0-9-]+\.)?ajou\.ac\.kr|(?:www|cdn)\.ajoumc\.or\.kr)(/.*)$
+	handle @src {
+		rewrite * /insecure/rs:fit:1280:0/plain/https://{re.src.1}{re.src.2}
+		reverse_proxy ajouevent-imgproxy:8080
+	}
+	respond 404
+}</code></pre>
+  <div class="psr">
+    <div class="p"><span class="k">현황</span><p>공지 이미지는 원본 사이트 URL을 그대로 씁니다(<code>club_event_images</code> 88,157행, 대부분 <code>www.ajou.ac.kr</code>). http 주소 4,476행은 HTTPS 페이지에서 브라우저가 막을 수 있고, 평균 765KB 이미지를 학교 서버에서 매번 받아 느립니다.</p></div>
+    <div class="s"><span class="k">설계</span><p><code>img.ajouevent.com/{원본 호스트}/{원본 경로}</code> → Cloudflare(프록시 켬, 캐시) → A1 Caddy → 원본 사이트. 허용한 아주대 계열 호스트만 대신 받아 오고, Cloudflare가 엣지에 캐시합니다. 저장 공간을 쓰지 않습니다.</p></div>
+    <div class="r"><span class="k">효과</span><p>모든 이미지가 https로 나가 차단 문제가 없어지고, 한국 엣지 캐시에서 빠르게 뜨며, 학교 서버 부하가 줄어듭니다. 작업량은 반나절이고 비용은 $0입니다. ④ 미러링을 나중에 붙여도 같은 주소를 그대로 씁니다.</p></div>
+  </div>
+<pre><code># Cloudflare DNS
+img  A  146.56.101.16   프록시 켬(주황 구름)
+
+# Cloudflare Cache Rule (무료 플랜 규칙 10개 중 1개 사용)
+조건: Hostname equals img.ajouevent.com
+동작: Eligible for cache · Edge TTL 30일(원본 헤더 무시) · Browser TTL 1년
+
+# Caddy (deploy/caddy/Caddyfile)
+img.ajouevent.com {
+	@allowed path_regexp src ^/((?:[a-z0-9-]+\.)?ajou\.ac\.kr|(?:www|cdn)\.ajoumc\.or\.kr)(/.*)$
+	handle @allowed {
+		method GET
+		rewrite * {re.src.2}
+		reverse_proxy https://{re.src.1} {
+			header_up Host {re.src.1}
+			header_down -Set-Cookie
+			transport http {
+				response_header_timeout 15s
+			}
+		}
+		header Cache-Control "public, max-age=31536000, immutable"
+	}
+	respond 404
+}
+
+# 백엔드: API 응답의 이미지 URL 변환 (원본 URL 은 그대로 함께 내려줌)
+http(s)://www.ajou.ac.kr/_attach/a.png  →  https://img.ajouevent.com/www.ajou.ac.kr/_attach/a.png
+허용 목록 밖 호스트나 깨진 주소(232행)는 원본 그대로</code></pre>
+  <ul>
+    <li><b>열린 프록시 방지</b>: 정규식으로 허용한 호스트 외에는 404를 냅니다. GET만 허용하고, 원본의 쿠키는 제거합니다.</li>
+    <li><b>(선택) 크기 줄이기</b>: Cloudflare Images 변환(<code>/cdn-cgi/image/width=1280,quality=80,format=auto/…</code>)을 켜면 엣지에서 WebP/AVIF로 줄여 줍니다. 무료 플랜에는 월 고유 변환 수 한도가 있으므로(신규 이미지는 월 약 550장), 켜기 전에 계정의 현재 한도를 확인합니다.</li>
+    <li><b>검증</b>: 공지 30건의 이미지가 <code>img.ajouevent.com</code>으로 200을 내는지, 두 번째 요청부터 <code>cf-cache-status: HIT</code>인지 확인합니다. Grafana에 Caddy 요청 수 패널을 추가해, 캐시 적중 뒤 원본 요청이 줄어드는지 봅니다.</li>
+    <li><b>롤백</b>: 백엔드 URL 변환을 끄는 환경 변수(<code>IMAGE_PROXY_ENABLED=false</code>) 하나로 원래대로 돌아갑니다.</li>
+    <li><b>한계</b>: 캐시는 영구 보관이 아닙니다. 원본이 지워진 뒤 캐시에서도 밀려나면 이미지가 사라지므로, 영구 보관은 ④ 미러링으로 해결합니다.</li>
+  </ul>
+
+  <h3>⑥ 공지 본문 시각화 (원문 서식 보존 + 핵심 정보 카드)</h3>
+  <div class="psr">
+    <div class="p"><span class="k">현황</span><p>크롤러가 본문에서 글자만 뽑아(<code>goquery .Text()</code>) 문자열 <code>\n</code>으로 이어 붙여 <code>club_events.content</code>(TEXT)에 저장합니다. 프론트(<code>EventDetailPage.jsx</code>)는 이를 <code>split('\\n')</code>으로 나눠 줄 단위로 보여 줍니다. 그래서 원문의 표, 링크, 굵은 글씨, 목록, 본문 속 이미지 위치가 모두 사라집니다.</p></div>
+    <div class="s"><span class="k">설계</span><p>(1) 크롤러가 본문 영역의 <b>HTML을 함께 저장</b>하고, (2) 백엔드가 허용 태그만 남기도록 정리한 뒤, (3) 프론트가 안전하게 렌더링합니다. 본문 위에는 신청 기간, 마감, 대상, 장소, 신청 링크를 뽑은 <b>핵심 정보 카드</b>를 둡니다.</p></div>
+    <div class="r"><span class="k">효과</span><p>표와 링크가 원문처럼 보이고, 마감일 같은 핵심 정보를 한눈에 봅니다(D-day 배지). 텍스트 <code>content</code>는 그대로 남아 검색 · 미리보기 · 푸시 본문에 계속 씁니다.</p></div>
+  </div>
+<pre><code># DB (기존 컬럼 유지, 새 컬럼만 추가)
+ALTER TABLE club_events
+  ADD COLUMN content_html MEDIUMTEXT NULL,      -- 정리된 HTML, 없으면 기존 텍스트로 표시
+  ADD COLUMN summary_json JSON NULL;            -- {"period":..,"deadline":"2026-11-20","target":..,"place":..,"applyUrl":..}
+
+# 크롤러 (Go)
+- 본문 컨테이너 HTML: Type2 #DivContents, Type1 .b-content-box 의 Html()
+- 첨부파일: a[href] 중 .pdf .hwp .hwpx .docx .xlsx .zip → [{name, url}]
+- 웹훅 페이로드에 contentHtml, attachments 추가 (기존 content 는 그대로)
+
+# 백엔드 정리 (jsoup)
+Safelist.relaxed() + table/td/th 의 colspan·rowspan 허용
+제거: script, style, iframe, on* 속성, style 속성, javascript: 링크
+a 태그: target="_blank" rel="noopener noreferrer" 추가
+img src: ⑤ 이미지 프록시 주소로 변환
+
+# 핵심 정보 추출 (규칙 기반, 비용 없음)
+라벨: 신청기간 · 접수기간 · 모집기간 · 마감 · 대상 · 장소 · 문의 · 신청방법
+날짜: 2026.11.20 / 11.20.(목) / 11월 20일 / ~ 범위 → deadline 은 범위의 끝
+링크: forms.gle · docs.google.com/forms · 본문 첫 외부 링크 → applyUrl
+
+# 프론트
+summary_json 이 있으면 상단 카드(기간 · 마감 D-day 배지 · 대상 · 장소 · [신청하기] 버튼)
+content_html 이 있으면 DOMPurify 로 한 번 더 정리 후 렌더링, 표는 overflow-x: auto
+첨부파일 목록 · [원문 보기] 버튼 · 없으면 지금처럼 텍스트 줄 단위 표시</code></pre>
+  <ul>
+    <li><b>보안</b>: 서버(jsoup)와 브라우저(DOMPurify)에서 두 번 정리합니다. 저장하는 HTML에는 스크립트와 이벤트 속성이 남지 않습니다.</li>
+    <li><b>백필</b>: 최근 6개월 공지(약 3,500건)만 원문을 다시 읽어 <code>content_html</code> · <code>summary_json</code>을 채웁니다(1초 1건, 약 1시간). 그 이전 공지는 지금 방식으로 보여 줍니다.</li>
+    <li><b>검증</b>: Type1 · Type2 사이트별로 공지 30건씩 원문과 나란히 비교합니다. 핵심 정보 추출은 마감일 정답률을 따로 재서 80% 미만이면 카드에서 그 항목을 숨깁니다.</li>
+    <li><b>롤백</b>: 프론트가 <code>content_html</code>을 무시하게 하면 지금 화면으로 돌아갑니다. DB 컬럼은 NULL 허용이라 남겨 둬도 됩니다.</li>
+    <li><b>작업량</b>: 크롤러 1일, 백엔드 1~1.5일, 프론트 1~1.5일. 합계 3~4일입니다. ⑤를 먼저 해 두면 본문 속 이미지도 바로 https로 나옵니다.</li>
+    <li><b>AI 요약을 넣지 않은 이유</b>: LLM 호출 비용이 생겨 "모든 인프라 무료" 목표와 맞지 않습니다. 규칙 기반 추출로 먼저 해 보고, 정확도가 부족할 때 다시 검토합니다.</li>
+  </ul>
+
+  <h3>참고: 지금 발견한 운영 이슈</h3>
+  <ul>
+    <li><b>소프트웨어학과 공지 수집 실패</b>: 크롤러 설정의 게시판 주소 <code>http://software.ajou.ac.kr/bbs/board.php?tbl=notice</code>가 학교 사이트에서 404를 냅니다(서버와 무관, 2026-11-13 확인). 새 게시판 주소를 찾아 <code>config/notifierConfigs.json</code>을 고쳐야 합니다.</li>
+  </ul>
+</section>
+
+<!-- ============ 탭 5 ============ -->
+<section class="panel" id="projects" role="tabpanel" aria-labelledby="tab-projects" hidden>
+  <h2>사용 중인 프로젝트 · 시크릿 위치</h2>
+  <p>이름에 AjouEvent가 붙은 프로젝트와 비밀 값이 여러 곳에 흩어져 있어서, 실제로 쓰는 것과 남은 것을 구분했습니다. 트래픽 수치는 최근 30일(2026-10-14 ~ 11-13) 기준입니다.</p>
+
+  <h3>시크릿이 있는 곳 (전체)</h3>
+  <div class="tbl"><table>
+    <tr><th>위치</th><th>항목 (값은 탭 6)</th><th>쓰는 곳</th><th>정리</th></tr>
+    <tr><td><b>OCI Vault</b><br><code>ajouevent-vault</code></td><td><code>ajouevent-app-env</code>: SPRING_PROFILES_ACTIVE, MYSQL_HOST · PORT · DATABASE · USER · PASSWORD, JWT_SECRET · ISSUER · 만료 2개, SWAGGER_SERVER_URL, DISCORD_ERROR · MEMBER_WEBHOOK_URL, GOOGLE_CLIENT_ID · SECRET, CORS_ALLOWED_ORIGINS, FCM_* 8개(코드에서 쓰지 않음), SCHEDULER_PUSH_POLLING_ENABLED<br><code>ajouevent-ops-env</code>: GRAFANA_ADMIN_USER · PASSWORD<br><code>ajouevent-crawling-env</code>: TZ, CRAWLING_PERIOD, DB_IP · NAME · PORT · USER · PW, WEBHOOK_ENDPOINT, REDIS_HOST · PORT<br><code>ajouevent-backup-env</code>: DB 백업 계정, 쓰기 전용 PAR URL<br><code>ajouevent-firebase-sa</code>: Firebase 키 JSON<br><code>ajouevent-heatwave-admin</code>, <code>ajouevent-db-users</code></td><td>A1 서버가 인스턴스 주체로 읽음 (<code>render-env.sh</code>)</td><td><span class="chip ok">원본</span></td></tr>
+    <tr><td><b>GitHub Secrets</b><br>AjouEvent_BE_V2</td><td>OCI_HOST, OCI_DEPLOY_KEY(배포 전용 SSH 키), NOTION_TOKEN, NOTION_ISSUE_DB_ID, NOTION_PR_DB_ID · 이미지 push는 자동 발급 <code>GITHUB_TOKEN</code></td><td>OCI 배포(deploy-oci.yml), Notion 동기화</td><td><span class="chip ok">정리 완료 (EC2_* · DOCKER_* · FIREBASE_SERVICE_ACCOUNT 삭제)</span></td></tr>
+    <tr><td><b>GitHub Secrets</b><br>AjouEvent_Crawling_V2</td><td>OCI_HOST, OCI_DEPLOY_KEY · 이미지 push는 <code>GITHUB_TOKEN</code></td><td>OCI 배포</td><td><span class="chip ok">정리 완료 (EC2_* · DOCKER_* 삭제)</span></td></tr>
+    <tr><td><b>GitHub Secrets</b><br>AjouEvent_FE</td><td>AUTH_TOKEN(개인 저장소로 push하는 토큰), OFFICIAL_ACCOUNT_EMAIL, ENV, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION</td><td>조직 저장소 → <code>Simzard10/AjouEvent_FE</code> 복사 (Vercel 배포)</td><td><span class="chip bad">AWS 키 3개는 어떤 워크플로도 쓰지 않음 → IAM 키 비활성화 후 삭제</span></td></tr>
+    <tr><td><b>GitHub Secrets</b><br>AjouEvent_Monitering</td><td>MONITORING_EC2_HOST, MONITORING_EC2_USER, MONITORING_EC2_SSH_KEY</td><td>중지된 AWS 모니터링 EC2</td><td><span class="chip warn">EC2 삭제 때 함께 삭제</span></td></tr>
+    <tr><td><b>Vercel</b><br><code>ajouevent</code> 프로젝트</td><td>REACT_APP_BE_URL, REACT_APP_GA_TRACKING_ID, REACT_APP_VAPID_KEY, REACT_APP_FIREBASE_API_KEY · AUTH_DOMAIN · PROJECT_ID · STORAGE_BUCKET · MESSAGING_SENDER_ID · APP_ID · MEASUREMENT_ID</td><td>프론트 빌드 (브라우저에 그대로 노출되는 공개 설정값)</td><td><span class="chip ok">변경 없음</span></td></tr>
+    <tr><td><b>아올다 서버</b><br><code>~/ajouevent/.env</code>, <code>~/crawling/.env</code></td><td>Vault로 옮긴 값의 원래 위치 (DB 비밀번호는 RDS용 옛 값)</td><td>지금 운영 중</td><td><span class="chip warn">전환 후 인스턴스와 함께 삭제</span></td></tr>
+    <tr><td><b>Docker Hub 공개 이미지</b><br><code>wa6221/ajouevent-be</code></td><td>Firebase 키 <code>38edb2</code>가 jar 안에 들어 있음</td><td>아올다 운영 앱</td><td><span class="chip ok">저장소 삭제 · 키 교체 완료</span></td></tr>
+    <tr><td><b>GCP</b> <code>ajou-event</code></td><td>서비스 계정 키: <code>firebase-adminsdk-aeken</code>의 <code>655a7e</code>(2024-03-02), <code>38edb2</code>(2026-06-01, 운영) · <code>firebase@ajou-event</code>의 <code>b0cef1</code>(2026-11-13, 역할 없음)</td><td>FCM 발송</td><td><span class="chip ok">운영 키 b0cef1 (firebase@, FCM 전용) · 옛 키 38edb2 · 655a7e 삭제 완료</span></td></tr>
+  </table></div>
+
+  <h3>Google Cloud · Firebase</h3>
+  <div class="tbl"><table>
+    <tr><th>프로젝트 (ID · 번호)</th><th>사용 여부</th><th>내용</th></tr>
+    <tr><td><b>ajou-event</b><br><code>ajou-event</code> · 605779034389</td><td><span class="chip ok">운영</span></td><td>FCM <b>5,209건</b>, FCM 등록 32, Installations 27, Identity Toolkit 9. 웹 앱 1개, Spark 무료 요금제, 결제 계정 없음. 로그인 계정에는 IAM 정책 변경 권한이 없음. <a href="https://console.firebase.google.com/project/ajou-event/overview">Firebase</a> · <a href="https://console.cloud.google.com/iam-admin/serviceaccounts?project=ajou-event">서비스 계정</a> · <a href="https://console.cloud.google.com/apis/dashboard?project=ajou-event">API 대시보드</a></td></tr>
+    <tr><td>ajou-event-v2-test<br><code>hello-22d56</code> · 827125474375</td><td><span class="chip info">로컬 개발</span></td><td>로컬 저장소의 <code>firebase-service-account.json</code>이 이 프로젝트 키입니다. Identity Toolkit 1건 외 트래픽 없음.</td></tr>
+    <tr><td>ajouevent-v2<br><code>ajouevent-v2</code> · 180178901245</td><td><span class="chip warn">미사용</span></td><td>2026-03-24 생성, 트래픽 없음.</td></tr>
+    <tr><td>Google OAuth 클라이언트 프로젝트<br>번호 995598133868</td><td><span class="chip info">이전 영향 없음</span></td><td>Google 로그인 · 캘린더 연동의 OAuth 클라이언트입니다. 도메인이 그대로라 리디렉션 URI 변경이 필요 없습니다. 소유자를 알 수 없어, 클라이언트 시크릿 교체나 동의 화면 관리가 필요할 때를 대비해 GCP 소유자 요청 때 함께 넘겨받는 것을 권장합니다. 개인 Gmail 두 계정으로는 403이라 학교 계정(<code>@ajou.ac.kr</code>) 소유로 추정합니다.</td></tr>
+    <tr><td>aolda-acc · onRank</td><td><span class="chip info">무관</span></td><td>AjouEvent와 관계없는 프로젝트입니다.</td></tr>
+  </table></div>
+
+  <h3>GitHub 저장소 (조직 <code>AjouEvent</code>)</h3>
+  <div class="tbl"><table>
+    <tr><th>저장소</th><th>상태</th><th>내용</th></tr>
+    <tr><td><a href="https://github.com/AjouEvent/AjouEvent_BE_V2">AjouEvent_BE_V2</a></td><td><span class="chip ok">운영</span></td><td>백엔드, 모니터링 설정(<code>monitoring/</code>), OCI 배포 파일(<code>deploy/</code>). 공개 저장소.</td></tr>
+    <tr><td><a href="https://github.com/AjouEvent/AjouEvent_Crawling_V2">AjouEvent_Crawling_V2</a></td><td><span class="chip ok">운영</span></td><td>Go 크롤러. 자체 CI와 배포 워크플로를 가집니다.</td></tr>
+    <tr><td><a href="https://github.com/AjouEvent/AjouEvent_FE">AjouEvent_FE</a></td><td><span class="chip ok">운영</span></td><td>프론트(CRA). push하면 <code>Simzard10/AjouEvent_FE</code>로 복사되고 Vercel이 배포합니다.</td></tr>
+    <tr><td><a href="https://github.com/AjouEvent/AjouEvent_Monitering">AjouEvent_Monitering</a></td><td><span class="chip warn">구버전</span></td><td>비공개. AWS 모니터링 EC2(중지)용 Prometheus · Grafana. 지금은 BE_V2의 <code>monitoring/</code>이 담당합니다. 스레드 풀 대시보드만 옮길 가치가 있습니다.</td></tr>
+    <tr><td><a href="https://github.com/AjouEvent/AjouEvent_Manifest">AjouEvent_Manifest</a></td><td><span class="chip warn">구버전</span></td><td>V1 시절 Kubernetes 매니페스트(ECK, Kibana, Fluent Bit). 마지막 커밋 2025-07-08.</td></tr>
+    <tr><td>AjouEvent_BE · Crawling · Admin_BE · Admin_FE</td><td><span class="chip warn">구버전</span></td><td>V1 코드. 운영에 쓰이지 않습니다.</td></tr>
+  </table></div>
+
+  <h3>그 밖의 계정 · 서비스</h3>
+  <div class="tbl"><table>
+    <tr><th>서비스</th><th>쓰는 것</th><th>링크 · 비고</th></tr>
+    <tr><td>OCI</td><td>테넌시 <code>rlagnlfo1004</code>, 춘천, PAYG</td><td><a href="https://cloud.oracle.com/?region=ap-chuncheon-1">콘솔</a></td></tr>
+    <tr><td>AWS</td><td>RDS, Route 53, EC2 2대 (이전 후 Route 53만 남김)</td><td><a href="https://us-east-1.console.aws.amazon.com/route53/v2/hostedzones?region=us-east-1#ListRecordSets/Z02670193V119FRCJV9N1">Route 53 호스팅 영역</a></td></tr>
+    <tr><td>아올다 클라우드</td><td><code>AOLDA_BETA_hrkim2001</code> 프로젝트의 <code>ajouevent-app</code> (전환 후 삭제)</td><td><a href="https://console.aoldacloud.com/base/overview">콘솔</a></td></tr>
+    <tr><td>Vercel</td><td><code>Simzard's projects</code> / <code>ajouevent</code>, Hobby</td><td><a href="https://vercel.com/simzards-projects/ajouevent">프로젝트</a></td></tr>
+    <tr><td>GitHub Container Registry</td><td><code>ghcr.io/ajouevent/ajouevent-be</code>, <code>ghcr.io/ajouevent/ajouevent-crawling</code> (운영 이미지)</td><td><a href="https://github.com/orgs/AjouEvent/packages">조직 패키지</a></td></tr>
+    <tr><td>Docker Hub (옛 이미지)</td><td><code>wa6221/ajouevent-be</code> <code>wa6221/ajouevent-crawling</code> 모두 <b>삭제 완료</b></td><td>운영은 GHCR 사용</td></tr>
+    <tr><td>가비아</td><td>도메인 <code>ajouevent.com</code> 등록 (만료 2027-05-28)</td><td>네임서버는 Route 53</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ 탭 DNS ============ -->
+<section class="panel" id="dns" role="tabpanel" aria-labelledby="tab-dns" hidden>
+  <h2>DNS · 도메인 · 비용</h2>
+  <p>목표는 <b>모든 인프라를 무료로 운영</b>하는 것입니다. 도메인 등록비(가비아 연 갱신)만 어느 업체를 써도 무료로 할 수 없습니다. 나머지는 모두 0원으로 맞춥니다.</p>
+
+  <h3>업체별 역할 (현재 → 목표)</h3>
+  <div class="tbl"><table>
+    <tr><th>업체</th><th>지금 맡은 일</th><th>목표</th><th>비용</th></tr>
+    <tr><td><b>가비아</b></td><td>도메인 <code>ajouevent.com</code> 등록 (만료 2027-05-28) · <b>네임서버를 Cloudflare로 변경 완료</b> (11-13)</td><td>도메인 등록만 담당 (소유자는 아직 심재엽 님)</td><td>도메인 연 갱신비 (유일한 유료 항목)</td></tr>
+    <tr><td><b>Cloudflare</b></td><td>존 <code>ajouevent.com</code> Free 플랜 추가 · 레코드 6개 · 네임서버 <code>chelsea</code> / <code>cody.ns.cloudflare.com</code> <b>활성</b> · Pages 프로젝트 <code>ajouevent</code> 운영 배포 완료</td><td>DNS + 프론트 배포</td><td><span class="chip ok">$0</span></td></tr>
+    <tr><td><b>OCI</b></td><td>A1 서버 · HeatWave DB · Vault · Object Storage (백엔드 · 크롤러 · 모니터링 · 백업)</td><td>그대로</td><td><span class="chip ok">$0 (Always Free 한도 안)</span></td></tr>
+    <tr><td><b>AWS</b></td><td><b>유료 리소스 0개</b> (11-13). RDS · EC2 · EBS · IP · 스냅숏 · Route 53 · IAM 사용자 4명 · 17개 리전 기본 VPC까지 삭제. 남은 것: 로그인용 IAM 사용자 <code>ajouevent-kim</code> · 그룹 · 서비스 연결 역할 4개 · 삭제 불가한 AWS 관리형 KMS 키 2개 · RDS 기본 그룹 2개 (모두 무료)</td><td>계정 해지(루트 계정, 선택)</td><td>$47.37/월 → <span class="chip ok">$0</span></td></tr>
+    <tr><td><b>Vercel</b></td><td>Cloudflare Pages로 이전 완료(FE PR #148). <code>www</code>는 Pages, 루트 도메인 리다이렉트는 OCI Caddy(#116). <b>의존성 없음</b></td><td>사용 중지 (프로젝트는 심재엽 님 계정에 남음)</td><td><span class="chip ok">$0</span></td></tr>
+    <tr><td><b>GitHub</b></td><td>코드 · CI · 이미지(GHCR <b>공개</b>, 익명 pull 확인) · FE 빌드 변수</td><td>그대로</td><td><span class="chip ok">$0</span></td></tr>
+    <tr><td><b>아올다</b></td><td><b>인스턴스 · 512GiB 볼륨 · 유동 IP 삭제 완료</b> (11-13)</td><td>사용 안 함</td><td><span class="chip ok">$0</span></td></tr>
+    <tr><td><b>Firebase</b></td><td>FCM 푸시 (Spark 무료 요금제)</td><td>그대로</td><td><span class="chip ok">$0</span></td></tr>
+  </table></div>
+
+  <h3>DNS 레코드 (Cloudflare로 옮길 값)</h3>
+  <div class="tbl"><table>
+    <tr><th>이름</th><th>유형</th><th>값</th><th>Cloudflare 프록시</th><th>연결 대상</th></tr>
+    <tr><td><code>ajouevent.com</code></td><td>A</td><td>216.198.79.1 (Vercel) → <b>146.56.101.16</b></td><td>끔</td><td>OCI Caddy가 www로 301 리다이렉트</td></tr>
+    <tr><td><code>www</code></td><td>CNAME</td><td>Vercel → <b><code>ajouevent.pages.dev</code></b></td><td>켬</td><td>Cloudflare Pages (프론트)</td></tr>
+    <tr><td><code>api</code></td><td>A</td><td>146.56.101.16</td><td>끔 (Caddy가 인증서 관리)</td><td>OCI A1</td></tr>
+    <tr><td><code>admin.api</code></td><td>A</td><td>146.56.101.16</td><td>끔</td><td>OCI A1</td></tr>
+    <tr><td><code>oci-api</code></td><td>A</td><td>146.56.101.16</td><td>끔</td><td>OCI A1 (직접 점검용)</td></tr>
+    <tr><td><code>grafana</code></td><td>A</td><td>146.56.101.16</td><td>끔</td><td>OCI A1 Grafana</td></tr>
+  </table></div>
+
+  <h3>진행 순서</h3>
+  <ol>
+    <li>Cloudflare에 <code>ajouevent.com</code>을 Free 플랜으로 추가하고, 위 레코드를 지금 값 그대로 넣습니다.</li>
+    <li>가비아에서 네임서버를 Cloudflare 2개로 변경 <span class="chip ok">완료</span> (소유자 인증은 심재엽 님)</li>
+    <li><code>www</code>를 Cloudflare Pages로, 루트 도메인을 OCI Caddy 리다이렉트로 전환 <span class="chip ok">완료</span> (15:44, <code>www</code> 인증서 발급까지 약 4분 응답 없음)</li>
+    <li>Route 53 호스팅 영역 삭제 <span class="chip ok">완료 (11-13)</span> · 국내 통신사 DNS 3곳과 공용 DNS 2곳이 모두 Cloudflare로 조회되는 것을 확인한 뒤 삭제</li>
+  </ol>
+</section>
+
+<!-- ============ 탭 6 ============ -->
+<section class="panel" id="secrets"><h2>비밀 값</h2><p>위키 사본에서는 비밀 값 구간을 제거했습니다.</p></section>
+
+
+<p class="meta">작성 근거: 아올다 · VM SSH 조회, RDS <code>information_schema</code>, 운영 앱 <code>/actuator/prometheus</code>, OCI CLI, AWS · Vercel · GCP 콘솔 조회, 로컬 이미지 빌드 측정. 2026-11-13 KST.</p>
+</div>
+
+<script>
+(function () {
+  var ids = ["infra", "migration", "cicd", "architecture", "projects", "dns", "secrets"];
+  function show(id) {
+    if (ids.indexOf(id) < 0) id = "infra";
+    ids.forEach(function (k) {
+      var panel = document.getElementById(k);
+      var tab = document.getElementById("tab-" + k);
+      var on = k === id;
+      panel.hidden = !on;
+      tab.setAttribute("aria-selected", on ? "true" : "false");
+      tab.tabIndex = on ? 0 : -1;
+    });
+  }
+  ids.forEach(function (k, i) {
+    var tab = document.getElementById("tab-" + k);
+    tab.addEventListener("click", function () {
+      if (location.hash !== "#" + k) location.hash = k; else show(k);
+    });
+    tab.addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      var next = ids[(i + (e.key === "ArrowRight" ? 1 : ids.length - 1)) % ids.length];
+      location.hash = next;
+      document.getElementById("tab-" + next).focus();
+    });
+  });
+  var tabs = document.querySelector(".tabs");
+  function route() { show(location.hash.slice(1)); if (location.hash) tabs.scrollIntoView({ block: "start" }); }
+  window.addEventListener("hashchange", route);
+  route();
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true, theme: "default", securityLevel: "strict" });</script>
+</body>
+</html>
