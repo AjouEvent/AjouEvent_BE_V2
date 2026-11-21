@@ -14,7 +14,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
@@ -150,11 +149,14 @@ public class ClubEventCacheAdapter implements ClubEventCachePort {
 
     @Override
     public Set<Long> getDirtyEventIds() {
-        Set<String> members = stringRedisTemplate.opsForSet().members(DIRTY_SET_KEY);
-        if (members == null || members.isEmpty()) {
-            return Collections.emptySet();
+        ScanOptions options = ScanOptions.scanOptions().count(100).build();
+        Set<Long> ids = new HashSet<>();
+        try (Cursor<String> cursor = stringRedisTemplate.opsForSet().scan(DIRTY_SET_KEY, options)) {
+            while (cursor.hasNext()) {
+                ids.add(Long.parseLong(cursor.next()));
+            }
         }
-        return members.stream().map(Long::parseLong).collect(Collectors.toSet());
+        return ids;
     }
 
     @Override
